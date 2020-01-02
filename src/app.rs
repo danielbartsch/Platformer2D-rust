@@ -19,12 +19,19 @@ pub mod app {
         a: 0xff,
     };
 
+    static WINDOW_WIDTH: u16 = 900;
+    static WINDOW_HEIGHT: u16 = 600;
+
     macro_rules! draw_relatively {
         ($canvas: expr, $entities: expr, $camera: expr) => {
             if $entities.len() > 0 {
                 for entity in $entities {
-                    let x = ((entity.x - $camera.get_x()) as f32 * entity.parallax_x) as i32;
-                    let y = ((entity.y - $camera.get_y()) as f32 * entity.parallax_y) as i32;
+                    let x = entity.x
+                        - ($camera.get_x() as f32 * entity.parallax_x - WINDOW_WIDTH as f32 / 2.0)
+                            as i32;
+                    let y = entity.y
+                        - ($camera.get_y() as f32 * entity.parallax_y - WINDOW_HEIGHT as f32 / 2.0)
+                            as i32;
 
                     $canvas.set_draw_color(Color {
                         r: 180,
@@ -119,11 +126,9 @@ pub mod app {
     pub fn run() {
         let sdl_context = sdl2::init().unwrap();
         let video_subsystem = sdl_context.video().unwrap();
-        let window_width = 900;
-        let window_height = 600;
 
         let window = video_subsystem
-            .window("Editor", window_width, window_height)
+            .window("Editor", WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32)
             .position_centered()
             .build()
             .unwrap();
@@ -467,13 +472,7 @@ pub mod app {
 
             level1.main_character[0].next_state(entities);
 
-            camera.to_target(
-                Point(
-                    camera_target.0 - (window_width / 2) as i32,
-                    camera_target.1 - (window_height / 2) as i32,
-                ),
-                0.1,
-            );
+            camera.to_target(Point(camera_target.0, camera_target.1), 0.1);
 
             draw_relatively!(canvas, &level1.background, &camera);
             draw_relatively!(canvas, &level1.indestructible, &camera);
