@@ -50,6 +50,66 @@ pub mod app {
                     $canvas
                         .draw_line((x, y + entity.height as i32), (x, y))
                         .unwrap();
+                    match entity.variant {
+                        EntityVariant::MainCharacter => {
+                            $canvas
+                                .draw_line((x, y + 4), (x + entity.width as i32, y + 4))
+                                .unwrap();
+                        }
+                        EntityVariant::Platform => {
+                            $canvas
+                                .draw_line((x + 4, y), (x + 4, y + entity.height as i32))
+                                .unwrap();
+                            $canvas
+                                .draw_line(
+                                    (x + entity.width as i32 - 4, y),
+                                    (x + entity.width as i32 - 4, y + entity.height as i32),
+                                )
+                                .unwrap();
+                            $canvas
+                                .draw_line(
+                                    (
+                                        x + entity.width as i32 - entity.width as i32 / 8,
+                                        y + entity.height as i32 / 8,
+                                    ),
+                                    (
+                                        x + entity.width as i32 / 8,
+                                        y + entity.height as i32 - entity.height as i32 / 8,
+                                    ),
+                                )
+                                .unwrap();
+                            $canvas
+                                .draw_line(
+                                    (
+                                        x + entity.width as i32 - entity.width as i32 / 8,
+                                        y + entity.height as i32 - entity.height as i32 / 8,
+                                    ),
+                                    (x + entity.width as i32 / 8, y + entity.height as i32 / 8),
+                                )
+                                .unwrap();
+                        }
+                        EntityVariant::Pillar => {
+                            for running_x in 0..entity.width / 4 {
+                                let real_x = running_x as i32 * 4;
+                                $canvas
+                                    .draw_line(
+                                        (x + real_x, y),
+                                        (x + real_x, y + entity.height as i32),
+                                    )
+                                    .unwrap();
+                                $canvas
+                                    .draw_line(
+                                        (x + entity.width as i32 - real_x, y),
+                                        (
+                                            x + entity.width as i32 - real_x,
+                                            y + entity.height as i32,
+                                        ),
+                                    )
+                                    .unwrap();
+                            }
+                        }
+                        _ => {}
+                    }
                 }
                 $canvas.set_draw_color(BACKGROUND_COLOR);
             }
@@ -75,44 +135,281 @@ pub mod app {
 
         video_subsystem.text_input().start();
 
+        let temple = vec![
+            Entity::new(20, 300, -180, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -160, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -140, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -120, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -100, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -60, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -40, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, -20, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, 0, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(20, 300, 20, -330)
+                .parallax_x(2.0)
+                .variant(EntityVariant::Pillar),
+            Entity::new(460, 20, -190, -350).parallax_x(2.0),
+            Entity::new(300, 20, -150, -370).parallax_x(2.0),
+            Entity::new(40, 20, -85, -390).parallax_x(2.0),
+        ];
+
+        let small_temple = vec![
+            Entity::new(5, 60, -180, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -160, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -140, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -120, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -100, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -60, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -40, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, -20, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, 0, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(5, 60, 20, -430)
+                .parallax_x(0.5)
+                .variant(EntityVariant::Pillar),
+            Entity::new(115, 5, -190, -435).parallax_x(0.5),
+            Entity::new(75, 5, -150, -440).parallax_x(0.5),
+            Entity::new(10, 5, -85, -445).parallax_x(0.5),
+        ];
+
         let mut level1 = Level {
-            background: vec![
-                Entity::new(50, 50, 0, -100).parallax_x(0.4).parallax_y(0.4),
-                Entity::new(50, 50, 100, 50).parallax_x(0.5).parallax_y(0.5),
-                Entity::new(50, 50, -100, 50)
-                    .parallax_x(0.6)
-                    .parallax_y(0.6),
-            ],
-            indestructible: vec![
-                Entity::new(50, 50, -375, -200),
-                Entity::new(50, 40, -330, -260),
-                Entity::new(50, 35, -285, -200),
-                Entity::new(50, 55, -225, -320),
-                Entity::new(50, 30, -225, 0),
-                Entity::new(50, 25, -180, -73),
-                Entity::new(50, 30, -135, 0),
-                Entity::new(50, 40, -115, -360),
-                Entity::new(50, 45, -90, -73),
-                Entity::new(500, 40, -250, -146),
-                Entity::new(50, 50, -45, 0),
-                Entity::new(50, 20, 0, -260),
-                Entity::new(50, 50, 0, -73),
-                Entity::new(50, 35, 45, 0),
-                Entity::new(50, 50, 90, -73),
-                Entity::new(50, 45, 115, -360),
-                Entity::new(50, 55, 135, 0),
-                Entity::new(50, 25, 180, -73),
-                Entity::new(50, 50, 225, 0),
-                Entity::new(50, 50, 225, -320),
-                Entity::new(50, 55, 285, -200),
-                Entity::new(50, 40, 330, -260),
-                Entity::new(50, 30, 375, -200),
-            ],
+            background: small_temple
+                .clone()
+                .into_iter()
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x - 300,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 300,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 600,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 900,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 1200,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 1500,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 1800,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 2100,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    small_temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 2400,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(vec![Entity::new(5, 5, 0, -375).parallax_x(0.5)])
+                .chain(vec![Entity::new(8, 8, 0, -357).parallax_x(0.5625)])
+                .chain(vec![Entity::new(10, 10, 0, -338).parallax_x(0.625)])
+                .chain(vec![Entity::new(15, 15, 0, -301).parallax_x(0.75)])
+                .chain(vec![Entity::new(25, 25, 0, -227).parallax_x(1.0)])
+                .chain(vec![Entity::new(38, 38, 0, -154).parallax_x(1.5)])
+                .chain(vec![Entity::new(44, 44, 0, -117).parallax_x(1.75)])
+                .chain(vec![Entity::new(47, 47, 0, -99).parallax_x(1.875)])
+                .chain(vec![Entity::new(50, 50, 0, -80).parallax_x(2.0)])
+                .collect::<Vec<Entity>>(),
+            indestructible: vec![Entity::new(5000, 40, -2250, -146)],
             destructible: vec![],
             enemies: vec![],
-            main_character: vec![Entity::new(20, 80, 0, -580)],
+            main_character: vec![Entity::new(20, 80, 0, -250).variant(EntityVariant::MainCharacter)],
             effects: vec![],
-            foreground: vec![],
+            foreground: temple
+                .clone()
+                .into_iter()
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x - 300,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 300,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 600,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 900,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 1200,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 1500,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 1800,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 2100,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .chain(
+                    temple
+                        .clone()
+                        .into_iter()
+                        .map(|entity| Entity {
+                            x: entity.x + 2400,
+                            ..entity
+                        })
+                        .collect::<Vec<Entity>>(),
+                )
+                .collect::<Vec<Entity>>(),
         };
 
         let mut camera = Camera::new(900, 600);
@@ -195,11 +492,14 @@ pub mod app {
 pub mod level {
     use super::camera::camera::Point;
 
+    #[derive(Clone)]
     pub enum EntityVariant {
         Block,
         Platform,
         MainCharacter,
+        Pillar,
     }
+    #[derive(Clone)]
     pub struct Entity {
         pub variant: EntityVariant,
         pub width: u16,
@@ -229,6 +529,10 @@ pub mod level {
                 parallax_x: 1.0,
                 parallax_y: 1.0,
             }
+        }
+        pub fn variant(mut self, variant: EntityVariant) -> Entity {
+            self.variant = variant;
+            self
         }
         pub fn parallax_x(mut self, parallax_x: f32) -> Self {
             self.parallax_x = parallax_x;
