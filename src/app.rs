@@ -148,17 +148,22 @@ pub mod app {
 
             if pressed_keys.contains(&Keycode::D) {
                 camera_target = Point(camera_target.0, level1.main_character[0].y - 200);
+                level1.main_character[0].velocity_y = -5.0;
             } else if pressed_keys.contains(&Keycode::S) {
                 camera_target = Point(camera_target.0, level1.main_character[0].y + 200);
+                level1.main_character[0].velocity_y = 5.0;
             }
             if pressed_keys.contains(&Keycode::A) {
                 camera_target = Point(level1.main_character[0].x - 200, camera_target.1);
+                level1.main_character[0].velocity_x = -5.0;
             } else if pressed_keys.contains(&Keycode::H) {
                 camera_target = Point(level1.main_character[0].x + 200, camera_target.1);
+                level1.main_character[0].velocity_x = 5.0;
             }
             if pressed_keys.len() == 0 {
                 camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
             }
+            level1.main_character[0].next_state();
 
             camera.to_target(
                 Point(
@@ -225,7 +230,7 @@ pub mod level {
             self.parallax_y = parallax_y;
             self
         }
-        pub fn next_state(mut self) -> Self {
+        pub fn next_state(&mut self) {
             self.acceleration_x += 0.0;
             self.acceleration_y += 0.001;
 
@@ -234,8 +239,6 @@ pub mod level {
 
             self.x += self.velocity_x as i32;
             self.y += self.velocity_y as i32;
-
-            self
         }
     }
     pub struct Level {
