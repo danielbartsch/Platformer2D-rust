@@ -13,9 +13,9 @@ pub mod app {
     use std::time::Duration;
 
     static BACKGROUND_COLOR: Color = Color {
-        r: 30,
+        r: 60,
         g: 30,
-        b: 30,
+        b: 60,
         a: 0xff,
     };
 
@@ -27,9 +27,9 @@ pub mod app {
                     let y = ((entity.y - $camera.get_y()) as f32 * entity.parallax_y) as i32;
 
                     $canvas.set_draw_color(Color {
-                        r: 80,
-                        g: 30,
-                        b: 30,
+                        r: 180,
+                        g: 130,
+                        b: 130,
                         a: 0xff,
                     });
                     $canvas
@@ -90,20 +90,17 @@ pub mod app {
                 Entity::new(50, 55, -225, -320),
                 Entity::new(50, 30, -225, 0),
                 Entity::new(50, 25, -180, -73),
-                Entity::new(50, 10, -135, -146),
                 Entity::new(50, 30, -135, 0),
                 Entity::new(50, 40, -115, -360),
                 Entity::new(50, 45, -90, -73),
-                Entity::new(50, 40, -45, -146),
+                Entity::new(500, 40, -250, -146),
                 Entity::new(50, 50, -45, 0),
                 Entity::new(50, 20, 0, -260),
                 Entity::new(50, 50, 0, -73),
-                Entity::new(50, 50, 45, -146),
                 Entity::new(50, 35, 45, 0),
                 Entity::new(50, 50, 90, -73),
                 Entity::new(50, 45, 115, -360),
                 Entity::new(50, 55, 135, 0),
-                Entity::new(50, 50, 135, -146),
                 Entity::new(50, 25, 180, -73),
                 Entity::new(50, 50, 225, 0),
                 Entity::new(50, 50, 225, -320),
@@ -113,7 +110,7 @@ pub mod app {
             ],
             destructible: vec![],
             enemies: vec![],
-            main_character: vec![Entity::new(20, 80, 0, -80)],
+            main_character: vec![Entity::new(20, 80, 0, -580)],
             effects: vec![],
             foreground: vec![],
         };
@@ -146,9 +143,11 @@ pub mod app {
                 }
             }
 
+            if pressed_keys.contains(&Keycode::N) {
+                level1.main_character[0].velocity_y = -5.0;
+            }
             if pressed_keys.contains(&Keycode::D) {
                 camera_target = Point(camera_target.0, level1.main_character[0].y - 200);
-                level1.main_character[0].velocity_y = -5.0;
             } else if pressed_keys.contains(&Keycode::S) {
                 camera_target = Point(camera_target.0, level1.main_character[0].y + 200);
                 level1.main_character[0].velocity_y = 5.0;
@@ -163,7 +162,13 @@ pub mod app {
             if pressed_keys.len() == 0 {
                 camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
             }
-            level1.main_character[0].next_state();
+
+            let mut entities = vec![];
+            entities.extend(&level1.indestructible);
+            entities.extend(&level1.destructible);
+            entities.extend(&level1.enemies);
+
+            level1.main_character[0].next_state(entities);
 
             camera.to_target(
                 Point(
@@ -188,6 +193,8 @@ pub mod app {
 }
 
 pub mod level {
+    use super::camera::camera::Point;
+
     pub enum EntityVariant {
         Block,
         Platform,
@@ -206,6 +213,7 @@ pub mod level {
         pub parallax_x: f32,
         pub parallax_y: f32,
     }
+    struct PointF32(f32, f32);
     impl Entity {
         pub fn new(width: u16, height: u16, x: i32, y: i32) -> Entity {
             Entity {
@@ -230,15 +238,85 @@ pub mod level {
             self.parallax_y = parallax_y;
             self
         }
-        pub fn next_state(&mut self) {
+        pub fn next_state(&mut self, mut interactive_entities: Vec<&Entity>) {
             self.acceleration_x += 0.0;
             self.acceleration_y += 0.001;
 
-            self.velocity_x += self.acceleration_x;
-            self.velocity_y += self.acceleration_y;
+            let intended_velocity = PointF32(
+                self.velocity_x + self.acceleration_x,
+                self.velocity_y + self.acceleration_y,
+            );
+            let intended_position = Point(
+                self.x + intended_velocity.0 as i32,
+                self.y + intended_velocity.1 as i32,
+            );
 
-            self.x += self.velocity_x as i32;
-            self.y += self.velocity_y as i32;
+            interactive_entities.retain(|entity| {
+                entity.is_inside_bounds(intended_position.clone(), self.width, self.height)
+            });
+
+            if interactive_entities.len() > 0 {
+                let left_collided_entity = interactive_entities
+                    .clone()
+                    .into_iter()
+                    .find(|entity| entity.x >= self.x + self.width as i32);
+                if let Some(entity) = left_collided_entity {
+                    self.x = entity.x - self.width as i32;
+                    self.velocity_x = 0.0;
+                } else {
+                    let right_collided_entity = interactive_entities
+                        .clone()
+                        .into_iter()
+                        .find(|entity| entity.x + entity.width as i32 <= self.x);
+                    if let Some(entity) = right_collided_entity {
+                        self.x = entity.x + entity.width as i32;
+                        self.velocity_x = 0.0;
+                    } else {
+                        self.x = intended_position.0;
+                        self.velocity_x = intended_velocity.0;
+                    }
+                }
+
+                let top_collided_entity = interactive_entities
+                    .clone()
+                    .into_iter()
+                    .find(|entity| entity.y >= self.y + self.height as i32);
+                if let Some(entity) = top_collided_entity {
+                    self.y = entity.y - self.height as i32;
+                    self.velocity_y = 0.0;
+                } else {
+                    let bottom_collided_entity = interactive_entities
+                        .clone()
+                        .into_iter()
+                        .find(|entity| entity.y + entity.height as i32 <= self.y);
+                    if let Some(entity) = bottom_collided_entity {
+                        self.y = entity.y + entity.height as i32;
+                        self.velocity_y = 0.0;
+                    } else {
+                        self.y = intended_position.1;
+                        self.velocity_y = intended_velocity.1;
+                    }
+                }
+            } else {
+                self.velocity_x += self.acceleration_x;
+                self.velocity_y += self.acceleration_y;
+
+                self.x += self.velocity_x as i32;
+                self.y += self.velocity_y as i32;
+            }
+        }
+        pub fn is_inside_bounds(&self, position: Point, width: u16, height: u16) -> bool {
+            (self.x + self.width as i32 >= position.0
+                && self.y + self.height as i32 >= position.1
+                && self.x <= position.0 + width as i32
+                && self.y <= position.1 + height as i32)
+                || (
+                    // for entities bigger than the rect
+                    (self.width > width && self.height > height)
+                        && (self.x < position.0 && self.y < position.0)
+                        && (self.x + self.width as i32 > width as i32
+                            && self.y + self.height as i32 > height as i32)
+                )
         }
     }
     pub struct Level {
