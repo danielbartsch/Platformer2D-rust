@@ -3,6 +3,7 @@ mod camera;
 
 pub mod app {
     use super::camera::camera::Camera;
+    use super::camera::camera::Point;
     use super::level::*;
     use sdl2::event::Event;
     use sdl2::keyboard::Keycode;
@@ -22,8 +23,8 @@ pub mod app {
         ($canvas: expr, $entities: expr, $camera: expr) => {
             if $entities.len() > 0 {
                 for entity in $entities {
-                    let x = ((entity.x - $camera.x) as f32 * entity.parallax_x) as i32;
-                    let y = ((entity.y - $camera.y) as f32 * entity.parallax_y) as i32;
+                    let x = ((entity.x - $camera.get_x()) as f32 * entity.parallax_x) as i32;
+                    let y = ((entity.y - $camera.get_y()) as f32 * entity.parallax_y) as i32;
 
                     $canvas.set_draw_color(Color {
                         r: 80,
@@ -74,8 +75,6 @@ pub mod app {
 
         video_subsystem.text_input().start();
 
-        let mut camera = Camera::new(900, 600);
-
         let level1 = Level {
             background: vec![
                 Entity::new(50, 50, 0, -100).parallax_x(0.4).parallax_y(0.4),
@@ -119,6 +118,10 @@ pub mod app {
             foreground: vec![],
         };
 
+        let mut camera = Camera::new(900, 600);
+
+        let mut camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
+
         'running: loop {
             canvas.set_draw_color(BACKGROUND_COLOR);
             canvas.clear();
@@ -144,21 +147,25 @@ pub mod app {
             }
 
             if pressed_keys.contains(&Keycode::D) {
-                camera.y -= 1;
+                camera_target = Point(camera_target.0, level1.main_character[0].y - 200);
             } else if pressed_keys.contains(&Keycode::S) {
-                camera.y += 1;
+                camera_target = Point(camera_target.0, level1.main_character[0].y + 200);
             }
-
             if pressed_keys.contains(&Keycode::A) {
-                camera.x -= 1;
+                camera_target = Point(level1.main_character[0].x - 200, camera_target.1);
             } else if pressed_keys.contains(&Keycode::H) {
-                camera.x += 1;
+                camera_target = Point(level1.main_character[0].x + 200, camera_target.1);
+            }
+            if pressed_keys.len() == 0 {
+                camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
             }
 
             camera.to_target(
-                level1.main_character[0].x - (window_width / 2) as i32,
-                level1.main_character[0].y - (window_height / 2) as i32,
-                0.01,
+                Point(
+                    camera_target.0 - (window_width / 2) as i32,
+                    camera_target.1 - (window_height / 2) as i32,
+                ),
+                0.1,
             );
 
             draw_relatively!(canvas, &level1.background, &camera);
@@ -170,7 +177,7 @@ pub mod app {
             draw_relatively!(canvas, &level1.foreground, &camera);
 
             canvas.present();
-            ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 16));
+            ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 32));
         }
     }
 }
