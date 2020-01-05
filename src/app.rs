@@ -575,7 +575,7 @@ pub mod app {
 
             level1.main_character[0].next_state(entities);
 
-            camera.to_target(Point(camera_target.0, camera_target.1), 0.1);
+            camera.to_target(Point(camera_target.0, camera_target.1), 0.05);
 
             draw_relatively!(canvas, &level1.background, &camera);
             draw_relatively!(canvas, &level1.indestructible, &camera);
