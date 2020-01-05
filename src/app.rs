@@ -541,6 +541,7 @@ pub mod app {
             }
 
             if pressed_keys.contains(&Keycode::N) {
+                level1.main_character[0].acceleration_y = 0.1;
                 level1.main_character[0].velocity_y = -5.0;
             }
             if pressed_keys.contains(&Keycode::D) {
@@ -555,6 +556,8 @@ pub mod app {
             } else if pressed_keys.contains(&Keycode::H) {
                 camera_target = Point(level1.main_character[0].x + 200, camera_target.1);
                 level1.main_character[0].velocity_x = 5.0;
+            } else {
+                level1.main_character[0].velocity_x *= 0.8;
             }
             if pressed_keys.len() == 0 {
                 camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
