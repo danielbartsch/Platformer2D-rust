@@ -8,6 +8,7 @@ pub mod app {
     use sdl2::event::Event;
     use sdl2::keyboard::Keycode;
     use sdl2::pixels::Color;
+    use sdl2::rect::Rect;
     use sdl2::render::WindowCanvas;
     use std::collections::HashSet;
     use std::time::Duration;
@@ -16,6 +17,19 @@ pub mod app {
         r: 60,
         g: 30,
         b: 60,
+        a: 0xff,
+    };
+
+    static LINE_COLOR: Color = Color {
+        r: 180,
+        g: 130,
+        b: 130,
+        a: 0xff,
+    };
+    static LINE_BACKGROUND_COLOR: Color = Color {
+        r: 120,
+        g: 90,
+        b: 90,
         a: 0xff,
     };
 
@@ -33,12 +47,12 @@ pub mod app {
                         - ($camera.get_y() as f32 * entity.parallax_y - WINDOW_HEIGHT as f32 / 2.0)
                             as i32;
 
-                    $canvas.set_draw_color(Color {
-                        r: 180,
-                        g: 130,
-                        b: 130,
-                        a: 0xff,
-                    });
+                    $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
+                    $canvas
+                        .fill_rect(Rect::new(x, y, entity.width as u32, entity.height as u32))
+                        .unwrap();
+
+                    $canvas.set_draw_color(LINE_COLOR);
                     $canvas
                         .draw_line((x, y), (x + entity.width as i32, y))
                         .unwrap();
