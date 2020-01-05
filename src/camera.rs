@@ -1,10 +1,10 @@
 pub mod camera {
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Copy)]
     pub struct Point(pub i32, pub i32);
 
     #[derive(Debug)]
     pub struct Camera {
-        position: Point,
+        pub position: Point,
         width: u16,
         height: u16,
     }

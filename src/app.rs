@@ -420,6 +420,7 @@ pub mod app {
             enemies: vec![],
             main_character: vec![Entity::new(20, 80, 0, -250).variant(EntityVariant::MainCharacter)],
             effects: vec![],
+            cameras: vec![Camera::new(WINDOW_WIDTH, WINDOW_HEIGHT)],
             foreground: temple
                 .clone()
                 .into_iter()
@@ -518,8 +519,6 @@ pub mod app {
 
         let mut camera = Camera::new(900, 600);
 
-        let mut camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
-
         'running: loop {
             canvas.set_draw_color(BACKGROUND_COLOR);
             canvas.clear();
@@ -555,27 +554,28 @@ pub mod app {
                 level1.main_character[0].velocity_y = -5.0;
             }
             if pressed_keys.contains(&Keycode::D) {
-                camera_target = Point(camera_target.0, level1.main_character[0].y - 200);
+                level1.cameras[0].position.1 = level1.main_character[0].y - 200;
             } else if pressed_keys.contains(&Keycode::S) {
-                camera_target = Point(camera_target.0, level1.main_character[0].y + 200);
+                level1.cameras[0].position.1 = level1.main_character[0].y + 200;
                 level1.main_character[0].velocity_y = 5.0;
             }
             if pressed_keys.contains(&Keycode::A) {
-                camera_target = Point(level1.main_character[0].x - 200, camera_target.1);
+                level1.cameras[0].position.0 = level1.main_character[0].x - 200;
                 level1.main_character[0].velocity_x = -5.0;
             } else if pressed_keys.contains(&Keycode::H) {
-                camera_target = Point(level1.main_character[0].x + 200, camera_target.1);
+                level1.cameras[0].position.0 = level1.main_character[0].x + 200;
                 level1.main_character[0].velocity_x = 5.0;
             } else {
                 level1.main_character[0].velocity_x *= 0.8;
             }
             if pressed_keys.len() == 0 {
-                camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
+                level1.cameras[0].position =
+                    Point(level1.main_character[0].x, level1.main_character[0].y);
             }
 
             level1.main_character[0].next_state(entities);
 
-            camera.to_target(Point(camera_target.0, camera_target.1), 0.05);
+            camera.to_target(level1.cameras[0].position, 0.05);
 
             draw_relatively!(canvas, &level1.background, &camera);
             draw_relatively!(canvas, &level1.indestructible, &camera);
@@ -592,6 +592,7 @@ pub mod app {
 }
 
 pub mod level {
+    use super::camera::camera::Camera;
     use super::camera::camera::Point;
 
     #[derive(Clone)]
@@ -741,6 +742,7 @@ pub mod level {
         pub enemies: Vec<Entity>,
         pub main_character: Vec<Entity>,
         pub effects: Vec<Entity>,
+        pub cameras: Vec<Camera>,
         pub foreground: Vec<Entity>,
     }
 }
