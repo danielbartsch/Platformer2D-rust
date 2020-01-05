@@ -411,7 +411,11 @@ pub mod app {
                 .chain(vec![Entity::new(45, 45, 900, -37).parallax_x(1.7)])
                 .chain(vec![Entity::new(50, 50, 900, 0).parallax_x(1.95)])
                 .collect::<Vec<Entity>>(),
-            indestructible: vec![Entity::new(5000, 40, -2250, -146)],
+            indestructible: vec![
+                Entity::new(5000, 40, -2250, -146),
+                Entity::new(100, 25, 100, -171),
+                Entity::new(100, 50, 500, -146),
+            ],
             destructible: vec![],
             enemies: vec![],
             main_character: vec![Entity::new(20, 80, 0, -250).variant(EntityVariant::MainCharacter)],
