@@ -450,7 +450,11 @@ pub mod app {
             ],
             destructible: vec![],
             enemies: vec![],
-            main_character: vec![Entity::new(20, 80, 0, -250).variant(EntityVariant::MainCharacter)],
+            main_character: vec![
+                Entity::new(20, 80, 0, -250).variant(EntityVariant::MainCharacter),
+                Entity::new(20, 60, 800, -250).variant(EntityVariant::MainCharacter),
+                Entity::new(20, 120, 900, -290).variant(EntityVariant::MainCharacter),
+            ],
             effects: vec![],
             cameras: vec![Camera::new(WINDOW_WIDTH, WINDOW_HEIGHT)],
             foreground: temple
@@ -551,6 +555,8 @@ pub mod app {
 
         let mut camera = Camera::new(900, 600);
 
+        let mut character_index = 0;
+
         'running: loop {
             canvas.set_draw_color(BACKGROUND_COLOR);
             canvas.clear();
@@ -571,6 +577,13 @@ pub mod app {
                     } => {
                         break 'running;
                     }
+                    Event::KeyDown {
+                        keycode: Some(Keycode::P),
+                        ..
+                    } => {
+                        character_index = (character_index + 1) % level1.main_character.len();
+                        println!("new {}", character_index);
+                    }
                     _ => {}
                 }
             }
@@ -581,31 +594,35 @@ pub mod app {
             entities.extend(&level1.enemies);
 
             if pressed_keys.contains(&Keycode::N)
-                && level1.main_character[0].is_touching_ground(entities.clone())
+                && level1.main_character[character_index].is_touching_ground(entities.clone())
             {
-                level1.main_character[0].velocity_y = -5.0;
+                level1.main_character[character_index].velocity_y = -5.0;
             }
             if pressed_keys.contains(&Keycode::D) {
-                level1.cameras[0].position.1 = level1.main_character[0].y - 200;
+                level1.cameras[0].position.1 = level1.main_character[character_index].y - 200;
             } else if pressed_keys.contains(&Keycode::S) {
-                level1.cameras[0].position.1 = level1.main_character[0].y + 200;
-                level1.main_character[0].velocity_y = 5.0;
+                level1.cameras[0].position.1 = level1.main_character[character_index].y + 200;
+                level1.main_character[character_index].velocity_y = 5.0;
             }
             if pressed_keys.contains(&Keycode::A) {
-                level1.cameras[0].position.0 = level1.main_character[0].x - 200;
-                level1.main_character[0].velocity_x = -5.0;
+                level1.cameras[0].position.0 = level1.main_character[character_index].x - 200;
+                level1.main_character[character_index].velocity_x = -5.0;
             } else if pressed_keys.contains(&Keycode::H) {
-                level1.cameras[0].position.0 = level1.main_character[0].x + 200;
-                level1.main_character[0].velocity_x = 5.0;
+                level1.cameras[0].position.0 = level1.main_character[character_index].x + 200;
+                level1.main_character[character_index].velocity_x = 5.0;
             } else {
-                level1.main_character[0].velocity_x *= 0.8;
+                level1.main_character[character_index].velocity_x *= 0.8;
             }
             if pressed_keys.len() == 0 {
-                level1.cameras[0].position =
-                    Point(level1.main_character[0].x, level1.main_character[0].y);
+                level1.cameras[0].position = Point(
+                    level1.main_character[character_index].x,
+                    level1.main_character[character_index].y,
+                );
             }
 
-            level1.main_character[0].next_state(entities);
+            for character in &mut level1.main_character {
+                character.next_state(entities.clone());
+            }
 
             camera.to_target(level1.cameras[0].position, 0.05);
 
