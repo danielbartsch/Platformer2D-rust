@@ -205,75 +205,107 @@ pub mod app {
         video_subsystem.text_input().start();
 
         let temple = vec![
-            Entity::new(20, 300, 40, -230)
+            Entity::new(20, 300, 40, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 120, -230)
+            Entity::new(20, 300, 120, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 200, -230)
+            Entity::new(20, 300, 200, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 280, -230)
+            Entity::new(20, 300, 280, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 360, -230)
+            Entity::new(20, 300, 360, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 520, -230)
+            Entity::new(20, 300, 520, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 600, -230)
+            Entity::new(20, 300, 600, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 680, -230)
+            Entity::new(20, 300, 680, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 760, -230)
+            Entity::new(20, 300, 760, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 840, -230)
+            Entity::new(20, 300, 840, -500)
                 .parallax_x(2.0)
+                .parallax_y(2.0)
                 .variant(EntityVariant::Pillar),
-            Entity::new(900, 20, 0, -250).parallax_x(2.0),
-            Entity::new(480, 20, 160, -270).parallax_x(2.0),
-            Entity::new(60, 20, 420, -290).parallax_x(2.0),
+            Entity::new(900, 20, 0, -500 - 20)
+                .parallax_x(2.0)
+                .parallax_y(2.0),
+            Entity::new(480, 20, 160, -500 - 40)
+                .parallax_x(2.0)
+                .parallax_y(2.0),
+            Entity::new(60, 20, 420, -500 - 60)
+                .parallax_x(2.0)
+                .parallax_y(2.0),
         ];
 
         let small_temple = vec![
-            Entity::new(5, 60, 10, -430)
+            Entity::new(5, 60, 10, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 30, -430)
+            Entity::new(5, 60, 30, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 50, -430)
+            Entity::new(5, 60, 50, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 70, -430)
+            Entity::new(5, 60, 70, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 90, -430)
+            Entity::new(5, 60, 90, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 130, -430)
+            Entity::new(5, 60, 130, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 150, -430)
+            Entity::new(5, 60, 150, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 170, -430)
+            Entity::new(5, 60, 170, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 190, -430)
+            Entity::new(5, 60, 190, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 210, -430)
+            Entity::new(5, 60, 210, -300)
                 .parallax_x(0.5)
+                .parallax_y(0.5)
                 .variant(EntityVariant::Pillar),
-            Entity::new(225, 5, 0, -435).parallax_x(0.5),
-            Entity::new(145, 5, 40, -440).parallax_x(0.5),
-            Entity::new(15, 5, 105, -445).parallax_x(0.5),
+            Entity::new(225, 5, 0, -300 - 5)
+                .parallax_x(0.5)
+                .parallax_y(0.5),
+            Entity::new(145, 5, 40, -300 - 10)
+                .parallax_x(0.5)
+                .parallax_y(0.5),
+            Entity::new(15, 5, 105, -300 - 15)
+                .parallax_x(0.5)
+                .parallax_y(0.5),
         ];
 
         let mut level1 = Level {
