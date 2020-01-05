@@ -540,8 +540,14 @@ pub mod app {
                 }
             }
 
-            if pressed_keys.contains(&Keycode::N) {
-                level1.main_character[0].acceleration_y = 0.1;
+            let mut entities = vec![];
+            entities.extend(&level1.indestructible);
+            entities.extend(&level1.destructible);
+            entities.extend(&level1.enemies);
+
+            if pressed_keys.contains(&Keycode::N)
+                && level1.main_character[0].is_touching_ground(entities.clone())
+            {
                 level1.main_character[0].velocity_y = -5.0;
             }
             if pressed_keys.contains(&Keycode::D) {
@@ -562,11 +568,6 @@ pub mod app {
             if pressed_keys.len() == 0 {
                 camera_target = Point(level1.main_character[0].x, level1.main_character[0].y);
             }
-
-            let mut entities = vec![];
-            entities.extend(&level1.indestructible);
-            entities.extend(&level1.destructible);
-            entities.extend(&level1.enemies);
 
             level1.main_character[0].next_state(entities);
 
@@ -639,9 +640,18 @@ pub mod level {
             self.parallax_y = parallax_y;
             self
         }
+        pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Entity>) -> bool {
+            let lower_end = self.y + self.height as i32;
+            interactive_entities.iter().any(|entity| {
+                entity.y == lower_end
+                    && ((entity.x < self.x && entity.x + entity.width as i32 > self.x)
+                        || (entity.x < self.x + self.width as i32
+                            && entity.x + entity.width as i32 > self.x + self.width as i32))
+            })
+        }
         pub fn next_state(&mut self, mut interactive_entities: Vec<&Entity>) {
-            self.acceleration_x += 0.0;
-            self.acceleration_y += 0.001;
+            self.acceleration_x = 0.0;
+            self.acceleration_y = 0.3;
 
             let intended_velocity = PointF32(
                 self.velocity_x + self.acceleration_x,
