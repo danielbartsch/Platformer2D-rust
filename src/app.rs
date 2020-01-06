@@ -601,7 +601,8 @@ pub mod app {
                         level1.main_character[character_index].y,
                     )
                     .velocity_x(level1.main_character[character_index].velocity_x * 2.0)
-                    .velocity_y(level1.main_character[character_index].velocity_y * 2.0),
+                    .velocity_y(level1.main_character[character_index].velocity_y * 2.0)
+                    .bouncyness(1.1),
                 );
             }
             if pressed_keys.contains(&Keycode::N)
@@ -672,6 +673,7 @@ pub mod level {
     #[derive(Clone)]
     pub struct Entity {
         pub variant: EntityVariant,
+        pub bouncyness: f32,
         pub width: u16,
         pub height: u16,
         pub x: i32,
@@ -688,6 +690,7 @@ pub mod level {
         pub fn new(width: u16, height: u16, x: i32, y: i32) -> Entity {
             Entity {
                 variant: EntityVariant::Platform,
+                bouncyness: 0.4,
                 width,
                 height,
                 x,
@@ -718,6 +721,10 @@ pub mod level {
         }
         pub fn velocity_y(mut self, velocity_y: f32) -> Self {
             self.velocity_y = velocity_y;
+            self
+        }
+        pub fn bouncyness(mut self, bouncyness: f32) -> Self {
+            self.bouncyness = bouncyness;
             self
         }
         pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Entity>) -> bool {
@@ -753,7 +760,7 @@ pub mod level {
                     .find(|entity| entity.x >= self.x + self.width as i32);
                 if let Some(entity) = left_collided_entity {
                     self.x = entity.x - self.width as i32;
-                    self.velocity_x = 0.0;
+                    self.velocity_x = self.velocity_x * -1.0 * self.bouncyness * entity.bouncyness;
                 } else {
                     let right_collided_entity = interactive_entities
                         .clone()
@@ -761,7 +768,8 @@ pub mod level {
                         .find(|entity| entity.x + entity.width as i32 <= self.x);
                     if let Some(entity) = right_collided_entity {
                         self.x = entity.x + entity.width as i32;
-                        self.velocity_x = 0.0;
+                        self.velocity_x =
+                            self.velocity_x * -1.0 * self.bouncyness * entity.bouncyness;
                     } else {
                         self.x = intended_position.0;
                         self.velocity_x = intended_velocity.0;
@@ -774,7 +782,7 @@ pub mod level {
                     .find(|entity| entity.y >= self.y + self.height as i32);
                 if let Some(entity) = top_collided_entity {
                     self.y = entity.y - self.height as i32;
-                    self.velocity_y = 0.0;
+                    self.velocity_y = self.velocity_y * -1.0 * self.bouncyness * entity.bouncyness;
                 } else {
                     let bottom_collided_entity = interactive_entities
                         .clone()
@@ -782,7 +790,8 @@ pub mod level {
                         .find(|entity| entity.y + entity.height as i32 <= self.y);
                     if let Some(entity) = bottom_collided_entity {
                         self.y = entity.y + entity.height as i32;
-                        self.velocity_y = 0.0;
+                        self.velocity_y =
+                            self.velocity_y * -1.0 * self.bouncyness * entity.bouncyness;
                     } else {
                         self.y = intended_position.1;
                         self.velocity_y = intended_velocity.1;
