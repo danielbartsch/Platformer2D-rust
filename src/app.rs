@@ -612,7 +612,11 @@ pub mod app {
             } else {
                 level1.main_character[character_index].velocity_x *= 0.8;
             }
-            if pressed_keys.len() == 0 {
+            if !pressed_keys.contains(&Keycode::A)
+                && !pressed_keys.contains(&Keycode::S)
+                && !pressed_keys.contains(&Keycode::H)
+                && !pressed_keys.contains(&Keycode::D)
+            {
                 level1.cameras[0].position = Point(
                     level1.main_character[character_index].x,
                     level1.main_character[character_index].y,
