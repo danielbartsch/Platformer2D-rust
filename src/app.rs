@@ -200,7 +200,6 @@ pub mod app {
                                         .unwrap();
                                 }
                             }
-                            _ => {}
                         }
                         $canvas.set_draw_color(BACKGROUND_COLOR);
                     }
@@ -617,6 +616,7 @@ pub mod app {
             entities.extend(&level1.enemies);
 
             if pressed_keys.contains(&Keycode::Y) {
+                let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
                 level1.effects.push(
                     Entity::new(
                         10,
@@ -625,8 +625,14 @@ pub mod app {
                         level1.main_character[character_index].y,
                     )
                     .variant(EntityVariant::Block)
-                    .velocity_x(level1.main_character[character_index].velocity_x * 2.0)
-                    .velocity_y(level1.main_character[character_index].velocity_y * 2.0)
+                    .velocity_x(
+                        level1.main_character[character_index].velocity_x
+                            * (2.2 + pseudo_random.cos()),
+                    )
+                    .velocity_y(
+                        level1.main_character[character_index].velocity_y
+                            * (2.2 + pseudo_random.sin()),
+                    )
                     .bouncyness(1.1),
                 );
             }
