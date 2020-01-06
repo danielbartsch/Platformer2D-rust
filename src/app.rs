@@ -67,6 +67,26 @@ pub mod app {
                         && y <= WINDOW_HEIGHT as i32
                     {
                         match entity.variant {
+                            EntityVariant::Block => {
+                                $canvas.set_draw_color(MAIN_BACKGROUND_COLOR);
+                                $canvas
+                                    .fill_rect(Rect::new(
+                                        x,
+                                        y,
+                                        entity.width as u32,
+                                        entity.height as u32,
+                                    ))
+                                    .unwrap();
+                                $canvas.set_draw_color(MAIN_LINE_COLOR);
+                                $canvas
+                                    .draw_rect(Rect::new(
+                                        x,
+                                        y,
+                                        entity.width as u32,
+                                        entity.height as u32,
+                                    ))
+                                    .unwrap();
+                            }
                             EntityVariant::MainCharacter => {
                                 $canvas.set_draw_color(MAIN_BACKGROUND_COLOR);
                                 $canvas
@@ -600,6 +620,7 @@ pub mod app {
                         level1.main_character[character_index].x,
                         level1.main_character[character_index].y,
                     )
+                    .variant(EntityVariant::Block)
                     .velocity_x(level1.main_character[character_index].velocity_x * 2.0)
                     .velocity_y(level1.main_character[character_index].velocity_y * 2.0)
                     .bouncyness(1.1),
