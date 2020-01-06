@@ -633,6 +633,7 @@ pub mod app {
                         level1.main_character[character_index].velocity_y
                             * (2.2 + pseudo_random.sin()),
                     )
+                    .acceleration_y(0.01)
                     .bouncyness(1.1),
                 );
             }
@@ -737,7 +738,7 @@ pub mod level {
                 velocity_x: 0.0,
                 velocity_y: 0.0,
                 acceleration_x: 0.0,
-                acceleration_y: 0.0,
+                acceleration_y: 0.3,
                 parallax_x: 1.0,
                 parallax_y: 1.0,
             }
@@ -762,6 +763,14 @@ pub mod level {
             self.velocity_y = velocity_y;
             self
         }
+        pub fn acceleration_x(mut self, acceleration_x: f32) -> Self {
+            self.acceleration_x = acceleration_x;
+            self
+        }
+        pub fn acceleration_y(mut self, acceleration_y: f32) -> Self {
+            self.acceleration_y = acceleration_y;
+            self
+        }
         pub fn bouncyness(mut self, bouncyness: f32) -> Self {
             self.bouncyness = bouncyness;
             self
@@ -776,9 +785,6 @@ pub mod level {
             })
         }
         pub fn next_state(&mut self, mut interactive_entities: Vec<&Entity>) {
-            self.acceleration_x = 0.0;
-            self.acceleration_y = 0.3;
-
             let intended_velocity = PointF32(
                 self.velocity_x + self.acceleration_x,
                 self.velocity_y + self.acceleration_y,
