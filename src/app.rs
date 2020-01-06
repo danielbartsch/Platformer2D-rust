@@ -592,6 +592,18 @@ pub mod app {
             entities.extend(&level1.destructible);
             entities.extend(&level1.enemies);
 
+            if pressed_keys.contains(&Keycode::Y) {
+                level1.effects.push(
+                    Entity::new(
+                        10,
+                        10,
+                        level1.main_character[character_index].x,
+                        level1.main_character[character_index].y,
+                    )
+                    .velocity_x(level1.main_character[character_index].velocity_x * 2.0)
+                    .velocity_y(level1.main_character[character_index].velocity_y * 2.0),
+                );
+            }
             if pressed_keys.contains(&Keycode::N)
                 && level1.main_character[character_index].is_touching_ground(entities.clone())
             {
@@ -624,6 +636,9 @@ pub mod app {
             }
 
             for character in &mut level1.main_character {
+                character.next_state(entities.clone());
+            }
+            for character in &mut level1.effects {
                 character.next_state(entities.clone());
             }
 
@@ -695,6 +710,14 @@ pub mod level {
         }
         pub fn parallax_y(mut self, parallax_y: f32) -> Self {
             self.parallax_y = parallax_y;
+            self
+        }
+        pub fn velocity_x(mut self, velocity_x: f32) -> Self {
+            self.velocity_x = velocity_x;
+            self
+        }
+        pub fn velocity_y(mut self, velocity_y: f32) -> Self {
+            self.velocity_y = velocity_y;
             self
         }
         pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Entity>) -> bool {
