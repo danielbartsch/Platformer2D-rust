@@ -582,7 +582,6 @@ pub mod app {
                         ..
                     } => {
                         character_index = (character_index + 1) % level1.main_character.len();
-                        println!("new {}", character_index);
                     }
                     _ => {}
                 }
