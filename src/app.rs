@@ -674,7 +674,7 @@ pub mod app {
                 character.next_state(entities.clone());
             }
 
-            camera.to_target(level1.cameras[0].position, 0.05);
+            camera.to_target(level1.cameras[0].position, 0.03);
 
             draw_relatively!(canvas, &level1.background, &camera);
             draw_relatively!(canvas, &level1.indestructible, &camera);
