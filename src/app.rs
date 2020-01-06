@@ -11,6 +11,7 @@ pub mod app {
     use sdl2::rect::Rect;
     use sdl2::render::WindowCanvas;
     use std::collections::HashSet;
+    use std::fs;
     use std::time::{Duration, SystemTime};
 
     static BACKGROUND_COLOR: Color = Color {
@@ -225,354 +226,7 @@ pub mod app {
 
         video_subsystem.text_input().start();
 
-        let temple = vec![
-            Entity::new(20, 300, 40.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 120.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 200.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 280.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 360.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 520.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 600.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 680.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 760.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(20, 300, 840.0, -500.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0)
-                .variant(EntityVariant::Pillar),
-            Entity::new(900, 20, 0.0, -500.0 - 20.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0),
-            Entity::new(480, 20, 160.0, -500.0 - 40.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0),
-            Entity::new(60, 20, 420.0, -500.0 - 60.0)
-                .parallax_x(2.0)
-                .parallax_y(2.0),
-        ];
-
-        let small_temple = vec![
-            Entity::new(5, 60, 10.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 30.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 50.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 70.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 90.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 130.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 150.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 170.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 190.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(5, 60, 210.0, -300.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5)
-                .variant(EntityVariant::Pillar),
-            Entity::new(225, 5, 0.0, -300.0 - 5.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5),
-            Entity::new(145, 5, 40.0, -300.0 - 10.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5),
-            Entity::new(15, 5, 105.0, -300.0 - 15.0)
-                .parallax_x(0.5)
-                .parallax_y(0.5),
-        ];
-
-        let mut level1 = Level {
-            background: small_temple
-                .clone()
-                .into_iter()
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 300.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 600.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 900.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 1200.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 1500.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 1800.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 2100.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 2400.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    small_temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 2700.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(vec![Entity::new(5, 5, 0.0, -375.0).parallax_x(0.5)])
-                .chain(vec![Entity::new(10, 10, 0.0, -289.0).parallax_x(0.65)])
-                .chain(vec![Entity::new(15, 15, 0.0, -242.0).parallax_x(0.8)])
-                .chain(vec![Entity::new(20, 20, 0.0, -205.0).parallax_x(0.95)])
-                .chain(vec![Entity::new(25, 25, 0.0, -177.0).parallax_x(1.0)])
-                .chain(vec![Entity::new(30, 30, 0.0, -140.0).parallax_x(1.25)])
-                .chain(vec![Entity::new(35, 35, 0.0, -102.0).parallax_x(1.4)])
-                .chain(vec![Entity::new(40, 40, 0.0, -75.0).parallax_x(1.55)])
-                .chain(vec![Entity::new(45, 45, 0.0, -37.0).parallax_x(1.7)])
-                .chain(vec![Entity::new(50, 50, 0.0, 0.0).parallax_x(1.95)])
-                .chain(vec![Entity::new(5, 5, 300.0, -375.0).parallax_x(0.5)])
-                .chain(vec![Entity::new(10, 10, 300.0, -289.0).parallax_x(0.65)])
-                .chain(vec![Entity::new(15, 15, 300.0, -242.0).parallax_x(0.8)])
-                .chain(vec![Entity::new(20, 20, 300.0, -205.0).parallax_x(0.95)])
-                .chain(vec![Entity::new(25, 25, 300.0, -177.0).parallax_x(1.0)])
-                .chain(vec![Entity::new(30, 30, 300.0, -140.0).parallax_x(1.25)])
-                .chain(vec![Entity::new(35, 35, 300.0, -102.0).parallax_x(1.4)])
-                .chain(vec![Entity::new(40, 40, 300.0, -75.0).parallax_x(1.55)])
-                .chain(vec![Entity::new(45, 45, 300.0, -37.0).parallax_x(1.7)])
-                .chain(vec![Entity::new(50, 50, 300.0, 0.0).parallax_x(1.95)])
-                .chain(vec![Entity::new(5, 5, 600.0, -375.0).parallax_x(0.5)])
-                .chain(vec![Entity::new(10, 10, 600.0, -289.0).parallax_x(0.65)])
-                .chain(vec![Entity::new(15, 15, 600.0, -242.0).parallax_x(0.8)])
-                .chain(vec![Entity::new(20, 20, 600.0, -205.0).parallax_x(0.95)])
-                .chain(vec![Entity::new(25, 25, 600.0, -177.0).parallax_x(1.0)])
-                .chain(vec![Entity::new(30, 30, 600.0, -140.0).parallax_x(1.25)])
-                .chain(vec![Entity::new(35, 35, 600.0, -102.0).parallax_x(1.4)])
-                .chain(vec![Entity::new(40, 40, 600.0, -75.0).parallax_x(1.55)])
-                .chain(vec![Entity::new(45, 45, 600.0, -37.0).parallax_x(1.7)])
-                .chain(vec![Entity::new(50, 50, 600.0, 0.0).parallax_x(1.95)])
-                .chain(vec![Entity::new(5, 5, 900.0, -375.0).parallax_x(0.5)])
-                .chain(vec![Entity::new(10, 10, 900.0, -289.0).parallax_x(0.65)])
-                .chain(vec![Entity::new(15, 15, 900.0, -242.0).parallax_x(0.8)])
-                .chain(vec![Entity::new(20, 20, 900.0, -205.0).parallax_x(0.95)])
-                .chain(vec![Entity::new(25, 25, 900.0, -177.0).parallax_x(1.0)])
-                .chain(vec![Entity::new(30, 30, 900.0, -140.0).parallax_x(1.25)])
-                .chain(vec![Entity::new(35, 35, 900.0, -102.0).parallax_x(1.4)])
-                .chain(vec![Entity::new(40, 40, 900.0, -75.0).parallax_x(1.55)])
-                .chain(vec![Entity::new(45, 45, 900.0, -37.0).parallax_x(1.7)])
-                .chain(vec![Entity::new(50, 50, 900.0, 0.0).parallax_x(1.95)])
-                .collect::<Vec<Entity>>(),
-            indestructible: vec![
-                Entity::new(5000, 40, -2250.0, -146.0),
-                Entity::new(100, 25, 100.0, -171.0),
-                Entity::new(100, 50, 500.0, -146.0),
-            ],
-            destructible: vec![],
-            enemies: vec![],
-            main_character: vec![
-                Entity::new(20, 80, 0.0, -250.0).variant(EntityVariant::MainCharacter),
-                Entity::new(20, 60, 800.0, -250.0).variant(EntityVariant::MainCharacter),
-                Entity::new(20, 120, 900.0, -290.0).variant(EntityVariant::MainCharacter),
-            ],
-            effects: vec![],
-            cameras: vec![Camera::new(WINDOW_WIDTH, WINDOW_HEIGHT)],
-            foreground: temple
-                .clone()
-                .into_iter()
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 1200.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 2400.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 3600.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 4800.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 6000.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 7200.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 8400.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 9600.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .chain(
-                    temple
-                        .clone()
-                        .into_iter()
-                        .map(|entity| Entity {
-                            x: entity.x + 10800.0,
-                            ..entity
-                        })
-                        .collect::<Vec<Entity>>(),
-                )
-                .collect::<Vec<Entity>>(),
-        };
+        let mut level1 = Level::deserialize(fs::read_to_string("levels/temples.json").unwrap());
 
         let mut camera = Camera::new(900, 600);
 
@@ -706,15 +360,16 @@ pub mod app {
 pub mod level {
     use super::camera::camera::Camera;
     use super::camera::camera::Point;
+    use serde::{Deserialize, Serialize};
 
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub enum EntityVariant {
         Block,
         Platform,
         MainCharacter,
         Pillar,
     }
-    #[derive(Clone)]
+    #[derive(Clone, Serialize, Deserialize)]
     pub struct Entity {
         pub variant: EntityVariant,
         pub bouncyness: f32,
@@ -868,6 +523,7 @@ pub mod level {
                 )
         }
     }
+    #[derive(Serialize, Deserialize)]
     pub struct Level {
         pub background: Vec<Entity>,
         pub indestructible: Vec<Entity>,
@@ -877,5 +533,14 @@ pub mod level {
         pub effects: Vec<Entity>,
         pub cameras: Vec<Camera>,
         pub foreground: Vec<Entity>,
+    }
+
+    impl Level {
+        pub fn serialize(&self) -> String {
+            serde_json::to_string(&self).unwrap()
+        }
+        pub fn deserialize(serialized: String) -> Level {
+            serde_json::from_str(&serialized).unwrap()
+        }
     }
 }

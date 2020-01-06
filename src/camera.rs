@@ -1,8 +1,10 @@
 pub mod camera {
-    #[derive(Debug, Clone, Copy)]
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
     pub struct Point(pub i32, pub i32);
 
-    #[derive(Debug)]
+    #[derive(Debug, Serialize, Deserialize)]
     pub struct Camera {
         pub position: Point,
         width: u16,
