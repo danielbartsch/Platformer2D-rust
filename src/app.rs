@@ -4,12 +4,14 @@ mod camera;
 pub mod app {
     use super::camera::camera::Camera;
     use super::camera::camera::Point;
+    use super::editor_menu::EditorMenu;
     use super::level::*;
     use sdl2::event::Event;
     use sdl2::keyboard::Keycode;
     use sdl2::pixels::Color;
     use sdl2::rect::Rect;
     use sdl2::render::WindowCanvas;
+    use std::cmp;
     use std::collections::HashSet;
     use std::fs;
     use std::time::{Duration, SystemTime};
@@ -234,6 +236,9 @@ pub mod app {
 
         let mut last_frame_time = SystemTime::now();
 
+        let mut mouse_click_position = None;
+        let mut mouse_selection_rect: Option<Rect> = None;
+
         'running: loop {
             canvas.set_draw_color(BACKGROUND_COLOR);
             canvas.clear();
@@ -244,6 +249,10 @@ pub mod app {
                 .pressed_scancodes()
                 .filter_map(Keycode::from_scancode)
                 .collect();
+
+            let mouse_state = event_pump.mouse_state();
+
+            let (mouse_x, mouse_y) = (mouse_state.x(), mouse_state.y());
 
             for event in event_pump.poll_iter() {
                 match event {
@@ -260,6 +269,29 @@ pub mod app {
                     } => {
                         character_index = (character_index + 1) % level1.main_character.len();
                     }
+                    Event::MouseButtonDown { x, y, .. } => match mouse_click_position {
+                        Some(_) => {
+                            mouse_click_position = None;
+
+                            let camera_to_level_coordinates = Some(Rect::new(
+                                mouse_selection_rect.unwrap().x() + camera.position.0
+                                    - WINDOW_WIDTH as i32 / 2,
+                                mouse_selection_rect.unwrap().y() + camera.position.1
+                                    - WINDOW_HEIGHT as i32 / 2,
+                                mouse_selection_rect.unwrap().width(),
+                                mouse_selection_rect.unwrap().height(),
+                            ));
+
+                            EditorMenu::create_entity(
+                                &mut level1,
+                                camera_to_level_coordinates.unwrap(),
+                            );
+                            mouse_selection_rect = None;
+                        }
+                        None => {
+                            mouse_click_position = Some((x, y));
+                        }
+                    },
                     _ => {}
                 }
             }
@@ -343,6 +375,27 @@ pub mod app {
             draw_relatively!(canvas, &level1.effects, &camera);
             draw_relatively!(canvas, &level1.foreground, &camera);
 
+            match mouse_click_position {
+                Some((x, y)) => {
+                    let original_color = canvas.draw_color();
+                    canvas.set_draw_color(Color {
+                        r: 255,
+                        g: 0,
+                        b: 0,
+                        a: 0xff,
+                    });
+                    let (pos_x, width) =
+                        (cmp::min(x, mouse_x), (x - mouse_x).wrapping_abs() as u32);
+                    let (pos_y, height) =
+                        (cmp::min(y, mouse_y), (y - mouse_y).wrapping_abs() as u32);
+
+                    mouse_selection_rect = Some(Rect::new(pos_x, pos_y, width, height));
+                    canvas.draw_rect(mouse_selection_rect.unwrap()).unwrap();
+                    canvas.set_draw_color(original_color);
+                }
+                None => {}
+            }
+
             canvas.present();
 
             let millis_to_sleep = MAX_FRAME_TIME_MILLIS as i32
@@ -357,19 +410,154 @@ pub mod app {
     }
 }
 
+pub mod editor_menu {
+    use super::level::{Entity, Level};
+    use ::sdl2::messagebox::*;
+    use sdl2::rect::Rect;
+    pub struct EditorMenu {}
+    impl EditorMenu {
+        pub fn create_entity(level: &mut Level, mouse_rect: Rect) {
+            match show_message_box(
+                MessageBoxFlag::INFORMATION,
+                vec![
+                    ButtonData {
+                        flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
+                        button_id: 1,
+                        text: "Create Entity",
+                    },
+                    ButtonData {
+                        flags: MessageBoxButtonFlag::NOTHING,
+                        button_id: 2,
+                        text: "Delete under selection",
+                    },
+                    ButtonData {
+                        flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
+                        button_id: 3,
+                        text: "Cancel",
+                    },
+                ]
+                .as_slice(),
+                "What to do?",
+                "",
+                None,
+                None,
+            ) {
+                Ok(message_box_result) => match message_box_result {
+                    ClickedButton::CustomButton(ButtonData { text, .. }) => match text {
+                        &"Create Entity" => {
+                            match show_message_box(
+                                MessageBoxFlag::INFORMATION,
+                                vec![
+                                    ButtonData {
+                                        flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
+                                        button_id: 1,
+                                        text: "Indestructible",
+                                    },
+                                    ButtonData {
+                                        flags: MessageBoxButtonFlag::NOTHING,
+                                        button_id: 2,
+                                        text: "Main Character",
+                                    },
+                                    ButtonData {
+                                        flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
+                                        button_id: 5,
+                                        text: "Cancel",
+                                    },
+                                ]
+                                .as_slice(),
+                                "What to create?",
+                                "",
+                                None,
+                                None,
+                            ) {
+                                Ok(creation_message_box_result) => {
+                                    match creation_message_box_result {
+                                        ClickedButton::CustomButton(ButtonData {
+                                            text, ..
+                                        }) => match text {
+                                            &"Indestructible" => {
+                                                level.indestructible.push(Entity::new(
+                                                    mouse_rect.width() as u16,
+                                                    mouse_rect.height() as u16,
+                                                    mouse_rect.x() as f32,
+                                                    mouse_rect.y() as f32,
+                                                ));
+                                            }
+                                            &"Main Character" => {
+                                                level.main_character.push(Entity::new(
+                                                    mouse_rect.width() as u16,
+                                                    mouse_rect.height() as u16,
+                                                    mouse_rect.x() as f32,
+                                                    mouse_rect.y() as f32,
+                                                ));
+                                            }
+                                            _ => {}
+                                        },
+                                        _ => {}
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        &"Delete under selection" => {
+                            match show_message_box(
+                                MessageBoxFlag::INFORMATION,
+                                vec![
+                                    ButtonData {
+                                        flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
+                                        button_id: 1,
+                                        text: "Yes, delete them!",
+                                    },
+                                    ButtonData {
+                                        flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
+                                        button_id: 2,
+                                        text: "Cancel",
+                                    },
+                                ]
+                                .as_slice(),
+                                &format!("Are you sure you want to delete these {} entities?", 0),
+                                "",
+                                None,
+                                None,
+                            ) {
+                                Ok(deletion_message_box_result) => {
+                                    match deletion_message_box_result {
+                                        ClickedButton::CustomButton(ButtonData {
+                                            text, ..
+                                        }) => match text {
+                                            &"Yes, delete them!" => {}
+                                            _ => {}
+                                        },
+                                        _ => {}
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+    }
+}
+
 pub mod level {
     use super::camera::camera::Camera;
     use super::camera::camera::Point;
+    use sdl2::rect::Rect;
     use serde::{Deserialize, Serialize};
 
-    #[derive(Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize)]
     pub enum EntityVariant {
         Block,
         Platform,
         MainCharacter,
         Pillar,
     }
-    #[derive(Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct Entity {
         pub variant: EntityVariant,
         pub bouncyness: f32,
@@ -521,6 +709,12 @@ pub mod level {
                         && (self.x as i32 + self.width as i32 > width as i32
                             && self.y as i32 + self.height as i32 > height as i32)
                 )
+        }
+        pub fn is_inside_rect(&self, rect: Rect) -> bool {
+            (rect.x() + self.width as i32) >= 0
+                && (rect.y() + self.height as i32) >= 0
+                && rect.x() <= rect.width() as i32
+                && rect.y() <= rect.height() as i32
         }
     }
     #[derive(Serialize, Deserialize)]
