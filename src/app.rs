@@ -11,7 +11,7 @@ pub mod app {
     use sdl2::rect::Rect;
     use sdl2::render::WindowCanvas;
     use std::collections::HashSet;
-    use std::time::Duration;
+    use std::time::{Duration, SystemTime};
 
     static BACKGROUND_COLOR: Color = Color {
         r: 42,
@@ -49,6 +49,8 @@ pub mod app {
 
     static WINDOW_WIDTH: u16 = 900;
     static WINDOW_HEIGHT: u16 = 600;
+
+    static MAX_FRAME_TIME_MILLIS: i8 = 16;
 
     macro_rules! draw_relatively {
         ($canvas: expr, $entities: expr, $camera: expr) => {
@@ -577,6 +579,8 @@ pub mod app {
 
         let mut character_index = 0;
 
+        let mut last_frame_time = SystemTime::now();
+
         'running: loop {
             canvas.set_draw_color(BACKGROUND_COLOR);
             canvas.clear();
@@ -675,7 +679,15 @@ pub mod app {
             draw_relatively!(canvas, &level1.foreground, &camera);
 
             canvas.present();
-            ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 32));
+
+            let millis_to_sleep = MAX_FRAME_TIME_MILLIS as i32
+                - last_frame_time.elapsed().unwrap().as_millis() as i32;
+            if millis_to_sleep > 0 {
+                ::std::thread::sleep(Duration::new(0, millis_to_sleep as u32 * 1_000_000u32));
+            } else {
+                println!("Detecting Lag. Frame took {}ms too long", -millis_to_sleep);
+            }
+            last_frame_time = SystemTime::now();
         }
     }
 }
