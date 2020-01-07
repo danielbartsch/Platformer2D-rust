@@ -330,19 +330,19 @@ pub mod app {
             }
             if pressed_keys.contains(&Keycode::D) {
                 level1.cameras[0].position.1 =
-                    level1.main_character[character_index].y as i32 - 200;
+                    level1.main_character[character_index].y as i32 - 400;
             } else if pressed_keys.contains(&Keycode::S) {
                 level1.cameras[0].position.1 =
-                    level1.main_character[character_index].y as i32 + 200;
+                    level1.main_character[character_index].y as i32 + 400;
                 level1.main_character[character_index].velocity_y = 5.0;
             }
             if pressed_keys.contains(&Keycode::A) {
                 level1.cameras[0].position.0 =
-                    level1.main_character[character_index].x as i32 - 200;
+                    level1.main_character[character_index].x as i32 - 400;
                 level1.main_character[character_index].velocity_x = -5.0;
             } else if pressed_keys.contains(&Keycode::H) {
                 level1.cameras[0].position.0 =
-                    level1.main_character[character_index].x as i32 + 200;
+                    level1.main_character[character_index].x as i32 + 400;
                 level1.main_character[character_index].velocity_x = 5.0;
             } else {
                 level1.main_character[character_index].velocity_x *= 0.8;
