@@ -14,6 +14,7 @@ pub mod app {
     use std::cmp;
     use std::collections::HashSet;
     use std::fs;
+    use std::mem;
     use std::time::{Duration, SystemTime};
 
     static BACKGROUND_COLOR: Color = Color {
@@ -236,6 +237,9 @@ pub mod app {
 
         let mut last_frame_time = SystemTime::now();
 
+        let mut edit_mode = false;
+        let mut editor_menu = EditorMenu::new();
+
         let mut mouse_click_position = None;
         let mut mouse_selection_rect: Option<Rect> = None;
 
@@ -263,35 +267,72 @@ pub mod app {
                     } => {
                         break 'running;
                     }
-                    Event::KeyDown {
-                        keycode: Some(Keycode::P),
-                        ..
-                    } => {
-                        character_index = (character_index + 1) % level1.main_character.len();
-                    }
-                    Event::MouseButtonDown { x, y, .. } => match mouse_click_position {
-                        Some(_) => {
-                            mouse_click_position = None;
-
-                            let camera_to_level_coordinates = Some(Rect::new(
-                                mouse_selection_rect.unwrap().x() + camera.position.0
-                                    - WINDOW_WIDTH as i32 / 2,
-                                mouse_selection_rect.unwrap().y() + camera.position.1
-                                    - WINDOW_HEIGHT as i32 / 2,
-                                mouse_selection_rect.unwrap().width(),
-                                mouse_selection_rect.unwrap().height(),
-                            ));
-
-                            EditorMenu::create_entity(
-                                &mut level1,
-                                camera_to_level_coordinates.unwrap(),
-                            );
-                            mouse_selection_rect = None;
+                    Event::KeyDown { keycode, .. } => match keycode {
+                        Some(Keycode::P) => {
+                            character_index = (character_index + 1) % level1.main_character.len();
                         }
-                        None => {
-                            mouse_click_position = Some((x, y));
+                        Some(Keycode::Num0) => {
+                            edit_mode = !edit_mode;
                         }
+                        _ => {}
                     },
+                    Event::MouseButtonDown { x, y, .. } => {
+                        if edit_mode {
+                            let clicked_variant_button = EditorMenu::get_variant_button_rects()
+                                .into_iter()
+                                .find(|(_, rect)| {
+                                    x > rect.x()
+                                        && x < rect.x() + rect.width() as i32
+                                        && y > rect.y()
+                                        && y < rect.y() + rect.height() as i32
+                                });
+                            let clicked_entity_variant_button =
+                                EditorMenu::get_entity_variant_button_rects()
+                                    .into_iter()
+                                    .find(|(_, rect)| {
+                                        x > rect.x()
+                                            && x < rect.x() + rect.width() as i32
+                                            && y > rect.y()
+                                            && y < rect.y() + rect.height() as i32
+                                    });
+                            if mem::discriminant(&clicked_entity_variant_button)
+                                == mem::discriminant(&None)
+                                && mem::discriminant(&clicked_variant_button)
+                                    == mem::discriminant(&None)
+                            {
+                                match mouse_click_position {
+                                    Some(_) => {
+                                        mouse_click_position = None;
+
+                                        let camera_to_level_coordinates = Some(Rect::new(
+                                            mouse_selection_rect.unwrap().x() + camera.position.0
+                                                - WINDOW_WIDTH as i32 / 2,
+                                            mouse_selection_rect.unwrap().y() + camera.position.1
+                                                - WINDOW_HEIGHT as i32 / 2,
+                                            mouse_selection_rect.unwrap().width(),
+                                            mouse_selection_rect.unwrap().height(),
+                                        ));
+
+                                        editor_menu.create_entity(
+                                            &mut level1,
+                                            camera_to_level_coordinates.unwrap(),
+                                        );
+                                        mouse_selection_rect = None;
+                                    }
+                                    None => {
+                                        mouse_click_position = Some((x, y));
+                                    }
+                                }
+                            } else {
+                                if let Some((variant, _)) = clicked_variant_button {
+                                    editor_menu.variant(variant);
+                                }
+                                if let Some((variant, _)) = clicked_entity_variant_button {
+                                    editor_menu.entity_variant(variant);
+                                }
+                            }
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -375,25 +416,71 @@ pub mod app {
             draw_relatively!(canvas, &level1.effects, &camera);
             draw_relatively!(canvas, &level1.foreground, &camera);
 
-            match mouse_click_position {
-                Some((x, y)) => {
-                    let original_color = canvas.draw_color();
-                    canvas.set_draw_color(Color {
-                        r: 255,
-                        g: 0,
-                        b: 0,
-                        a: 0xff,
-                    });
-                    let (pos_x, width) =
-                        (cmp::min(x, mouse_x), (x - mouse_x).wrapping_abs() as u32);
-                    let (pos_y, height) =
-                        (cmp::min(y, mouse_y), (y - mouse_y).wrapping_abs() as u32);
+            if edit_mode {
+                let original_color = canvas.draw_color();
+                canvas.set_draw_color(Color {
+                    r: 255,
+                    g: 60,
+                    b: 60,
+                    a: 0xff,
+                });
 
-                    mouse_selection_rect = Some(Rect::new(pos_x, pos_y, width, height));
-                    canvas.draw_rect(mouse_selection_rect.unwrap()).unwrap();
-                    canvas.set_draw_color(original_color);
+                canvas.draw_rect(Rect::new(0, 0, 20, 20)).unwrap();
+                canvas.draw_line((5, 5), (20 - 5, 5)).unwrap();
+                canvas.draw_line((5, 5), (5, 20 - 5)).unwrap();
+                canvas.draw_line((5, 20 - 5), (20 - 5, 20 - 5)).unwrap();
+                canvas.draw_line((5, 20 / 2), (20 - 5, 20 / 2)).unwrap();
+
+                for (variant, rect) in EditorMenu::get_variant_button_rects() {
+                    canvas.draw_rect(rect).unwrap();
+                    if mem::discriminant(&variant) == mem::discriminant(&editor_menu.variant) {
+                        canvas
+                            .draw_rect(Rect::new(
+                                rect.x() + 5,
+                                rect.y() + 5,
+                                rect.width() - 10,
+                                rect.height() - 10,
+                            ))
+                            .unwrap();
+                    }
                 }
-                None => {}
+                for (variant, rect) in EditorMenu::get_entity_variant_button_rects() {
+                    canvas.draw_rect(rect).unwrap();
+                    if mem::discriminant(&variant) == mem::discriminant(&editor_menu.entity_variant)
+                    {
+                        canvas
+                            .draw_rect(Rect::new(
+                                rect.x() + 5,
+                                rect.y() + 5,
+                                rect.width() - 10,
+                                rect.height() - 10,
+                            ))
+                            .unwrap();
+                    }
+                }
+
+                canvas.set_draw_color(original_color);
+
+                match mouse_click_position {
+                    Some((x, y)) => {
+                        let original_color = canvas.draw_color();
+                        canvas.set_draw_color(Color {
+                            r: 255,
+                            g: 60,
+                            b: 60,
+                            a: 0xff,
+                        });
+                        let (pos_x, width) =
+                            (cmp::min(x, mouse_x), (x - mouse_x).wrapping_abs() as u32);
+                        let (pos_y, height) =
+                            (cmp::min(y, mouse_y), (y - mouse_y).wrapping_abs() as u32);
+
+                        mouse_selection_rect = Some(Rect::new(pos_x, pos_y, width, height));
+                        canvas.draw_rect(mouse_selection_rect.unwrap()).unwrap();
+                        canvas.set_draw_color(original_color);
+                    }
+                    None => {}
+                }
             }
 
             canvas.present();
@@ -411,134 +498,114 @@ pub mod app {
 }
 
 pub mod editor_menu {
-    use super::level::{Entity, Level};
-    use ::sdl2::messagebox::*;
+    use super::level::{Entity, EntityVariant, Level};
     use sdl2::rect::Rect;
-    pub struct EditorMenu {}
+
+    #[derive(Debug)]
+    pub enum LevelEntityVariant {
+        Background,
+        Indestructible,
+        Destructible,
+        Enemies,
+        MainCharacter,
+        Effects,
+        Foreground,
+        Deletion,
+    }
+    pub struct EditorMenu {
+        pub variant: LevelEntityVariant,
+        pub entity_variant: EntityVariant,
+    }
     impl EditorMenu {
-        pub fn create_entity(level: &mut Level, mouse_rect: Rect) {
-            match show_message_box(
-                MessageBoxFlag::INFORMATION,
-                vec![
-                    ButtonData {
-                        flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
-                        button_id: 1,
-                        text: "Create Entity",
-                    },
-                    ButtonData {
-                        flags: MessageBoxButtonFlag::NOTHING,
-                        button_id: 2,
-                        text: "Delete under selection",
-                    },
-                    ButtonData {
-                        flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
-                        button_id: 3,
-                        text: "Cancel",
-                    },
-                ]
-                .as_slice(),
-                "What to do?",
-                "",
-                None,
-                None,
-            ) {
-                Ok(message_box_result) => match message_box_result {
-                    ClickedButton::CustomButton(ButtonData { text, .. }) => match text {
-                        &"Create Entity" => {
-                            match show_message_box(
-                                MessageBoxFlag::INFORMATION,
-                                vec![
-                                    ButtonData {
-                                        flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
-                                        button_id: 1,
-                                        text: "Indestructible",
-                                    },
-                                    ButtonData {
-                                        flags: MessageBoxButtonFlag::NOTHING,
-                                        button_id: 2,
-                                        text: "Main Character",
-                                    },
-                                    ButtonData {
-                                        flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
-                                        button_id: 5,
-                                        text: "Cancel",
-                                    },
-                                ]
-                                .as_slice(),
-                                "What to create?",
-                                "",
-                                None,
-                                None,
-                            ) {
-                                Ok(creation_message_box_result) => {
-                                    match creation_message_box_result {
-                                        ClickedButton::CustomButton(ButtonData {
-                                            text, ..
-                                        }) => match text {
-                                            &"Indestructible" => {
-                                                level.indestructible.push(Entity::new(
-                                                    mouse_rect.width() as u16,
-                                                    mouse_rect.height() as u16,
-                                                    mouse_rect.x() as f32,
-                                                    mouse_rect.y() as f32,
-                                                ));
-                                            }
-                                            &"Main Character" => {
-                                                level.main_character.push(Entity::new(
-                                                    mouse_rect.width() as u16,
-                                                    mouse_rect.height() as u16,
-                                                    mouse_rect.x() as f32,
-                                                    mouse_rect.y() as f32,
-                                                ));
-                                            }
-                                            _ => {}
-                                        },
-                                        _ => {}
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                        &"Delete under selection" => {
-                            match show_message_box(
-                                MessageBoxFlag::INFORMATION,
-                                vec![
-                                    ButtonData {
-                                        flags: MessageBoxButtonFlag::RETURNKEY_DEFAULT,
-                                        button_id: 1,
-                                        text: "Yes, delete them!",
-                                    },
-                                    ButtonData {
-                                        flags: MessageBoxButtonFlag::ESCAPEKEY_DEFAULT,
-                                        button_id: 2,
-                                        text: "Cancel",
-                                    },
-                                ]
-                                .as_slice(),
-                                &format!("Are you sure you want to delete these {} entities?", 0),
-                                "",
-                                None,
-                                None,
-                            ) {
-                                Ok(deletion_message_box_result) => {
-                                    match deletion_message_box_result {
-                                        ClickedButton::CustomButton(ButtonData {
-                                            text, ..
-                                        }) => match text {
-                                            &"Yes, delete them!" => {}
-                                            _ => {}
-                                        },
-                                        _ => {}
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
-                        _ => {}
-                    },
-                    _ => {}
-                },
-                _ => {}
+        pub fn new() -> EditorMenu {
+            EditorMenu {
+                variant: LevelEntityVariant::Effects,
+                entity_variant: EntityVariant::Platform,
+            }
+        }
+        pub fn variant(&mut self, variant: LevelEntityVariant) {
+            self.variant = variant;
+        }
+        pub fn entity_variant(&mut self, entity_variant: EntityVariant) {
+            self.entity_variant = entity_variant;
+        }
+        pub fn get_variant_button_rects() -> Vec<(LevelEntityVariant, Rect)> {
+            vec![
+                (LevelEntityVariant::Background, Rect::new(0, 30, 20, 20)),
+                (
+                    LevelEntityVariant::Indestructible,
+                    Rect::new(0, 30 + (25), 20, 20),
+                ),
+                (
+                    LevelEntityVariant::Destructible,
+                    Rect::new(0, 30 + (25 * 2), 20, 20),
+                ),
+                (
+                    LevelEntityVariant::Enemies,
+                    Rect::new(0, 30 + (25 * 3), 20, 20),
+                ),
+                (
+                    LevelEntityVariant::MainCharacter,
+                    Rect::new(0, 30 + (25 * 4), 20, 20),
+                ),
+                (
+                    LevelEntityVariant::Effects,
+                    Rect::new(0, 30 + (25 * 5), 20, 20),
+                ),
+                (
+                    LevelEntityVariant::Foreground,
+                    Rect::new(0, 30 + (25 * 6), 20, 20),
+                ),
+                (
+                    LevelEntityVariant::Deletion,
+                    Rect::new(0, 30 + (25 * 7), 20, 20),
+                ),
+            ]
+        }
+        pub fn get_entity_variant_button_rects() -> Vec<(EntityVariant, Rect)> {
+            vec![
+                (EntityVariant::Block, Rect::new(30, 30, 20, 20)),
+                (EntityVariant::Platform, Rect::new(30, 30 + (25), 20, 20)),
+                (
+                    EntityVariant::MainCharacter,
+                    Rect::new(30, 30 + (25 * 2), 20, 20),
+                ),
+                (EntityVariant::Pillar, Rect::new(30, 30 + (25 * 3), 20, 20)),
+            ]
+        }
+        pub fn create_entity(&mut self, level: &mut Level, mouse_rect: Rect) {
+            let entity = Entity::new(
+                mouse_rect.width() as u16,
+                mouse_rect.height() as u16,
+                mouse_rect.x() as f32,
+                mouse_rect.y() as f32,
+            )
+            .variant(self.entity_variant.clone());
+            match self.variant {
+                LevelEntityVariant::Deletion => {
+                    println!("Not yet implemented: Deletion");
+                }
+                LevelEntityVariant::Background => {
+                    level.background.push(entity);
+                }
+                LevelEntityVariant::Indestructible => {
+                    level.indestructible.push(entity);
+                }
+                LevelEntityVariant::Destructible => {
+                    level.destructible.push(entity);
+                }
+                LevelEntityVariant::Enemies => {
+                    level.enemies.push(entity);
+                }
+                LevelEntityVariant::MainCharacter => {
+                    level.main_character.push(entity);
+                }
+                LevelEntityVariant::Effects => {
+                    level.effects.push(entity);
+                }
+                LevelEntityVariant::Foreground => {
+                    level.foreground.push(entity);
+                }
             }
         }
     }
