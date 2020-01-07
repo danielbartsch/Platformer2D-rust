@@ -342,61 +342,74 @@ pub mod app {
             entities.extend(&level1.destructible);
             entities.extend(&level1.enemies);
 
-            if pressed_keys.contains(&Keycode::Y) {
-                let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
-                level1.effects.push(
-                    Entity::new(
-                        10,
-                        10,
-                        level1.main_character[character_index].x,
-                        level1.main_character[character_index].y,
-                    )
-                    .variant(EntityVariant::Block)
-                    .velocity_x(
-                        level1.main_character[character_index].velocity_x
-                            * (2.2 + pseudo_random.cos()),
-                    )
-                    .velocity_y(
-                        level1.main_character[character_index].velocity_y
-                            * (2.2 + pseudo_random.sin()),
-                    )
-                    .acceleration_y(0.01)
-                    .bouncyness(1.1),
-                );
-            }
-            if pressed_keys.contains(&Keycode::N)
-                && level1.main_character[character_index].is_touching_ground(entities.clone())
-            {
-                level1.main_character[character_index].velocity_y = -5.0;
-            }
-            if pressed_keys.contains(&Keycode::D) {
-                level1.cameras[0].position.1 =
-                    level1.main_character[character_index].y as i32 - 400;
-            } else if pressed_keys.contains(&Keycode::S) {
-                level1.cameras[0].position.1 =
-                    level1.main_character[character_index].y as i32 + 400;
-                level1.main_character[character_index].velocity_y = 5.0;
-            }
-            if pressed_keys.contains(&Keycode::A) {
-                level1.cameras[0].position.0 =
-                    level1.main_character[character_index].x as i32 - 400;
-                level1.main_character[character_index].velocity_x = -5.0;
-            } else if pressed_keys.contains(&Keycode::H) {
-                level1.cameras[0].position.0 =
-                    level1.main_character[character_index].x as i32 + 400;
-                level1.main_character[character_index].velocity_x = 5.0;
+            if edit_mode {
+                if pressed_keys.contains(&Keycode::D) {
+                    level1.cameras[0].position.1 -= 25;
+                } else if pressed_keys.contains(&Keycode::S) {
+                    level1.cameras[0].position.1 += 25;
+                }
+                if pressed_keys.contains(&Keycode::A) {
+                    level1.cameras[0].position.0 -= 25;
+                } else if pressed_keys.contains(&Keycode::H) {
+                    level1.cameras[0].position.0 += 25;
+                }
             } else {
-                level1.main_character[character_index].velocity_x *= 0.8;
-            }
-            if !pressed_keys.contains(&Keycode::A)
-                && !pressed_keys.contains(&Keycode::S)
-                && !pressed_keys.contains(&Keycode::H)
-                && !pressed_keys.contains(&Keycode::D)
-            {
-                level1.cameras[0].position = Point(
-                    level1.main_character[character_index].x as i32,
-                    level1.main_character[character_index].y as i32,
-                );
+                if pressed_keys.contains(&Keycode::Y) {
+                    let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
+                    level1.effects.push(
+                        Entity::new(
+                            10,
+                            10,
+                            level1.main_character[character_index].x,
+                            level1.main_character[character_index].y,
+                        )
+                        .variant(EntityVariant::Block)
+                        .velocity_x(
+                            level1.main_character[character_index].velocity_x
+                                * (2.2 + pseudo_random.cos()),
+                        )
+                        .velocity_y(
+                            level1.main_character[character_index].velocity_y
+                                * (2.2 + pseudo_random.sin()),
+                        )
+                        .acceleration_y(0.01)
+                        .bouncyness(1.1),
+                    );
+                }
+                if pressed_keys.contains(&Keycode::N)
+                    && level1.main_character[character_index].is_touching_ground(entities.clone())
+                {
+                    level1.main_character[character_index].velocity_y = -5.0;
+                }
+                if pressed_keys.contains(&Keycode::D) {
+                    level1.cameras[0].position.1 =
+                        level1.main_character[character_index].y as i32 - 400;
+                } else if pressed_keys.contains(&Keycode::S) {
+                    level1.cameras[0].position.1 =
+                        level1.main_character[character_index].y as i32 + 400;
+                    level1.main_character[character_index].velocity_y = 5.0;
+                }
+                if pressed_keys.contains(&Keycode::A) {
+                    level1.cameras[0].position.0 =
+                        level1.main_character[character_index].x as i32 - 400;
+                    level1.main_character[character_index].velocity_x = -5.0;
+                } else if pressed_keys.contains(&Keycode::H) {
+                    level1.cameras[0].position.0 =
+                        level1.main_character[character_index].x as i32 + 400;
+                    level1.main_character[character_index].velocity_x = 5.0;
+                } else {
+                    level1.main_character[character_index].velocity_x *= 0.8;
+                }
+                if !pressed_keys.contains(&Keycode::A)
+                    && !pressed_keys.contains(&Keycode::S)
+                    && !pressed_keys.contains(&Keycode::H)
+                    && !pressed_keys.contains(&Keycode::D)
+                {
+                    level1.cameras[0].position = Point(
+                        level1.main_character[character_index].x as i32,
+                        level1.main_character[character_index].y as i32,
+                    );
+                }
             }
 
             for character in &mut level1.main_character {
@@ -406,7 +419,10 @@ pub mod app {
                 character.next_state(entities.clone());
             }
 
-            camera.to_target(level1.cameras[0].position, 0.03);
+            camera.to_target(
+                level1.cameras[0].position,
+                if edit_mode { 0.3 } else { 0.03 },
+            );
 
             draw_relatively!(canvas, &level1.background, &camera);
             draw_relatively!(canvas, &level1.indestructible, &camera);
