@@ -574,8 +574,8 @@ pub mod level {
     }
     struct PointF32(f32, f32);
     impl Entity {
-        pub fn new(width: u16, height: u16, x: f32, y: f32) -> Entity {
-            Entity {
+        pub fn new(width: u16, height: u16, x: f32, y: f32) -> Self {
+            Self {
                 variant: EntityVariant::Platform,
                 bouncyness: 0.4,
                 width,
@@ -590,7 +590,7 @@ pub mod level {
                 parallax_y: 1.0,
             }
         }
-        pub fn variant(mut self, variant: EntityVariant) -> Entity {
+        pub fn variant(mut self, variant: EntityVariant) -> Self {
             self.variant = variant;
             self
         }
@@ -622,7 +622,7 @@ pub mod level {
             self.bouncyness = bouncyness;
             self
         }
-        pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Entity>) -> bool {
+        pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Self>) -> bool {
             let lower_end = self.y as i32 + self.height as i32;
             interactive_entities.iter().any(|entity| {
                 entity.y as i32 == lower_end
@@ -631,7 +631,7 @@ pub mod level {
                             && entity.x + entity.width as f32 > self.x + self.width as f32))
             })
         }
-        pub fn next_state(&mut self, mut interactive_entities: Vec<&Entity>) {
+        pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
             let intended_velocity = PointF32(
                 self.velocity_x + self.acceleration_x,
                 self.velocity_y + self.acceleration_y,
