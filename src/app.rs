@@ -3,7 +3,6 @@ mod camera;
 
 pub mod app {
     use super::camera::camera::Camera;
-    use super::camera::camera::Point;
     use super::editor_menu::EditorMenu;
     use super::level::*;
     use sdl2::event::Event;
@@ -404,7 +403,7 @@ pub mod app {
                     && !pressed_keys.contains(&Keycode::H)
                     && !pressed_keys.contains(&Keycode::D)
                 {
-                    level1.cameras[0].position = Point(
+                    level1.cameras[0].position = (
                         level1.main_character[character_index].x as i32,
                         level1.main_character[character_index].y as i32,
                     );
@@ -628,7 +627,6 @@ pub mod editor_menu {
 
 pub mod level {
     use super::camera::camera::Camera;
-    use super::camera::camera::Point;
     use sdl2::rect::Rect;
     use serde::{Deserialize, Serialize};
 
@@ -654,7 +652,6 @@ pub mod level {
         pub parallax_x: f32,
         pub parallax_y: f32,
     }
-    struct PointF32(f32, f32);
     impl Entity {
         pub fn new(width: u16, height: u16, x: f32, y: f32) -> Self {
             Self {
@@ -714,11 +711,11 @@ pub mod level {
             })
         }
         pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
-            let intended_velocity = PointF32(
+            let intended_velocity = (
                 self.velocity_x + self.acceleration_x,
                 self.velocity_y + self.acceleration_y,
             );
-            let intended_position = Point(
+            let intended_position = (
                 (self.x + intended_velocity.0 as f32) as i32,
                 (self.y + intended_velocity.1 as f32) as i32,
             );
@@ -779,7 +776,7 @@ pub mod level {
                 self.y += self.velocity_y;
             }
         }
-        pub fn is_inside_bounds(&self, position: Point, width: u16, height: u16) -> bool {
+        pub fn is_inside_bounds(&self, position: (i32, i32), width: u16, height: u16) -> bool {
             (self.x as i32 + self.width as i32 >= position.0
                 && self.y as i32 + self.height as i32 >= position.1
                 && self.x as i32 <= position.0 + width as i32
