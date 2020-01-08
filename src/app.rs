@@ -215,6 +215,16 @@ pub mod app {
                         }
                         _ => {}
                     },
+                    Event::MouseWheel { y, .. } => {
+                        if edit_mode {
+                            println!("y{}", y);
+                            if y < 0 {
+                                level1.cameras[0].zoom(0.97);
+                            } else {
+                                level1.cameras[0].zoom(1.03);
+                            }
+                        }
+                    }
                     Event::MouseButtonDown { x, y, .. } => {
                         if edit_mode {
                             let clicked_variant_button = EditorMenu::get_variant_button_rects()
@@ -292,7 +302,13 @@ pub mod app {
                 } else if pressed_keys.contains(&Keycode::H) {
                     level1.cameras[0].position.0 += 25;
                 }
+                if pressed_keys.contains(&Keycode::Q) {
+                    level1.cameras[0].zoom(1.03);
+                } else if pressed_keys.contains(&Keycode::R) {
+                    level1.cameras[0].zoom(0.97);
+                }
             } else {
+                level1.cameras[0].set_zoom(1.0);
                 if pressed_keys.contains(&Keycode::Y) {
                     let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
                     level1.effects.push(

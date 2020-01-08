@@ -29,6 +29,19 @@ pub mod camera {
         pub fn get_scale_y(&self) -> f32 {
             self.scale.1
         }
+        pub fn zoom(&mut self, scale: f32) {
+            self.scale.0 *= scale;
+            self.scale.1 *= scale;
+            self.position.0 = (self.position.0 as f32 * (1.0 / scale)) as i32;
+            self.position.1 = (self.position.1 as f32 * (1.0 / scale)) as i32;
+        }
+        pub fn set_zoom(&mut self, scale: f32) {
+            let difference = (self.scale.0 / scale, self.scale.1 / scale);
+            self.scale.0 = scale;
+            self.scale.1 = scale;
+            self.position.0 = (self.position.0 as f32 * difference.0) as i32;
+            self.position.1 = (self.position.1 as f32 * difference.1) as i32;
+        }
         pub fn to_target(&mut self, target_camera: &Self, rate: f32) {
             self.position.0 += ((target_camera.get_x() - self.get_x()) as f32 * rate) as i32;
             self.position.1 += ((target_camera.get_y() - self.get_y()) as f32 * rate) as i32;
