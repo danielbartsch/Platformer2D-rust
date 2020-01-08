@@ -260,14 +260,13 @@ pub mod app {
 
             for event in event_pump.poll_iter() {
                 match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => {
+                    Event::Quit { .. } => {
                         break 'running;
                     }
                     Event::KeyDown { keycode, .. } => match keycode {
+                        Some(Keycode::Escape) => {
+                            mouse_click_position = None;
+                        }
                         Some(Keycode::P) => {
                             character_index = (character_index + 1) % level1.main_character.len();
                         }
