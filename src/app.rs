@@ -59,15 +59,18 @@ pub mod app {
         ($canvas: expr, $entities: expr, $camera: expr) => {
             if $entities.len() > 0 {
                 for entity in $entities {
-                    let x = entity.x as i32
+                    let x = (entity.x * $camera.get_scale_x()) as i32
                         - ($camera.get_x() as f32 * entity.parallax_x - WINDOW_WIDTH as f32 / 2.0)
                             as i32;
-                    let y = entity.y as i32
+                    let y = (entity.y * $camera.get_scale_y()) as i32
                         - ($camera.get_y() as f32 * entity.parallax_y - WINDOW_HEIGHT as f32 / 2.0)
                             as i32;
 
-                    if (x + entity.width as i32) >= 0
-                        && (y + entity.height as i32) >= 0
+                    let width = (entity.width as f32 * $camera.get_scale_x()) as i32;
+                    let height = (entity.height as f32 * $camera.get_scale_y()) as i32;
+
+                    if (x + width) >= 0
+                        && (y + height) >= 0
                         && x <= WINDOW_WIDTH as i32
                         && y <= WINDOW_HEIGHT as i32
                     {
@@ -75,130 +78,68 @@ pub mod app {
                             EntityVariant::Block => {
                                 $canvas.set_draw_color(MAIN_BACKGROUND_COLOR);
                                 $canvas
-                                    .fill_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .fill_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
                                 $canvas.set_draw_color(MAIN_LINE_COLOR);
                                 $canvas
-                                    .draw_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .draw_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
                             }
                             EntityVariant::MainCharacter => {
                                 $canvas.set_draw_color(MAIN_BACKGROUND_COLOR);
                                 $canvas
-                                    .fill_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .fill_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
                                 $canvas.set_draw_color(MAIN_LINE_COLOR);
                                 $canvas
-                                    .draw_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .draw_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
-                                $canvas
-                                    .draw_line((x, y + 4), (x + entity.width as i32, y + 4))
-                                    .unwrap();
+                                $canvas.draw_line((x, y + 4), (x + width, y + 4)).unwrap();
                             }
                             EntityVariant::Platform => {
                                 $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
                                 $canvas
-                                    .fill_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .fill_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
                                 $canvas.set_draw_color(LINE_COLOR);
                                 $canvas
-                                    .draw_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .draw_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
+                                $canvas.draw_line((x + 4, y), (x + 4, y + height)).unwrap();
                                 $canvas
-                                    .draw_line((x + 4, y), (x + 4, y + entity.height as i32))
+                                    .draw_line((x + width - 4, y), (x + width - 4, y + height))
                                     .unwrap();
                                 $canvas
                                     .draw_line(
-                                        (x + entity.width as i32 - 4, y),
-                                        (x + entity.width as i32 - 4, y + entity.height as i32),
+                                        (x + width - width / 8, y + height / 8),
+                                        (x + width / 8, y + height - height / 8),
                                     )
                                     .unwrap();
                                 $canvas
                                     .draw_line(
-                                        (
-                                            x + entity.width as i32 - entity.width as i32 / 8,
-                                            y + entity.height as i32 / 8,
-                                        ),
-                                        (
-                                            x + entity.width as i32 / 8,
-                                            y + entity.height as i32 - entity.height as i32 / 8,
-                                        ),
-                                    )
-                                    .unwrap();
-                                $canvas
-                                    .draw_line(
-                                        (
-                                            x + entity.width as i32 - entity.width as i32 / 8,
-                                            y + entity.height as i32 - entity.height as i32 / 8,
-                                        ),
-                                        (x + entity.width as i32 / 8, y + entity.height as i32 / 8),
+                                        (x + width - width / 8, y + height - height / 8),
+                                        (x + width / 8, y + height / 8),
                                     )
                                     .unwrap();
                             }
                             EntityVariant::Pillar => {
                                 $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
                                 $canvas
-                                    .fill_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .fill_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
                                 $canvas.set_draw_color(LINE_COLOR);
                                 $canvas
-                                    .draw_rect(Rect::new(
-                                        x,
-                                        y,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ))
+                                    .draw_rect(Rect::new(x, y, width as u32, height as u32))
                                     .unwrap();
-                                for running_x in 0..entity.width / 4 {
+                                for running_x in 0..width / 4 {
                                     let real_x = running_x as i32 * 4;
                                     $canvas
-                                        .draw_line(
-                                            (x + real_x, y),
-                                            (x + real_x, y + entity.height as i32),
-                                        )
+                                        .draw_line((x + real_x, y), (x + real_x, y + height))
                                         .unwrap();
                                     $canvas
                                         .draw_line(
-                                            (x + entity.width as i32 - real_x, y),
-                                            (
-                                                x + entity.width as i32 - real_x,
-                                                y + entity.height as i32,
-                                            ),
+                                            (x + width - real_x, y),
+                                            (x + width - real_x, y + height),
                                         )
                                         .unwrap();
                                 }
