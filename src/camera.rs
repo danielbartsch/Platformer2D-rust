@@ -29,9 +29,11 @@ pub mod camera {
         pub fn get_scale_y(&self) -> f32 {
             self.scale.1
         }
-        pub fn to_target(&mut self, target_position: (i32, i32), rate: f32) {
-            self.position.0 += ((target_position.0 - self.get_x()) as f32 * rate) as i32;
-            self.position.1 += ((target_position.1 - self.get_y()) as f32 * rate) as i32;
+        pub fn to_target(&mut self, target_camera: &Self, rate: f32) {
+            self.position.0 += ((target_camera.get_x() - self.get_x()) as f32 * rate) as i32;
+            self.position.1 += ((target_camera.get_y() - self.get_y()) as f32 * rate) as i32;
+            self.scale.0 += (target_camera.get_scale_x() - self.get_scale_x()) * rate;
+            self.scale.1 += (target_camera.get_scale_y() - self.get_scale_y()) * rate;
         }
     }
 }
