@@ -331,10 +331,18 @@ pub mod app {
                         .bouncyness(1.1),
                     );
                 }
-                if pressed_keys.contains(&Keycode::N)
-                    && level1.main_character[character_index].is_touching_ground(entities.clone())
-                {
-                    level1.main_character[character_index].velocity_y = -5.0;
+                if pressed_keys.contains(&Keycode::N) {
+                    if level1.main_character[character_index].is_touching_ground(entities.clone()) {
+                        level1.main_character[character_index].velocity_y = -8.0;
+                        level1.main_character[character_index].acceleration_y = 0.1;
+                    }
+                    if level1.main_character[character_index].velocity_y < 0.0 {
+                        level1.main_character[character_index].acceleration_y += 0.01;
+                    } else {
+                        level1.main_character[character_index].acceleration_y += 0.002;
+                    }
+                } else {
+                    level1.main_character[character_index].acceleration_y = 1.0;
                 }
                 if pressed_keys.contains(&Keycode::D) {
                     level1.cameras[0].position.1 =
@@ -618,7 +626,7 @@ pub mod level {
                 velocity_x: 0.0,
                 velocity_y: 0.0,
                 acceleration_x: 0.0,
-                acceleration_y: 0.3,
+                acceleration_y: 1.0,
                 parallax_x: 1.0,
                 parallax_y: 1.0,
             }
