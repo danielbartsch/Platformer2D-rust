@@ -218,7 +218,6 @@ pub mod app {
                     },
                     Event::MouseWheel { y, .. } => {
                         if edit_mode {
-                            println!("y{}", y);
                             if y < 0 {
                                 level1.cameras[0].zoom(0.97);
                             } else {
