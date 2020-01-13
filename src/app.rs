@@ -172,7 +172,7 @@ pub fn run(level_name: &str) {
 
     video_subsystem.text_input().start();
 
-    let mut level1 = Level::deserialize(
+    let mut level = Level::deserialize(
         fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap(),
     );
 
@@ -214,7 +214,7 @@ pub fn run(level_name: &str) {
                         mouse_click_position = None;
                     }
                     Some(Keycode::P) => {
-                        character_index = (character_index + 1) % level1.main_character.len();
+                        character_index = (character_index + 1) % level.main_character.len();
                     }
                     Some(Keycode::Num0) => {
                         edit_mode = !edit_mode;
@@ -270,7 +270,7 @@ pub fn run(level_name: &str) {
                                     ));
 
                                     editor_menu.create_entity(
-                                        &mut level1,
+                                        &mut level,
                                         camera_to_level_coordinates.unwrap(),
                                     );
                                     mouse_selection_rect = None;
@@ -294,9 +294,9 @@ pub fn run(level_name: &str) {
         }
 
         let mut entities = vec![];
-        entities.extend(&level1.indestructible);
-        entities.extend(&level1.destructible);
-        entities.extend(&level1.enemies);
+        entities.extend(&level.indestructible);
+        entities.extend(&level.destructible);
+        entities.extend(&level.enemies);
 
         if edit_mode {
             if pressed_keys.contains(&Keycode::D) {
@@ -318,20 +318,20 @@ pub fn run(level_name: &str) {
             target_camera.set_zoom(1.0);
             if pressed_keys.contains(&Keycode::Y) {
                 let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
-                level1.effects.push(
+                level.effects.push(
                     Entity::new(
                         10,
                         10,
-                        level1.main_character[character_index].x,
-                        level1.main_character[character_index].y,
+                        level.main_character[character_index].x,
+                        level.main_character[character_index].y,
                     )
                     .variant(EntityVariant::Block)
                     .velocity_x(
-                        level1.main_character[character_index].velocity_x
+                        level.main_character[character_index].velocity_x
                             * (2.2 + pseudo_random.cos()),
                     )
                     .velocity_y(
-                        level1.main_character[character_index].velocity_y
+                        level.main_character[character_index].velocity_y
                             * (2.2 + pseudo_random.sin()),
                     )
                     .acceleration_y(0.01)
@@ -339,32 +339,32 @@ pub fn run(level_name: &str) {
                 );
             }
             if pressed_keys.contains(&Keycode::N) {
-                if level1.main_character[character_index].is_touching_ground(entities.clone()) {
-                    level1.main_character[character_index].velocity_y = -8.0;
-                    level1.main_character[character_index].acceleration_y = 0.1;
+                if level.main_character[character_index].is_touching_ground(entities.clone()) {
+                    level.main_character[character_index].velocity_y = -8.0;
+                    level.main_character[character_index].acceleration_y = 0.1;
                 }
-                if level1.main_character[character_index].velocity_y < 0.0 {
-                    level1.main_character[character_index].acceleration_y += 0.01;
+                if level.main_character[character_index].velocity_y < 0.0 {
+                    level.main_character[character_index].acceleration_y += 0.01;
                 } else {
-                    level1.main_character[character_index].acceleration_y += 0.002;
+                    level.main_character[character_index].acceleration_y += 0.002;
                 }
             } else {
-                level1.main_character[character_index].acceleration_y = 1.0;
+                level.main_character[character_index].acceleration_y = 1.0;
             }
             if pressed_keys.contains(&Keycode::D) {
-                target_camera.position.1 = level1.main_character[character_index].y - 400.0;
+                target_camera.position.1 = level.main_character[character_index].y - 400.0;
             } else if pressed_keys.contains(&Keycode::S) {
-                target_camera.position.1 = level1.main_character[character_index].y + 400.0;
-                level1.main_character[character_index].velocity_y = 5.0;
+                target_camera.position.1 = level.main_character[character_index].y + 400.0;
+                level.main_character[character_index].velocity_y = 5.0;
             }
             if pressed_keys.contains(&Keycode::A) {
-                target_camera.position.0 = level1.main_character[character_index].x - 400.0;
-                level1.main_character[character_index].velocity_x = -5.0;
+                target_camera.position.0 = level.main_character[character_index].x - 400.0;
+                level.main_character[character_index].velocity_x = -5.0;
             } else if pressed_keys.contains(&Keycode::H) {
-                target_camera.position.0 = level1.main_character[character_index].x + 400.0;
-                level1.main_character[character_index].velocity_x = 5.0;
+                target_camera.position.0 = level.main_character[character_index].x + 400.0;
+                level.main_character[character_index].velocity_x = 5.0;
             } else {
-                level1.main_character[character_index].velocity_x *= 0.8;
+                level.main_character[character_index].velocity_x *= 0.8;
             }
             if !pressed_keys.contains(&Keycode::A)
                 && !pressed_keys.contains(&Keycode::S)
@@ -372,16 +372,16 @@ pub fn run(level_name: &str) {
                 && !pressed_keys.contains(&Keycode::D)
             {
                 target_camera.position = (
-                    level1.main_character[character_index].x,
-                    level1.main_character[character_index].y,
+                    level.main_character[character_index].x,
+                    level.main_character[character_index].y,
                 );
             }
         }
 
-        for character in &mut level1.main_character {
+        for character in &mut level.main_character {
             character.next_state(entities.clone());
         }
-        for character in &mut level1.effects {
+        for character in &mut level.effects {
             character.next_state(entities.clone());
         }
 
@@ -390,13 +390,13 @@ pub fn run(level_name: &str) {
             if edit_mode { (0.3, 0.3) } else { (0.03, 0.01) },
         );
 
-        draw_relatively!(canvas, &level1.background, &camera);
-        draw_relatively!(canvas, &level1.indestructible, &camera);
-        draw_relatively!(canvas, &level1.destructible, &camera);
-        draw_relatively!(canvas, &level1.enemies, &camera);
-        draw_relatively!(canvas, &level1.main_character, &camera);
-        draw_relatively!(canvas, &level1.effects, &camera);
-        draw_relatively!(canvas, &level1.foreground, &camera);
+        draw_relatively!(canvas, &level.background, &camera);
+        draw_relatively!(canvas, &level.indestructible, &camera);
+        draw_relatively!(canvas, &level.destructible, &camera);
+        draw_relatively!(canvas, &level.enemies, &camera);
+        draw_relatively!(canvas, &level.main_character, &camera);
+        draw_relatively!(canvas, &level.effects, &camera);
+        draw_relatively!(canvas, &level.foreground, &camera);
 
         if edit_mode {
             let original_color = canvas.draw_color();
