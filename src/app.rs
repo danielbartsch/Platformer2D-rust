@@ -293,14 +293,14 @@ pub mod app {
 
             if edit_mode {
                 if pressed_keys.contains(&Keycode::D) {
-                    level1.cameras[0].position.1 -= 25;
+                    level1.cameras[0].position.1 -= (25.0 / level1.cameras[0].scale.1) as i32;
                 } else if pressed_keys.contains(&Keycode::S) {
-                    level1.cameras[0].position.1 += 25;
+                    level1.cameras[0].position.1 += (25.0 / level1.cameras[0].scale.1) as i32;
                 }
                 if pressed_keys.contains(&Keycode::A) {
-                    level1.cameras[0].position.0 -= 25;
+                    level1.cameras[0].position.0 -= (25.0 / level1.cameras[0].scale.0) as i32;
                 } else if pressed_keys.contains(&Keycode::H) {
-                    level1.cameras[0].position.0 += 25;
+                    level1.cameras[0].position.0 += (25.0 / level1.cameras[0].scale.1) as i32;
                 }
                 if pressed_keys.contains(&Keycode::Q) {
                     level1.cameras[0].zoom(1.03);
