@@ -254,10 +254,12 @@ pub mod app {
                                         mouse_click_position = None;
 
                                         let camera_to_level_coordinates = Some(Rect::new(
-                                            mouse_selection_rect.unwrap().x() + camera.position.0
-                                                - WINDOW_WIDTH as i32 / 2,
-                                            mouse_selection_rect.unwrap().y() + camera.position.1
-                                                - WINDOW_HEIGHT as i32 / 2,
+                                            mouse_selection_rect.unwrap().x()
+                                                + (camera.position.0 as i32)
+                                                - (WINDOW_WIDTH / 2) as i32,
+                                            mouse_selection_rect.unwrap().y()
+                                                + (camera.position.1 as i32)
+                                                - (WINDOW_HEIGHT / 2) as i32,
                                             mouse_selection_rect.unwrap().width(),
                                             mouse_selection_rect.unwrap().height(),
                                         ));
@@ -293,14 +295,14 @@ pub mod app {
 
             if edit_mode {
                 if pressed_keys.contains(&Keycode::D) {
-                    level1.cameras[0].position.1 -= (25.0 / level1.cameras[0].scale.1) as i32;
+                    level1.cameras[0].position.1 -= 25.0 / level1.cameras[0].scale.1;
                 } else if pressed_keys.contains(&Keycode::S) {
-                    level1.cameras[0].position.1 += (25.0 / level1.cameras[0].scale.1) as i32;
+                    level1.cameras[0].position.1 += 25.0 / level1.cameras[0].scale.1;
                 }
                 if pressed_keys.contains(&Keycode::A) {
-                    level1.cameras[0].position.0 -= (25.0 / level1.cameras[0].scale.0) as i32;
+                    level1.cameras[0].position.0 -= 25.0 / level1.cameras[0].scale.0;
                 } else if pressed_keys.contains(&Keycode::H) {
-                    level1.cameras[0].position.0 += (25.0 / level1.cameras[0].scale.1) as i32;
+                    level1.cameras[0].position.0 += 25.0 / level1.cameras[0].scale.1;
                 }
                 if pressed_keys.contains(&Keycode::Q) {
                     level1.cameras[0].zoom(1.03);
@@ -345,20 +347,16 @@ pub mod app {
                     level1.main_character[character_index].acceleration_y = 1.0;
                 }
                 if pressed_keys.contains(&Keycode::D) {
-                    level1.cameras[0].position.1 =
-                        level1.main_character[character_index].y as i32 - 400;
+                    level1.cameras[0].position.1 = level1.main_character[character_index].y - 400.0;
                 } else if pressed_keys.contains(&Keycode::S) {
-                    level1.cameras[0].position.1 =
-                        level1.main_character[character_index].y as i32 + 400;
+                    level1.cameras[0].position.1 = level1.main_character[character_index].y + 400.0;
                     level1.main_character[character_index].velocity_y = 5.0;
                 }
                 if pressed_keys.contains(&Keycode::A) {
-                    level1.cameras[0].position.0 =
-                        level1.main_character[character_index].x as i32 - 400;
+                    level1.cameras[0].position.0 = level1.main_character[character_index].x - 400.0;
                     level1.main_character[character_index].velocity_x = -5.0;
                 } else if pressed_keys.contains(&Keycode::H) {
-                    level1.cameras[0].position.0 =
-                        level1.main_character[character_index].x as i32 + 400;
+                    level1.cameras[0].position.0 = level1.main_character[character_index].x + 400.0;
                     level1.main_character[character_index].velocity_x = 5.0;
                 } else {
                     level1.main_character[character_index].velocity_x *= 0.8;
@@ -369,8 +367,8 @@ pub mod app {
                     && !pressed_keys.contains(&Keycode::D)
                 {
                     level1.cameras[0].position = (
-                        level1.main_character[character_index].x as i32,
-                        level1.main_character[character_index].y as i32,
+                        level1.main_character[character_index].x,
+                        level1.main_character[character_index].y,
                     );
                 }
             }
