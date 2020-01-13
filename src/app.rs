@@ -155,7 +155,7 @@ macro_rules! draw_relatively {
     };
 }
 
-pub fn run() {
+pub fn run(level_name: &str) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -172,7 +172,9 @@ pub fn run() {
 
     video_subsystem.text_input().start();
 
-    let mut level1 = Level::deserialize(fs::read_to_string("assets/levels/temples.json").unwrap());
+    let mut level1 = Level::deserialize(
+        fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap(),
+    );
 
     let mut camera = Camera::new(900, 600);
     let mut target_camera = Camera::new(900, 600);
