@@ -60,11 +60,11 @@ pub mod app {
             if $entities.len() > 0 {
                 for entity in $entities {
                     let x = (entity.x * $camera.get_scale_x()) as i32
-                        - ($camera.get_x() as f32 * entity.parallax_x - WINDOW_WIDTH as f32 / 2.0)
-                            as i32;
+                        - ($camera.get_x() as f32 * (entity.parallax_x * $camera.get_scale_x())
+                            - WINDOW_WIDTH as f32 / 2.0) as i32;
                     let y = (entity.y * $camera.get_scale_y()) as i32
-                        - ($camera.get_y() as f32 * entity.parallax_y - WINDOW_HEIGHT as f32 / 2.0)
-                            as i32;
+                        - ($camera.get_y() as f32 * (entity.parallax_y * $camera.get_scale_y())
+                            - WINDOW_HEIGHT as f32 / 2.0) as i32;
 
                     let width = (entity.width as f32 * $camera.get_scale_x()) as i32;
                     let height = (entity.height as f32 * $camera.get_scale_y()) as i32;
