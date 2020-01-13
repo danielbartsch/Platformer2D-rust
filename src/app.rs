@@ -170,7 +170,7 @@ pub mod app {
         video_subsystem.text_input().start();
 
         let mut level1 =
-            Level::deserialize(fs::read_to_string("src/assets/levels/temples.json").unwrap());
+            Level::deserialize(fs::read_to_string("assets/levels/temples.json").unwrap());
 
         let mut camera = Camera::new(900, 600);
 
