@@ -173,6 +173,7 @@ pub mod app {
             Level::deserialize(fs::read_to_string("assets/levels/temples.json").unwrap());
 
         let mut camera = Camera::new(900, 600);
+        let mut target_camera = Camera::new(900, 600);
 
         let mut character_index = 0;
 
@@ -219,9 +220,9 @@ pub mod app {
                     Event::MouseWheel { y, .. } => {
                         if edit_mode {
                             if y < 0 {
-                                level1.cameras[0].zoom(0.97);
+                                target_camera.zoom(0.97);
                             } else {
-                                level1.cameras[0].zoom(1.03);
+                                target_camera.zoom(1.03);
                             }
                         }
                     }
@@ -295,22 +296,22 @@ pub mod app {
 
             if edit_mode {
                 if pressed_keys.contains(&Keycode::D) {
-                    level1.cameras[0].position.1 -= 25.0 / level1.cameras[0].scale.1;
+                    target_camera.position.1 -= 25.0 / target_camera.scale.1;
                 } else if pressed_keys.contains(&Keycode::S) {
-                    level1.cameras[0].position.1 += 25.0 / level1.cameras[0].scale.1;
+                    target_camera.position.1 += 25.0 / target_camera.scale.1;
                 }
                 if pressed_keys.contains(&Keycode::A) {
-                    level1.cameras[0].position.0 -= 25.0 / level1.cameras[0].scale.0;
+                    target_camera.position.0 -= 25.0 / target_camera.scale.0;
                 } else if pressed_keys.contains(&Keycode::H) {
-                    level1.cameras[0].position.0 += 25.0 / level1.cameras[0].scale.1;
+                    target_camera.position.0 += 25.0 / target_camera.scale.1;
                 }
                 if pressed_keys.contains(&Keycode::Q) {
-                    level1.cameras[0].zoom(1.03);
+                    target_camera.zoom(1.03);
                 } else if pressed_keys.contains(&Keycode::R) {
-                    level1.cameras[0].zoom(0.97);
+                    target_camera.zoom(0.97);
                 }
             } else {
-                level1.cameras[0].set_zoom(1.0);
+                target_camera.set_zoom(1.0);
                 if pressed_keys.contains(&Keycode::Y) {
                     let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
                     level1.effects.push(
@@ -347,16 +348,16 @@ pub mod app {
                     level1.main_character[character_index].acceleration_y = 1.0;
                 }
                 if pressed_keys.contains(&Keycode::D) {
-                    level1.cameras[0].position.1 = level1.main_character[character_index].y - 400.0;
+                    target_camera.position.1 = level1.main_character[character_index].y - 400.0;
                 } else if pressed_keys.contains(&Keycode::S) {
-                    level1.cameras[0].position.1 = level1.main_character[character_index].y + 400.0;
+                    target_camera.position.1 = level1.main_character[character_index].y + 400.0;
                     level1.main_character[character_index].velocity_y = 5.0;
                 }
                 if pressed_keys.contains(&Keycode::A) {
-                    level1.cameras[0].position.0 = level1.main_character[character_index].x - 400.0;
+                    target_camera.position.0 = level1.main_character[character_index].x - 400.0;
                     level1.main_character[character_index].velocity_x = -5.0;
                 } else if pressed_keys.contains(&Keycode::H) {
-                    level1.cameras[0].position.0 = level1.main_character[character_index].x + 400.0;
+                    target_camera.position.0 = level1.main_character[character_index].x + 400.0;
                     level1.main_character[character_index].velocity_x = 5.0;
                 } else {
                     level1.main_character[character_index].velocity_x *= 0.8;
@@ -366,7 +367,7 @@ pub mod app {
                     && !pressed_keys.contains(&Keycode::H)
                     && !pressed_keys.contains(&Keycode::D)
                 {
-                    level1.cameras[0].position = (
+                    target_camera.position = (
                         level1.main_character[character_index].x,
                         level1.main_character[character_index].y,
                     );
@@ -381,7 +382,7 @@ pub mod app {
             }
 
             camera.to_target(
-                &level1.cameras[0],
+                &target_camera,
                 if edit_mode { (0.3, 0.3) } else { (0.03, 0.01) },
             );
 
@@ -589,7 +590,6 @@ pub mod editor_menu {
 }
 
 pub mod level {
-    use super::camera::camera::Camera;
     use sdl2::rect::Rect;
     use serde::{Deserialize, Serialize};
 
@@ -767,7 +767,6 @@ pub mod level {
         pub enemies: Vec<Entity>,
         pub main_character: Vec<Entity>,
         pub effects: Vec<Entity>,
-        pub cameras: Vec<Camera>,
         pub foreground: Vec<Entity>,
     }
 
