@@ -9,8 +9,8 @@ pub mod camera {
         height: u16,
     }
     impl Camera {
-        pub fn new(width: u16, height: u16) -> Camera {
-            Camera {
+        pub fn new(width: u16, height: u16) -> Self {
+            Self {
                 position: (0.0, 0.0),
                 scale: (1.0, 1.0),
                 width,
