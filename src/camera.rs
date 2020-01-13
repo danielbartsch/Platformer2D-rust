@@ -40,11 +40,11 @@ pub mod camera {
             self.position.0 *= difference.0;
             self.position.1 *= difference.1;
         }
-        pub fn to_target(&mut self, target_camera: &Self, rate: f32) {
-            self.position.0 += (target_camera.get_x() - self.get_x()) * rate;
-            self.position.1 += (target_camera.get_y() - self.get_y()) * rate;
-            self.scale.0 += (target_camera.get_scale_x() - self.get_scale_x()) * rate;
-            self.scale.1 += (target_camera.get_scale_y() - self.get_scale_y()) * rate;
+        pub fn to_target(&mut self, target_camera: &Self, rate: (f32, f32)) {
+            self.position.0 += (target_camera.get_x() - self.get_x()) * rate.0;
+            self.position.1 += (target_camera.get_y() - self.get_y()) * rate.1;
+            self.scale.0 += (target_camera.get_scale_x() - self.get_scale_x()) * rate.0;
+            self.scale.1 += (target_camera.get_scale_y() - self.get_scale_y()) * rate.1;
         }
     }
 }
