@@ -32,8 +32,6 @@ pub mod camera {
         pub fn zoom(&mut self, scale: f32) {
             self.scale.0 *= scale;
             self.scale.1 *= scale;
-            self.position.0 = (self.position.0 as f32 * (1.0 / scale)) as i32;
-            self.position.1 = (self.position.1 as f32 * (1.0 / scale)) as i32;
         }
         pub fn set_zoom(&mut self, scale: f32) {
             let difference = (self.scale.0 / scale, self.scale.1 / scale);
