@@ -64,16 +64,11 @@ macro_rules! draw_relatively {
     ($canvas: expr, $entities: expr, $camera: expr) => {
         if $entities.len() > 0 {
             for entity in $entities {
-                let x = (entity.x * $camera.get_scale_x()) as i32 + (WINDOW_WIDTH as i32 / 2)
-                    - ($camera.get_x() as f32 * (entity.parallax_x * $camera.get_scale_x())) as i32;
-                let y = (entity.y * $camera.get_scale_y()) as i32 + (WINDOW_HEIGHT as i32 / 2)
-                    - ($camera.get_y() as f32 * (entity.parallax_y * $camera.get_scale_y())) as i32;
+                let (_x, _y, _width, _height) = entity.to_canvas_coordinates($camera);
+                let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
 
-                let width = (entity.width as f32 * $camera.get_scale_x()) as i32;
-                let height = (entity.height as f32 * $camera.get_scale_y()) as i32;
-
-                if (x + width) >= 0
-                    && (y + height) >= 0
+                if x + width as i32 >= 0
+                    && y + height as i32 >= 0
                     && x <= WINDOW_WIDTH as i32
                     && y <= WINDOW_HEIGHT as i32
                 {
@@ -97,7 +92,9 @@ macro_rules! draw_relatively {
                             $canvas
                                 .draw_rect(Rect::new(x, y, width as u32, height as u32))
                                 .unwrap();
-                            $canvas.draw_line((x, y + 4), (x + width, y + 4)).unwrap();
+                            $canvas
+                                .draw_line((x, y + 4), (x + width as i32, y + 4))
+                                .unwrap();
                         }
                         EntityVariant::Platform => {
                             $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
@@ -108,20 +105,28 @@ macro_rules! draw_relatively {
                             $canvas
                                 .draw_rect(Rect::new(x, y, width as u32, height as u32))
                                 .unwrap();
-                            $canvas.draw_line((x + 4, y), (x + 4, y + height)).unwrap();
                             $canvas
-                                .draw_line((x + width - 4, y), (x + width - 4, y + height))
+                                .draw_line((x + 4, y), (x + 4, y + height as i32))
                                 .unwrap();
                             $canvas
                                 .draw_line(
-                                    (x + width - width / 8, y + height / 8),
-                                    (x + width / 8, y + height - height / 8),
+                                    (x + width as i32 - 4, y),
+                                    (x + width as i32 - 4, y + height as i32),
                                 )
                                 .unwrap();
                             $canvas
                                 .draw_line(
-                                    (x + width - width / 8, y + height - height / 8),
-                                    (x + width / 8, y + height / 8),
+                                    (x + width as i32 - width as i32 / 8, y + height as i32 / 8),
+                                    (x + width as i32 / 8, y + height as i32 - height as i32 / 8),
+                                )
+                                .unwrap();
+                            $canvas
+                                .draw_line(
+                                    (
+                                        x + width as i32 - width as i32 / 8,
+                                        y + height as i32 - height as i32 / 8,
+                                    ),
+                                    (x + width as i32 / 8, y + height as i32 / 8),
                                 )
                                 .unwrap();
                         }
@@ -137,12 +142,12 @@ macro_rules! draw_relatively {
                             for running_x in 0..width / 4 {
                                 let real_x = running_x as i32 * 4;
                                 $canvas
-                                    .draw_line((x + real_x, y), (x + real_x, y + height))
+                                    .draw_line((x + real_x, y), (x + real_x, y + height as i32))
                                     .unwrap();
                                 $canvas
                                     .draw_line(
-                                        (x + width - real_x, y),
-                                        (x + width - real_x, y + height),
+                                        (x + width as i32 - real_x, y),
+                                        (x + width as i32 - real_x, y + height as i32),
                                     )
                                     .unwrap();
                             }
@@ -258,15 +263,21 @@ pub fn run(level_name: &str) {
                                 Some(_) => {
                                     mouse_click_position = None;
 
+                                    let entity = Entity::from_canvas_coordinates(
+                                        &Entity::new(
+                                            mouse_selection_rect.unwrap().width() as u16,
+                                            mouse_selection_rect.unwrap().height() as u16,
+                                            mouse_selection_rect.unwrap().x() as f32,
+                                            mouse_selection_rect.unwrap().y() as f32,
+                                        ),
+                                        &camera,
+                                    );
+
                                     let camera_to_level_coordinates = Some(Rect::new(
-                                        mouse_selection_rect.unwrap().x()
-                                            + (camera.position.0 as i32)
-                                            - (WINDOW_WIDTH / 2) as i32,
-                                        mouse_selection_rect.unwrap().y()
-                                            + (camera.position.1 as i32)
-                                            - (WINDOW_HEIGHT / 2) as i32,
-                                        mouse_selection_rect.unwrap().width(),
-                                        mouse_selection_rect.unwrap().height(),
+                                        entity.x as i32,
+                                        entity.y as i32,
+                                        entity.width as u32,
+                                        entity.height as u32,
                                     ));
 
                                     editor_menu.create_entity(
