@@ -1,3 +1,4 @@
+use super::camera::Camera;
 use sdl2::rect::Rect;
 use serde::{Deserialize, Serialize};
 
@@ -80,6 +81,25 @@ impl Entity {
                     || (entity.x < self.x + self.width as f32
                         && entity.x + entity.width as f32 > self.x + self.width as f32))
         })
+    }
+    pub fn to_canvas_coordinates(&self, camera: &Camera) -> (f32, f32, u16, u16) {
+        (
+            self.x * camera.get_scale_x()
+                - camera.get_x() * (self.parallax_x * camera.get_scale_x()),
+            self.y * camera.get_scale_y()
+                - camera.get_y() * (self.parallax_y * camera.get_scale_y()),
+            (self.width as f32 * camera.get_scale_x()) as u16,
+            (self.height as f32 * camera.get_scale_y()) as u16,
+        )
+    }
+    pub fn from_canvas_coordinates(entity: &Self, camera: &Camera) -> Self {
+        let x = entity.x / camera.get_scale_x()
+            + camera.get_x() / (entity.parallax_x * camera.get_scale_x());
+        let y = entity.y / camera.get_scale_y()
+            + camera.get_y() / (entity.parallax_y * camera.get_scale_y());
+        let width = (entity.width as f32 / camera.get_scale_x()) as u16;
+        let height = (entity.height as f32 / camera.get_scale_y()) as u16;
+        Entity::new(width, height, x, y)
     }
     pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
         let intended_velocity = (
