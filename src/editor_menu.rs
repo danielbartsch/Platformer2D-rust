@@ -1,5 +1,3 @@
-mod level;
-
 use super::level::{Entity, EntityVariant, Level};
 use sdl2::rect::Rect;
 
