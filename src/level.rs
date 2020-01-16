@@ -1,5 +1,4 @@
 use super::camera::Camera;
-use sdl2::rect::Rect;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -179,12 +178,6 @@ impl Entity {
                     && (self.x as i32 + self.width as i32 > width as i32
                         && self.y as i32 + self.height as i32 > height as i32)
             )
-    }
-    pub fn is_inside_rect(&self, rect: Rect) -> bool {
-        (rect.x() + self.width as i32) >= 0
-            && (rect.y() + self.height as i32) >= 0
-            && rect.x() <= rect.width() as i32
-            && rect.y() <= rect.height() as i32
     }
 }
 #[derive(Serialize, Deserialize)]
