@@ -167,7 +167,7 @@ impl Entity {
             self.y += self.velocity_y;
         }
     }
-    pub fn is_inside_bounds(&self, position: (i32, i32), width: u16, height: u16) -> bool {
+    fn is_inside_bounds(&self, position: (i32, i32), width: u16, height: u16) -> bool {
         (self.x as i32 + self.width as i32 >= position.0
             && self.y as i32 + self.height as i32 >= position.1
             && self.x as i32 <= position.0 + width as i32
