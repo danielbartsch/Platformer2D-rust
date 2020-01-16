@@ -206,3 +206,88 @@ impl Level {
         serde_json::from_str(&serialized).unwrap()
     }
 }
+
+#[test]
+fn window_entity_coordinates_vs_actual_coordinates_entity_at_center() {
+    let mut camera = Camera::new(900, 600);
+    camera.position.0 = -450.0;
+    camera.position.1 = -300.0;
+
+    let entity = Entity::new(0.0, 0.0, 10, 10);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let entity_like_at_the_beginning =
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+
+    assert_eq!(x, 450.0);
+    assert_eq!(y, 300.0);
+    assert_eq!(width, 10);
+    assert_eq!(height, 10);
+
+    assert_eq!(entity.x, entity_like_at_the_beginning.x);
+    assert_eq!(entity.y, entity_like_at_the_beginning.y);
+    assert_eq!(entity.width, entity_like_at_the_beginning.width);
+    assert_eq!(entity.height, entity_like_at_the_beginning.height);
+}
+
+#[test]
+fn window_entity_coordinates_vs_actual_coordinates_entity_at_start() {
+    let camera = Camera::new(900, 600);
+
+    let entity = Entity::new(0.0, 0.0, 10, 10);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let entity_like_at_the_beginning =
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+
+    assert_eq!(x, 0.0);
+    assert_eq!(y, 0.0);
+    assert_eq!(width, 10);
+    assert_eq!(height, 10);
+
+    assert_eq!(entity.x, entity_like_at_the_beginning.x);
+    assert_eq!(entity.y, entity_like_at_the_beginning.y);
+    assert_eq!(entity.width, entity_like_at_the_beginning.width);
+    assert_eq!(entity.height, entity_like_at_the_beginning.height);
+}
+
+#[test]
+fn window_entity_coordinates_vs_actual_coordinates() {
+    let mut camera = Camera::new(900, 600);
+    camera.position.0 = 450.0;
+
+    let entity = Entity::new(600.0, 0.0, 10, 10);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let entity_like_at_the_beginning =
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+
+    assert_eq!(x, 150.0);
+    assert_eq!(y, 0.0);
+    assert_eq!(width, 10);
+    assert_eq!(height, 10);
+
+    assert_eq!(entity.x, entity_like_at_the_beginning.x);
+    assert_eq!(entity.y, entity_like_at_the_beginning.y);
+    assert_eq!(entity.width, entity_like_at_the_beginning.width);
+    assert_eq!(entity.height, entity_like_at_the_beginning.height);
+}
+
+#[test]
+fn window_entity_coordinates_vs_actual_coordinates_plus_scale() {
+    let mut camera = Camera::new(900, 600);
+    camera.zoom(2.0);
+    camera.position.0 = 450.0;
+
+    let entity = Entity::new(600.0, 0.0, 10, 10);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let entity_like_at_the_beginning =
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+
+    assert_eq!(x, 300.0);
+    assert_eq!(y, 0.0);
+    assert_eq!(width, 20);
+    assert_eq!(height, 20);
+
+    assert_eq!(entity.x, entity_like_at_the_beginning.x);
+    assert_eq!(entity.y, entity_like_at_the_beginning.y);
+    assert_eq!(entity.width, entity_like_at_the_beginning.width);
+    assert_eq!(entity.height, entity_like_at_the_beginning.height);
+}
