@@ -25,7 +25,7 @@ pub struct Entity {
     pub parallax_y: f32,
 }
 impl Entity {
-    pub fn new(width: u16, height: u16, x: f32, y: f32) -> Self {
+    pub fn new(x: f32, y: f32, width: u16, height: u16) -> Self {
         Self {
             variant: EntityVariant::Platform,
             bouncyness: 0.4,
@@ -99,7 +99,7 @@ impl Entity {
             + camera.get_y() / (entity.parallax_y * camera.get_scale_y());
         let width = (entity.width as f32 / camera.get_scale_x()) as u16;
         let height = (entity.height as f32 / camera.get_scale_y()) as u16;
-        Entity::new(width, height, x, y)
+        Entity::new(x, y, width, height)
     }
     pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
         let intended_velocity = (

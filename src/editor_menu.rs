@@ -75,10 +75,10 @@ impl EditorMenu {
     }
     pub fn create_entity(&mut self, level: &mut Level, mouse_rect: Rect) {
         let entity = Entity::new(
-            mouse_rect.width() as u16,
-            mouse_rect.height() as u16,
             mouse_rect.x() as f32,
             mouse_rect.y() as f32,
+            mouse_rect.width() as u16,
+            mouse_rect.height() as u16,
         )
         .variant(self.entity_variant.clone());
         match self.variant {

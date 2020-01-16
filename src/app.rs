@@ -265,10 +265,10 @@ pub fn run(level_name: &str) {
 
                                     let entity = Entity::from_canvas_coordinates(
                                         &Entity::new(
-                                            mouse_selection_rect.unwrap().width() as u16,
-                                            mouse_selection_rect.unwrap().height() as u16,
                                             mouse_selection_rect.unwrap().x() as f32,
                                             mouse_selection_rect.unwrap().y() as f32,
+                                            mouse_selection_rect.unwrap().width() as u16,
+                                            mouse_selection_rect.unwrap().height() as u16,
                                         ),
                                         &camera,
                                     );
@@ -331,10 +331,10 @@ pub fn run(level_name: &str) {
                 let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
                 level.effects.push(
                     Entity::new(
-                        10,
-                        10,
                         level.main_character[character_index].x,
                         level.main_character[character_index].y,
+                        10,
+                        10,
                     )
                     .variant(EntityVariant::Block)
                     .velocity_x(
