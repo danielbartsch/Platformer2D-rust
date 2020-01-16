@@ -81,26 +81,38 @@ impl Entity {
                         && entity.x + entity.width as f32 > self.x + self.width as f32))
         })
     }
-    pub fn to_canvas_coordinates(&self, camera: &Camera) -> (f32, f32, u16, u16) {
+    pub fn to_canvas_coordinates(
+        &self,
+        camera: &Camera,
+        offset: (u16, u16),
+    ) -> (f32, f32, u16, u16) {
         (
             self.x * camera.get_scale_x()
-                - camera.get_x() * (self.parallax_x * camera.get_scale_x()),
+                - camera.get_x() * (self.parallax_x * camera.get_scale_x())
+                + offset.0 as f32,
             self.y * camera.get_scale_y()
-                - camera.get_y() * (self.parallax_y * camera.get_scale_y()),
+                - camera.get_y() * (self.parallax_y * camera.get_scale_y())
+                + offset.1 as f32,
             (self.width as f32 * camera.get_scale_x()) as u16,
             (self.height as f32 * camera.get_scale_y()) as u16,
         )
     }
+
     pub fn from_canvas_coordinates(
         (x, y, width, height, parallax_x, parallax_y): (f32, f32, u16, u16, f32, f32),
         camera: &Camera,
+        offset: (u16, u16),
     ) -> Self {
         Entity::new(
-            (x + camera.get_x() * parallax_x * camera.get_scale_x()) / camera.get_scale_x(),
-            (y + camera.get_y() * parallax_y * camera.get_scale_y()) / camera.get_scale_y(),
+            (x + camera.get_x() * parallax_x * camera.get_scale_x() - offset.0 as f32)
+                / camera.get_scale_x(),
+            (y + camera.get_y() * parallax_y * camera.get_scale_y() - offset.1 as f32)
+                / camera.get_scale_y(),
             (width as f32 / camera.get_scale_x()) as u16,
             (height as f32 / camera.get_scale_y()) as u16,
         )
+        .parallax_x(parallax_x)
+        .parallax_y(parallax_y)
     }
     pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
         let intended_velocity = (
@@ -207,12 +219,12 @@ fn window_entity_coordinates_vs_actual_coordinates_entity_at_center() {
     camera.position.1 = -300.0;
 
     let entity = Entity::new(0.0, 0.0, 10, 10);
-    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera, (450, 300));
     let entity_like_at_the_beginning =
-        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera, (450, 300));
 
-    assert_eq!(x, 450.0);
-    assert_eq!(y, 300.0);
+    assert_eq!(x, 900.0);
+    assert_eq!(y, 600.0);
     assert_eq!(width, 10);
     assert_eq!(height, 10);
 
@@ -227,12 +239,12 @@ fn window_entity_coordinates_vs_actual_coordinates_entity_at_start() {
     let camera = Camera::new(900, 600);
 
     let entity = Entity::new(0.0, 0.0, 10, 10);
-    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera, (450, 300));
     let entity_like_at_the_beginning =
-        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera, (450, 300));
 
-    assert_eq!(x, 0.0);
-    assert_eq!(y, 0.0);
+    assert_eq!(x, 450.0);
+    assert_eq!(y, 300.0);
     assert_eq!(width, 10);
     assert_eq!(height, 10);
 
@@ -248,12 +260,12 @@ fn window_entity_coordinates_vs_actual_coordinates() {
     camera.position.0 = 450.0;
 
     let entity = Entity::new(600.0, 0.0, 10, 10);
-    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera, (450, 300));
     let entity_like_at_the_beginning =
-        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera, (450, 300));
 
-    assert_eq!(x, 150.0);
-    assert_eq!(y, 0.0);
+    assert_eq!(x, 600.0);
+    assert_eq!(y, 300.0);
     assert_eq!(width, 10);
     assert_eq!(height, 10);
 
@@ -270,12 +282,12 @@ fn window_entity_coordinates_vs_actual_coordinates_plus_scale() {
     camera.position.0 = 450.0;
 
     let entity = Entity::new(600.0, 0.0, 10, 10);
-    let (x, y, width, height) = entity.to_canvas_coordinates(&camera);
+    let (x, y, width, height) = entity.to_canvas_coordinates(&camera, (450, 300));
     let entity_like_at_the_beginning =
-        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera);
+        Entity::from_canvas_coordinates((x, y, width, height, 1.0, 1.0), &camera, (450, 300));
 
-    assert_eq!(x, 300.0);
-    assert_eq!(y, 0.0);
+    assert_eq!(x, 750.0);
+    assert_eq!(y, 300.0);
     assert_eq!(width, 20);
     assert_eq!(height, 20);
 

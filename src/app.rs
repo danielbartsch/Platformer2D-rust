@@ -64,7 +64,8 @@ macro_rules! draw_relatively {
     ($canvas: expr, $entities: expr, $camera: expr) => {
         if $entities.len() > 0 {
             for entity in $entities {
-                let (_x, _y, _width, _height) = entity.to_canvas_coordinates($camera);
+                let (_x, _y, _width, _height) =
+                    entity.to_canvas_coordinates($camera, (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
                 let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
 
                 if x + width as i32 >= 0
@@ -273,6 +274,7 @@ pub fn run(level_name: &str) {
                                             1.0,
                                         ),
                                         &camera,
+                                        (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
                                     );
 
                                     let camera_to_level_coordinates = Some(Rect::new(
