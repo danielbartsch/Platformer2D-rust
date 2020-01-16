@@ -96,11 +96,12 @@ impl Entity {
         (x, y, width, height, parallax_x, parallax_y): (f32, f32, u16, u16, f32, f32),
         camera: &Camera,
     ) -> Self {
-        let x = x / camera.get_scale_x() + camera.get_x() / (parallax_x / camera.get_scale_x());
-        let y = y / camera.get_scale_y() + camera.get_y() / (parallax_y / camera.get_scale_y());
-        let width = (width as f32 / camera.get_scale_x()) as u16;
-        let height = (height as f32 / camera.get_scale_y()) as u16;
-        Entity::new(x, y, width, height)
+        Entity::new(
+            (x + camera.get_x() * parallax_x * camera.get_scale_x()) / camera.get_scale_x(),
+            (y + camera.get_y() * parallax_y * camera.get_scale_y()) / camera.get_scale_y(),
+            (width as f32 / camera.get_scale_x()) as u16,
+            (height as f32 / camera.get_scale_y()) as u16,
+        )
     }
     pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
         let intended_velocity = (
