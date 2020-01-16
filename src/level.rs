@@ -92,13 +92,14 @@ impl Entity {
             (self.height as f32 * camera.get_scale_y()) as u16,
         )
     }
-    pub fn from_canvas_coordinates(entity: &Self, camera: &Camera) -> Self {
-        let x = entity.x / camera.get_scale_x()
-            + camera.get_x() / (entity.parallax_x * camera.get_scale_x());
-        let y = entity.y / camera.get_scale_y()
-            + camera.get_y() / (entity.parallax_y * camera.get_scale_y());
-        let width = (entity.width as f32 / camera.get_scale_x()) as u16;
-        let height = (entity.height as f32 / camera.get_scale_y()) as u16;
+    pub fn from_canvas_coordinates(
+        (x, y, width, height, parallax_x, parallax_y): (f32, f32, u16, u16, f32, f32),
+        camera: &Camera,
+    ) -> Self {
+        let x = x / camera.get_scale_x() + camera.get_x() / (parallax_x / camera.get_scale_x());
+        let y = y / camera.get_scale_y() + camera.get_y() / (parallax_y / camera.get_scale_y());
+        let width = (width as f32 / camera.get_scale_x()) as u16;
+        let height = (height as f32 / camera.get_scale_y()) as u16;
         Entity::new(x, y, width, height)
     }
     pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {

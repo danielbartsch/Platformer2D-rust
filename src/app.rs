@@ -264,11 +264,13 @@ pub fn run(level_name: &str) {
                                     mouse_click_position = None;
 
                                     let entity = Entity::from_canvas_coordinates(
-                                        &Entity::new(
+                                        (
                                             mouse_selection_rect.unwrap().x() as f32,
                                             mouse_selection_rect.unwrap().y() as f32,
                                             mouse_selection_rect.unwrap().width() as u16,
                                             mouse_selection_rect.unwrap().height() as u16,
+                                            1.0,
+                                            1.0,
                                         ),
                                         &camera,
                                     );
