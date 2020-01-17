@@ -82,7 +82,21 @@ impl EditorMenu {
 
         match self.variant {
             LevelEntityVariant::Deletion => {
-                println!("Not yet implemented: Deletion");
+                let delete_entities = &Box::new(|current_entity: &Entity| {
+                    !current_entity.is_inside_bounds(
+                        (entity.x as i32, entity.y as i32),
+                        entity.width,
+                        entity.height,
+                    )
+                });
+
+                level.background.retain(delete_entities);
+                level.indestructible.retain(delete_entities);
+                level.destructible.retain(delete_entities);
+                level.enemies.retain(delete_entities);
+                level.main_character.retain(delete_entities);
+                level.effects.retain(delete_entities);
+                level.foreground.retain(delete_entities);
             }
             LevelEntityVariant::Background => {
                 level.background.push(entity);
