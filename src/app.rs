@@ -277,16 +277,9 @@ pub fn run(level_name: &str) {
                                         (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
                                     );
 
-                                    let camera_to_level_coordinates = Some(Rect::new(
-                                        entity.x as i32,
-                                        entity.y as i32,
-                                        entity.width as u32,
-                                        entity.height as u32,
-                                    ));
-
                                     editor_menu.create_entity(
                                         &mut level,
-                                        camera_to_level_coordinates.unwrap(),
+                                        (entity.x, entity.y, entity.width, entity.height),
                                     );
                                     mouse_selection_rect = None;
                                 }
