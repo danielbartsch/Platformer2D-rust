@@ -402,7 +402,7 @@ pub fn run(level_name: &str) {
 
         camera.to_target(
             &target_camera,
-            if edit_mode { (0.3, 0.3) } else { (0.03, 0.01) },
+            if edit_mode { (0.3, 0.3) } else { (0.03, 0.03) },
         );
 
         draw_relatively!(canvas, &level.background, &camera);
