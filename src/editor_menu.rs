@@ -73,12 +73,10 @@ impl EditorMenu {
             (EntityVariant::Pillar, Rect::new(30, 30 + (25 * 3), 20, 20)),
         ]
     }
-    pub fn create_entity(
-        &mut self,
-        level: &mut Level,
-        (x, y, width, height): (f32, f32, u16, u16),
-    ) {
-        let entity = Entity::new(x, y, width, height).variant(self.entity_variant.clone());
+    pub fn create_entity(&mut self, level: &mut Level, actionable_entity: &Entity) {
+        let entity = actionable_entity
+            .clone()
+            .variant(self.entity_variant.clone());
 
         match self.variant {
             LevelEntityVariant::Deletion => {

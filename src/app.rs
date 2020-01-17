@@ -264,22 +264,20 @@ pub fn run(level_name: &str) {
                                 Some(_) => {
                                     mouse_click_position = None;
 
-                                    let entity = Entity::from_canvas_coordinates(
-                                        (
-                                            mouse_selection_rect.unwrap().x() as f32,
-                                            mouse_selection_rect.unwrap().y() as f32,
-                                            mouse_selection_rect.unwrap().width() as u16,
-                                            mouse_selection_rect.unwrap().height() as u16,
-                                            1.0,
-                                            1.0,
-                                        ),
-                                        &camera,
-                                        (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
-                                    );
-
                                     editor_menu.create_entity(
                                         &mut level,
-                                        (entity.x, entity.y, entity.width, entity.height),
+                                        &Entity::from_canvas_coordinates(
+                                            (
+                                                mouse_selection_rect.unwrap().x() as f32,
+                                                mouse_selection_rect.unwrap().y() as f32,
+                                                mouse_selection_rect.unwrap().width() as u16,
+                                                mouse_selection_rect.unwrap().height() as u16,
+                                                1.0,
+                                                1.0,
+                                            ),
+                                            &camera,
+                                            (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
+                                        ),
                                     );
                                     mouse_selection_rect = None;
                                 }
