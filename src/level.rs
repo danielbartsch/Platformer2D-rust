@@ -84,7 +84,7 @@ impl Entity {
     pub fn to_canvas_coordinates(
         &self,
         camera: &Camera,
-        offset: (u16, u16),
+        offset: (u32, u32),
     ) -> (f32, f32, u16, u16) {
         (
             self.x * camera.get_scale_x()
@@ -101,7 +101,7 @@ impl Entity {
     pub fn from_canvas_coordinates(
         (x, y, width, height, parallax_x, parallax_y): (f32, f32, u16, u16, f32, f32),
         camera: &Camera,
-        offset: (u16, u16),
+        offset: (u32, u32),
     ) -> Self {
         Entity::new(
             (x + camera.get_x() * parallax_x * camera.get_scale_x() - offset.0 as f32)

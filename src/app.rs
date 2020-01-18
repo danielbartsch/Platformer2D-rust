@@ -10,7 +10,7 @@ mod editor_menu;
 use camera::Camera;
 use editor_menu::EditorMenu;
 use level::{Entity, EntityVariant, Level};
-use sdl2::event::Event;
+use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -55,23 +55,20 @@ static MAIN_LINE_COLOR: Color = Color {
     a: 0xff,
 };
 
-static WINDOW_WIDTH: u16 = 900;
-static WINDOW_HEIGHT: u16 = 600;
-
 static MAX_FRAME_TIME_MILLIS: u64 = 16;
 
 macro_rules! draw_relatively {
-    ($canvas: expr, $entities: expr, $camera: expr) => {
+    ($canvas: expr, $entities: expr, $camera: expr, $dimensions: expr) => {
         if $entities.len() > 0 {
             for entity in $entities {
                 let (_x, _y, _width, _height) =
-                    entity.to_canvas_coordinates($camera, (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2));
+                    entity.to_canvas_coordinates($camera, ($dimensions.0 / 2, $dimensions.1 / 2));
                 let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
 
                 if x + width as i32 >= 0
                     && y + height as i32 >= 0
-                    && x <= WINDOW_WIDTH as i32
-                    && y <= WINDOW_HEIGHT as i32
+                    && x <= $dimensions.0 as i32
+                    && y <= $dimensions.1 as i32
                 {
                     match entity.variant {
                         EntityVariant::Block => {
@@ -165,11 +162,16 @@ pub fn run(level_name: &str) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
+    let mut window_width: u32 = 900;
+    let mut window_height: u32 = 600;
+
     let window = video_subsystem
-        .window("Platformer 2D", WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32)
+        .window("Platformer 2D", window_width, window_height)
         .position_centered()
+        .resizable()
         .build()
         .unwrap();
+
     let mut canvas: WindowCanvas = window.into_canvas().build().unwrap();
     canvas.clear();
     canvas.present();
@@ -234,6 +236,13 @@ pub fn run(level_name: &str) {
                     }
                     _ => {}
                 },
+                Event::Window {
+                    win_event: WindowEvent::Resized(width, height),
+                    ..
+                } => {
+                    window_width = width as u32;
+                    window_height = height as u32;
+                }
                 Event::MouseWheel { y, .. } => {
                     if has_free_camera {
                         if y < 0 {
@@ -283,7 +292,7 @@ pub fn run(level_name: &str) {
                                                 1.0,
                                             ),
                                             &camera,
-                                            (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
+                                            (window_width / 2, window_height / 2),
                                         ),
                                     );
                                     mouse_selection_rect = None;
@@ -409,13 +418,48 @@ pub fn run(level_name: &str) {
             },
         );
 
-        draw_relatively!(canvas, &level.background, &camera);
-        draw_relatively!(canvas, &level.indestructible, &camera);
-        draw_relatively!(canvas, &level.destructible, &camera);
-        draw_relatively!(canvas, &level.enemies, &camera);
-        draw_relatively!(canvas, &level.main_character, &camera);
-        draw_relatively!(canvas, &level.effects, &camera);
-        draw_relatively!(canvas, &level.foreground, &camera);
+        draw_relatively!(
+            canvas,
+            &level.background,
+            &camera,
+            (window_width, window_height)
+        );
+        draw_relatively!(
+            canvas,
+            &level.indestructible,
+            &camera,
+            (window_width, window_height)
+        );
+        draw_relatively!(
+            canvas,
+            &level.destructible,
+            &camera,
+            (window_width, window_height)
+        );
+        draw_relatively!(
+            canvas,
+            &level.enemies,
+            &camera,
+            (window_width, window_height)
+        );
+        draw_relatively!(
+            canvas,
+            &level.main_character,
+            &camera,
+            (window_width, window_height)
+        );
+        draw_relatively!(
+            canvas,
+            &level.effects,
+            &camera,
+            (window_width, window_height)
+        );
+        draw_relatively!(
+            canvas,
+            &level.foreground,
+            &camera,
+            (window_width, window_height)
+        );
 
         if paused {
             let original_color = canvas.draw_color();
@@ -463,14 +507,14 @@ pub fn run(level_name: &str) {
             // Crosshair to indicate center of frame
             canvas
                 .draw_line(
-                    (WINDOW_WIDTH as i32 / 2, 0),
-                    (WINDOW_WIDTH as i32 / 2, WINDOW_HEIGHT as i32),
+                    (window_width as i32 / 2, 0),
+                    (window_width as i32 / 2, window_height as i32),
                 )
                 .unwrap();
             canvas
                 .draw_line(
-                    (0, WINDOW_HEIGHT as i32 / 2),
-                    (WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32 / 2),
+                    (0, window_height as i32 / 2),
+                    (window_width as i32, window_height as i32 / 2),
                 )
                 .unwrap();
 
