@@ -493,11 +493,8 @@ pub fn run(level_name: &str) {
                 }
             }
 
-            canvas.set_draw_color(original_color);
-
             match mouse_click_position {
                 Some((x, y)) => {
-                    let original_color = canvas.draw_color();
                     canvas.set_draw_color(Color {
                         r: 255,
                         g: 60,
@@ -508,13 +505,12 @@ pub fn run(level_name: &str) {
                         (cmp::min(x, mouse_x), (x - mouse_x).wrapping_abs() as u32);
                     let (pos_y, height) =
                         (cmp::min(y, mouse_y), (y - mouse_y).wrapping_abs() as u32);
-
                     mouse_selection_rect = Some(Rect::new(pos_x, pos_y, width, height));
                     canvas.draw_rect(mouse_selection_rect.unwrap()).unwrap();
-                    canvas.set_draw_color(original_color);
                 }
                 None => {}
             }
+            canvas.set_draw_color(original_color);
         }
 
         canvas.present();
