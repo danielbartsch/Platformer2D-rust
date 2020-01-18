@@ -421,48 +421,15 @@ pub fn run(level_name: &str) {
             },
         );
 
-        draw_relatively!(
-            canvas,
-            &level.background,
-            &camera,
-            (window_width, window_height)
-        );
-        draw_relatively!(
-            canvas,
-            &level.indestructible,
-            &camera,
-            (window_width, window_height)
-        );
-        draw_relatively!(
-            canvas,
-            &level.destructible,
-            &camera,
-            (window_width, window_height)
-        );
-        draw_relatively!(
-            canvas,
-            &level.enemies,
-            &camera,
-            (window_width, window_height)
-        );
-        draw_relatively!(
-            canvas,
-            &level.main_character,
-            &camera,
-            (window_width, window_height)
-        );
-        draw_relatively!(
-            canvas,
-            &level.effects,
-            &camera,
-            (window_width, window_height)
-        );
-        draw_relatively!(
-            canvas,
-            &level.foreground,
-            &camera,
-            (window_width, window_height)
-        );
+        let dimensions = (window_width, window_height);
+
+        draw_relatively!(canvas, &level.background, &camera, dimensions);
+        draw_relatively!(canvas, &level.indestructible, &camera, dimensions);
+        draw_relatively!(canvas, &level.destructible, &camera, dimensions);
+        draw_relatively!(canvas, &level.enemies, &camera, dimensions);
+        draw_relatively!(canvas, &level.main_character, &camera, dimensions);
+        draw_relatively!(canvas, &level.effects, &camera, dimensions);
+        draw_relatively!(canvas, &level.foreground, &camera, dimensions);
 
         if paused {
             let original_color = canvas.draw_color();
