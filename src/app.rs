@@ -395,8 +395,10 @@ pub fn run(level_name: &str) {
                 && !pressed_keys.contains(&Keycode::D)
             {
                 target_camera.position = (
-                    level.main_character[character_index].x,
-                    level.main_character[character_index].y,
+                    level.main_character[character_index].x
+                        + level.main_character[character_index].width as f32 / 2.0,
+                    level.main_character[character_index].y
+                        + level.main_character[character_index].height as f32 / 2.0,
                 );
             }
         }
