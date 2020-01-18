@@ -460,6 +460,21 @@ pub fn run(level_name: &str) {
                 a: 0xff,
             });
 
+            // Crosshair to indicate center of frame
+            canvas
+                .draw_line(
+                    (WINDOW_WIDTH as i32 / 2, 0),
+                    (WINDOW_WIDTH as i32 / 2, WINDOW_HEIGHT as i32),
+                )
+                .unwrap();
+            canvas
+                .draw_line(
+                    (0, WINDOW_HEIGHT as i32 / 2),
+                    (WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32 / 2),
+                )
+                .unwrap();
+
+            // Edit mode "logo"
             canvas.draw_rect(Rect::new(0, 0, 20, 20)).unwrap();
             canvas.draw_line((5, 5), (20 - 5, 5)).unwrap();
             canvas.draw_line((5, 5), (5, 20 - 5)).unwrap();
