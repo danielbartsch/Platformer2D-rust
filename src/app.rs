@@ -182,6 +182,8 @@ pub fn run(level_name: &str) {
         fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap(),
     );
 
+    let mut paused = false;
+
     let mut camera = Camera::new(900, 600);
     let mut target_camera = Camera::new(900, 600);
 
@@ -210,6 +212,8 @@ pub fn run(level_name: &str) {
 
         let (mouse_x, mouse_y) = (mouse_state.x(), mouse_state.y());
 
+        let has_free_camera = edit_mode || paused;
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => {
@@ -217,7 +221,10 @@ pub fn run(level_name: &str) {
                 }
                 Event::KeyDown { keycode, .. } => match keycode {
                     Some(Keycode::Escape) => {
-                        mouse_click_position = None;
+                        if edit_mode {
+                            mouse_click_position = None;
+                        }
+                        paused = !paused;
                     }
                     Some(Keycode::P) => {
                         character_index = (character_index + 1) % level.main_character.len();
@@ -228,7 +235,7 @@ pub fn run(level_name: &str) {
                     _ => {}
                 },
                 Event::MouseWheel { y, .. } => {
-                    if edit_mode {
+                    if has_free_camera {
                         if y < 0 {
                             target_camera.zoom(0.97);
                         } else {
@@ -237,7 +244,7 @@ pub fn run(level_name: &str) {
                     }
                 }
                 Event::MouseButtonDown { x, y, .. } => {
-                    if edit_mode {
+                    if has_free_camera {
                         let clicked_variant_button = EditorMenu::get_variant_button_rects()
                             .into_iter()
                             .find(|(_, rect)| {
@@ -304,7 +311,7 @@ pub fn run(level_name: &str) {
         entities.extend(&level.destructible);
         entities.extend(&level.enemies);
 
-        if edit_mode {
+        if has_free_camera {
             if pressed_keys.contains(&Keycode::D) {
                 target_camera.position.1 -= 25.0 / target_camera.scale.1;
             } else if pressed_keys.contains(&Keycode::S) {
@@ -384,16 +391,22 @@ pub fn run(level_name: &str) {
             }
         }
 
-        for character in &mut level.main_character {
-            character.next_state(entities.clone());
-        }
-        for character in &mut level.effects {
-            character.next_state(entities.clone());
+        if !paused {
+            for character in &mut level.main_character {
+                character.next_state(entities.clone());
+            }
+            for character in &mut level.effects {
+                character.next_state(entities.clone());
+            }
         }
 
         camera.to_target(
             &target_camera,
-            if edit_mode { (0.3, 0.3) } else { (0.03, 0.03) },
+            if has_free_camera {
+                (0.3, 0.3)
+            } else {
+                (0.03, 0.03)
+            },
         );
 
         draw_relatively!(canvas, &level.background, &camera);
@@ -403,6 +416,40 @@ pub fn run(level_name: &str) {
         draw_relatively!(canvas, &level.main_character, &camera);
         draw_relatively!(canvas, &level.effects, &camera);
         draw_relatively!(canvas, &level.foreground, &camera);
+
+        if paused {
+            let original_color = canvas.draw_color();
+            canvas.set_draw_color(Color {
+                r: 255,
+                g: 60,
+                b: 60,
+                a: 0xff,
+            });
+
+            let stop_width = 8u32;
+            let stop_height = 20u32;
+            let bar_gap = 4i32;
+            let stop_1_bar_x = 30i32;
+            let stop_1_bar_y = 0i32;
+
+            canvas
+                .fill_rect(Rect::new(
+                    stop_1_bar_x,
+                    stop_1_bar_y,
+                    stop_width,
+                    stop_height,
+                ))
+                .unwrap();
+            canvas
+                .fill_rect(Rect::new(
+                    stop_1_bar_x + stop_width as i32 + bar_gap,
+                    stop_1_bar_y,
+                    stop_width,
+                    stop_height,
+                ))
+                .unwrap();
+            canvas.set_draw_color(original_color);
+        }
 
         if edit_mode {
             let original_color = canvas.draw_color();
