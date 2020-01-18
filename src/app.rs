@@ -173,6 +173,7 @@ pub fn run(level_name: &str) {
         .unwrap();
 
     let mut canvas: WindowCanvas = window.into_canvas().build().unwrap();
+    canvas.window_mut().set_minimum_size(350, 250).unwrap();
     canvas.clear();
     canvas.present();
 
