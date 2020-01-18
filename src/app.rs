@@ -58,7 +58,7 @@ static MAIN_LINE_COLOR: Color = Color {
 static WINDOW_WIDTH: u16 = 900;
 static WINDOW_HEIGHT: u16 = 600;
 
-static MAX_FRAME_TIME_MILLIS: i8 = 16;
+static MAX_FRAME_TIME_MILLIS: u64 = 16;
 
 macro_rules! draw_relatively {
     ($canvas: expr, $entities: expr, $camera: expr) => {
@@ -531,11 +531,14 @@ pub fn run(level_name: &str) {
         canvas.present();
 
         let millis_to_sleep =
-            MAX_FRAME_TIME_MILLIS as i32 - last_frame_time.elapsed().unwrap().as_millis() as i32;
+            MAX_FRAME_TIME_MILLIS - last_frame_time.elapsed().unwrap().as_millis() as u64;
         if millis_to_sleep > 0 {
-            ::std::thread::sleep(Duration::new(0, millis_to_sleep as u32 * 1_000_000u32));
+            ::std::thread::sleep(Duration::from_millis(millis_to_sleep));
         } else {
-            println!("Detecting Lag. Frame took {}ms too long", -millis_to_sleep);
+            println!(
+                "Detecting Lag. Frame took {}ms too long",
+                -(millis_to_sleep as i32)
+            );
         }
         last_frame_time = SystemTime::now();
     }
