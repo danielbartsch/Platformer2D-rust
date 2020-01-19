@@ -87,7 +87,7 @@ macro_rules! draw_relatively {
     };
 }
 
-pub fn run(level_name: &str) {
+pub fn run(level_name: &str, sprite_sheet_name: &str) {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
@@ -114,8 +114,11 @@ pub fn run(level_name: &str) {
         fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap(),
     );
 
-    let mut temp_surface =
-        sdl2::surface::Surface::load_bmp(std::path::Path::new("assets/main.bmp")).unwrap();
+    let mut temp_surface = sdl2::surface::Surface::load_bmp(std::path::Path::new(&format!(
+        "assets/spritesheets/{}.bmp",
+        sprite_sheet_name
+    )))
+    .unwrap();
     temp_surface
         .set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0))
         .unwrap();

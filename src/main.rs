@@ -1,5 +1,5 @@
 mod app;
 
 fn main() {
-    app::run("temples");
+    app::run("temples", "temples");
 }
