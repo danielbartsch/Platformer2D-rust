@@ -131,7 +131,8 @@ pub fn run(level_name: &str) {
 
     let mut character_index = 0;
 
-    let mut last_frame_time = SystemTime::now();
+    let first_frame_time = SystemTime::now();
+    let mut last_frame_time = first_frame_time.clone();
 
     let mut edit_mode = false;
     let mut editor_menu = EditorMenu::new();
@@ -142,6 +143,8 @@ pub fn run(level_name: &str) {
     'running: loop {
         canvas.set_draw_color(BACKGROUND_COLOR);
         canvas.clear();
+
+        let ticks = first_frame_time.elapsed().unwrap().as_millis();
 
         let mut pressed_keys = HashSet::new();
         pressed_keys = event_pump
@@ -302,9 +305,19 @@ pub fn run(level_name: &str) {
             if pressed_keys.contains(&Keycode::A) {
                 target_camera.position.0 = level.main_character[character_index].x - 400.0;
                 level.main_character[character_index].velocity_x = -5.0;
+                if ticks % 300 > 150 {
+                    level.main_character[character_index].sprite_sheet_rect = Some((0, 0, 32, 32));
+                } else {
+                    level.main_character[character_index].sprite_sheet_rect = Some((32, 0, 32, 32));
+                }
             } else if pressed_keys.contains(&Keycode::H) {
                 target_camera.position.0 = level.main_character[character_index].x + 400.0;
                 level.main_character[character_index].velocity_x = 5.0;
+                if ticks % 300 > 150 {
+                    level.main_character[character_index].sprite_sheet_rect = Some((64, 0, 32, 32));
+                } else {
+                    level.main_character[character_index].sprite_sheet_rect = Some((96, 0, 32, 32));
+                }
             } else {
                 level.main_character[character_index].velocity_x *= 0.8;
             }
