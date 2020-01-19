@@ -1,4 +1,4 @@
-use super::level::{Entity, EntityVariant, Level};
+use super::level::{Entity, Level};
 use sdl2::rect::Rect;
 
 #[derive(Debug)]
@@ -14,20 +14,15 @@ pub enum LevelEntityVariant {
 }
 pub struct EditorMenu {
     pub variant: LevelEntityVariant,
-    pub entity_variant: EntityVariant,
 }
 impl EditorMenu {
     pub fn new() -> Self {
         Self {
             variant: LevelEntityVariant::Effects,
-            entity_variant: EntityVariant::Platform,
         }
     }
     pub fn variant(&mut self, variant: LevelEntityVariant) {
         self.variant = variant;
-    }
-    pub fn entity_variant(&mut self, entity_variant: EntityVariant) {
-        self.entity_variant = entity_variant;
     }
     pub fn get_variant_button_rects() -> Vec<(LevelEntityVariant, Rect)> {
         vec![
@@ -62,21 +57,8 @@ impl EditorMenu {
             ),
         ]
     }
-    pub fn get_entity_variant_button_rects() -> Vec<(EntityVariant, Rect)> {
-        vec![
-            (EntityVariant::Block, Rect::new(30, 30, 20, 20)),
-            (EntityVariant::Platform, Rect::new(30, 30 + (25), 20, 20)),
-            (
-                EntityVariant::MainCharacter,
-                Rect::new(30, 30 + (25 * 2), 20, 20),
-            ),
-            (EntityVariant::Pillar, Rect::new(30, 30 + (25 * 3), 20, 20)),
-        ]
-    }
     pub fn create_entity(&mut self, level: &mut Level, actionable_entity: &Entity) {
-        let entity = actionable_entity
-            .clone()
-            .variant(self.entity_variant.clone());
+        let entity = actionable_entity.clone();
 
         match self.variant {
             LevelEntityVariant::Deletion => {

@@ -9,7 +9,7 @@ mod editor_menu;
 
 use camera::Camera;
 use editor_menu::EditorMenu;
-use level::{Entity, EntityVariant, Level};
+use level::{Entity, Level};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -27,7 +27,6 @@ static BACKGROUND_COLOR: Color = Color {
     b: 37,
     a: 0xff,
 };
-
 static LINE_COLOR: Color = Color {
     r: 67,
     g: 86,
@@ -41,24 +40,10 @@ static LINE_BACKGROUND_COLOR: Color = Color {
     a: 0xff,
 };
 
-static MAIN_BACKGROUND_COLOR: Color = Color {
-    r: 179,
-    g: 54,
-    b: 57,
-    a: 0xff,
-};
-
-static MAIN_LINE_COLOR: Color = Color {
-    r: 255,
-    g: 128,
-    b: 131,
-    a: 0xff,
-};
-
 static MAX_FRAME_TIME_MILLIS: u64 = 16;
 
 macro_rules! draw_relatively {
-    ($canvas: expr, $entities: expr, $camera: expr, $dimensions: expr) => {
+    ($canvas: expr, $entities: expr, $camera: expr, $texture: expr, $dimensions: expr) => {
         if $entities.len() > 0 {
             for entity in $entities {
                 let (_x, _y, _width, _height) =
@@ -70,88 +55,32 @@ macro_rules! draw_relatively {
                     && x <= $dimensions.0 as i32
                     && y <= $dimensions.1 as i32
                 {
-                    match entity.variant {
-                        EntityVariant::Block => {
-                            $canvas.set_draw_color(MAIN_BACKGROUND_COLOR);
-                            $canvas
-                                .fill_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            $canvas.set_draw_color(MAIN_LINE_COLOR);
-                            $canvas
-                                .draw_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                        }
-                        EntityVariant::MainCharacter => {
-                            $canvas.set_draw_color(MAIN_BACKGROUND_COLOR);
-                            $canvas
-                                .fill_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            $canvas.set_draw_color(MAIN_LINE_COLOR);
-                            $canvas
-                                .draw_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            $canvas
-                                .draw_line((x, y + 4), (x + width as i32, y + 4))
-                                .unwrap();
-                        }
-                        EntityVariant::Platform => {
-                            $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
-                            $canvas
-                                .fill_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            $canvas.set_draw_color(LINE_COLOR);
-                            $canvas
-                                .draw_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            $canvas
-                                .draw_line((x + 4, y), (x + 4, y + height as i32))
-                                .unwrap();
-                            $canvas
-                                .draw_line(
-                                    (x + width as i32 - 4, y),
-                                    (x + width as i32 - 4, y + height as i32),
-                                )
-                                .unwrap();
-                            $canvas
-                                .draw_line(
-                                    (x + width as i32 - width as i32 / 8, y + height as i32 / 8),
-                                    (x + width as i32 / 8, y + height as i32 - height as i32 / 8),
-                                )
-                                .unwrap();
-                            $canvas
-                                .draw_line(
-                                    (
-                                        x + width as i32 - width as i32 / 8,
-                                        y + height as i32 - height as i32 / 8,
-                                    ),
-                                    (x + width as i32 / 8, y + height as i32 / 8),
-                                )
-                                .unwrap();
-                        }
-                        EntityVariant::Pillar => {
-                            $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
-                            $canvas
-                                .fill_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            $canvas.set_draw_color(LINE_COLOR);
-                            $canvas
-                                .draw_rect(Rect::new(x, y, width as u32, height as u32))
-                                .unwrap();
-                            for running_x in 0..width / 4 {
-                                let real_x = running_x as i32 * 4;
-                                $canvas
-                                    .draw_line((x + real_x, y), (x + real_x, y + height as i32))
-                                    .unwrap();
-                                $canvas
-                                    .draw_line(
-                                        (x + width as i32 - real_x, y),
-                                        (x + width as i32 - real_x, y + height as i32),
-                                    )
-                                    .unwrap();
-                            }
-                        }
+                    let entity_rect = Rect::new(x, y, width, height);
+                    if let Some(sprite_rect) = entity.sprite_sheet_rect {
+                        $canvas
+                            .copy_ex(
+                                $texture,
+                                Some(Rect::new(
+                                    sprite_rect.0,
+                                    sprite_rect.1,
+                                    sprite_rect.2,
+                                    sprite_rect.3,
+                                )),
+                                Some(entity_rect),
+                                0.0,
+                                None,
+                                false,
+                                false,
+                            )
+                            .unwrap();
+                    } else {
+                        let original_color = $canvas.draw_color();
+                        $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
+                        $canvas.fill_rect(entity_rect).unwrap();
+                        $canvas.set_draw_color(LINE_COLOR);
+                        $canvas.draw_rect(entity_rect).unwrap();
+                        $canvas.set_draw_color(original_color);
                     }
-                    $canvas.set_draw_color(BACKGROUND_COLOR);
                 }
             }
         }
@@ -184,6 +113,13 @@ pub fn run(level_name: &str) {
     let mut level = Level::deserialize(
         fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap(),
     );
+
+    let temp_surface =
+        sdl2::surface::Surface::load_bmp(std::path::Path::new("assets/main.bmp")).unwrap();
+    let texture_creator = canvas.texture_creator();
+    let texture = texture_creator
+        .create_texture_from_surface(&temp_surface)
+        .unwrap();
 
     let mut paused = false;
 
@@ -263,20 +199,7 @@ pub fn run(level_name: &str) {
                                     && y > rect.y()
                                     && y < rect.y() + rect.height() as i32
                             });
-                        let clicked_entity_variant_button =
-                            EditorMenu::get_entity_variant_button_rects()
-                                .into_iter()
-                                .find(|(_, rect)| {
-                                    x > rect.x()
-                                        && x < rect.x() + rect.width() as i32
-                                        && y > rect.y()
-                                        && y < rect.y() + rect.height() as i32
-                                });
-                        if mem::discriminant(&clicked_entity_variant_button)
-                            == mem::discriminant(&None)
-                            && mem::discriminant(&clicked_variant_button)
-                                == mem::discriminant(&None)
-                        {
+                        if mem::discriminant(&clicked_variant_button) == mem::discriminant(&None) {
                             match mouse_click_position {
                                 Some(_) => {
                                     mouse_click_position = None;
@@ -302,13 +225,8 @@ pub fn run(level_name: &str) {
                                     mouse_click_position = Some((x, y));
                                 }
                             }
-                        } else {
-                            if let Some((variant, _)) = clicked_variant_button {
-                                editor_menu.variant(variant);
-                            }
-                            if let Some((variant, _)) = clicked_entity_variant_button {
-                                editor_menu.entity_variant(variant);
-                            }
+                        } else if let Some((variant, _)) = clicked_variant_button {
+                            editor_menu.variant(variant);
                         }
                     }
                 }
@@ -348,7 +266,6 @@ pub fn run(level_name: &str) {
                         10,
                         10,
                     )
-                    .variant(EntityVariant::Block)
                     .velocity_x(
                         level.main_character[character_index].velocity_x
                             * (2.2 + pseudo_random.cos()),
@@ -423,13 +340,13 @@ pub fn run(level_name: &str) {
 
         let dimensions = (window_width, window_height);
 
-        draw_relatively!(canvas, &level.background, &camera, dimensions);
-        draw_relatively!(canvas, &level.indestructible, &camera, dimensions);
-        draw_relatively!(canvas, &level.destructible, &camera, dimensions);
-        draw_relatively!(canvas, &level.enemies, &camera, dimensions);
-        draw_relatively!(canvas, &level.main_character, &camera, dimensions);
-        draw_relatively!(canvas, &level.effects, &camera, dimensions);
-        draw_relatively!(canvas, &level.foreground, &camera, dimensions);
+        draw_relatively!(canvas, &level.background, &camera, &texture, dimensions);
+        draw_relatively!(canvas, &level.indestructible, &camera, &texture, dimensions);
+        draw_relatively!(canvas, &level.destructible, &camera, &texture, dimensions);
+        draw_relatively!(canvas, &level.enemies, &camera, &texture, dimensions);
+        draw_relatively!(canvas, &level.main_character, &camera, &texture, dimensions);
+        draw_relatively!(canvas, &level.effects, &camera, &texture, dimensions);
+        draw_relatively!(canvas, &level.foreground, &camera, &texture, dimensions);
 
         if paused {
             let original_color = canvas.draw_color();
@@ -498,19 +415,6 @@ pub fn run(level_name: &str) {
             for (variant, rect) in EditorMenu::get_variant_button_rects() {
                 canvas.draw_rect(rect).unwrap();
                 if mem::discriminant(&variant) == mem::discriminant(&editor_menu.variant) {
-                    canvas
-                        .draw_rect(Rect::new(
-                            rect.x() + 5,
-                            rect.y() + 5,
-                            rect.width() - 10,
-                            rect.height() - 10,
-                        ))
-                        .unwrap();
-                }
-            }
-            for (variant, rect) in EditorMenu::get_entity_variant_button_rects() {
-                canvas.draw_rect(rect).unwrap();
-                if mem::discriminant(&variant) == mem::discriminant(&editor_menu.entity_variant) {
                     canvas
                         .draw_rect(Rect::new(
                             rect.x() + 5,

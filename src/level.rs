@@ -2,15 +2,8 @@ use super::camera::Camera;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum EntityVariant {
-    Block,
-    Platform,
-    MainCharacter,
-    Pillar,
-}
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Entity {
-    pub variant: EntityVariant,
+    pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
     pub bounciness: f32,
     pub width: u16,
     pub height: u16,
@@ -26,7 +19,7 @@ pub struct Entity {
 impl Entity {
     pub fn new(x: f32, y: f32, width: u16, height: u16) -> Self {
         Self {
-            variant: EntityVariant::Platform,
+            sprite_sheet_rect: None,
             bounciness: 0.4,
             width,
             height,
@@ -39,10 +32,6 @@ impl Entity {
             parallax_x: 1.0,
             parallax_y: 1.0,
         }
-    }
-    pub fn variant(mut self, variant: EntityVariant) -> Self {
-        self.variant = variant;
-        self
     }
     pub fn parallax_x(mut self, parallax_x: f32) -> Self {
         self.parallax_x = parallax_x;
