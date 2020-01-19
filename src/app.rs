@@ -358,7 +358,7 @@ pub fn run(level_name: &str) {
                             * (2.2 + pseudo_random.sin()),
                     )
                     .acceleration_y(0.01)
-                    .bouncyness(1.1),
+                    .bounciness(1.1),
                 );
             }
             if pressed_keys.contains(&Keycode::N) {

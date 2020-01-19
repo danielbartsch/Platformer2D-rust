@@ -11,7 +11,7 @@ pub enum EntityVariant {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Entity {
     pub variant: EntityVariant,
-    pub bouncyness: f32,
+    pub bounciness: f32,
     pub width: u16,
     pub height: u16,
     pub x: f32,
@@ -27,7 +27,7 @@ impl Entity {
     pub fn new(x: f32, y: f32, width: u16, height: u16) -> Self {
         Self {
             variant: EntityVariant::Platform,
-            bouncyness: 0.4,
+            bounciness: 0.4,
             width,
             height,
             x,
@@ -68,8 +68,8 @@ impl Entity {
         self.acceleration_y = acceleration_y;
         self
     }
-    pub fn bouncyness(mut self, bouncyness: f32) -> Self {
-        self.bouncyness = bouncyness;
+    pub fn bounciness(mut self, bounciness: f32) -> Self {
+        self.bounciness = bounciness;
         self
     }
     pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Self>) -> bool {
@@ -135,7 +135,7 @@ impl Entity {
                 .find(|entity| entity.x >= self.x + self.width as f32);
             if let Some(entity) = left_collided_entity {
                 self.x = entity.x - self.width as f32;
-                self.velocity_x = self.velocity_x * -1.0 * self.bouncyness * entity.bouncyness;
+                self.velocity_x = self.velocity_x * -1.0 * self.bounciness * entity.bounciness;
             } else {
                 let right_collided_entity = interactive_entities
                     .clone()
@@ -143,7 +143,7 @@ impl Entity {
                     .find(|entity| entity.x + entity.width as f32 <= self.x);
                 if let Some(entity) = right_collided_entity {
                     self.x = entity.x + entity.width as f32;
-                    self.velocity_x = self.velocity_x * -1.0 * self.bouncyness * entity.bouncyness;
+                    self.velocity_x = self.velocity_x * -1.0 * self.bounciness * entity.bounciness;
                 } else {
                     self.x = intended_position.0 as f32;
                     self.velocity_x = intended_velocity.0;
@@ -156,7 +156,7 @@ impl Entity {
                 .find(|entity| entity.y >= self.y + self.height as f32);
             if let Some(entity) = top_collided_entity {
                 self.y = entity.y - self.height as f32;
-                self.velocity_y = self.velocity_y * -1.0 * self.bouncyness * entity.bouncyness;
+                self.velocity_y = self.velocity_y * -1.0 * self.bounciness * entity.bounciness;
             } else {
                 let bottom_collided_entity = interactive_entities
                     .clone()
@@ -164,7 +164,7 @@ impl Entity {
                     .find(|entity| entity.y + entity.height as f32 <= self.y);
                 if let Some(entity) = bottom_collided_entity {
                     self.y = entity.y + entity.height as f32;
-                    self.velocity_y = self.velocity_y * -1.0 * self.bouncyness * entity.bouncyness;
+                    self.velocity_y = self.velocity_y * -1.0 * self.bounciness * entity.bounciness;
                 } else {
                     self.y = intended_position.1 as f32;
                     self.velocity_y = intended_velocity.1;
