@@ -114,8 +114,11 @@ pub fn run(level_name: &str) {
         fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap(),
     );
 
-    let temp_surface =
+    let mut temp_surface =
         sdl2::surface::Surface::load_bmp(std::path::Path::new("assets/main.bmp")).unwrap();
+    temp_surface
+        .set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0))
+        .unwrap();
     let texture_creator = canvas.texture_creator();
     let texture = texture_creator
         .create_texture_from_surface(&temp_surface)
