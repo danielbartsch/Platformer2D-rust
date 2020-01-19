@@ -295,7 +295,6 @@ pub fn run(level_name: &str) {
                 target_camera.position.1 = level.main_character[character_index].y - 400.0;
             } else if pressed_keys.contains(&Keycode::S) {
                 target_camera.position.1 = level.main_character[character_index].y + 400.0;
-                level.main_character[character_index].velocity_y = 5.0;
             }
             if pressed_keys.contains(&Keycode::A) {
                 target_camera.position.0 = level.main_character[character_index].x - 400.0;
