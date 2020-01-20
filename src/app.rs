@@ -266,6 +266,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             }
         } else {
             target_camera.set_zoom(1.0);
+
+            let mut commands: Vec<Box<dyn FnMut(&mut Entity)>> = vec![];
             if pressed_keys.contains(&Keycode::Y) {
                 let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
                 level.effects.push(
@@ -288,17 +290,21 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 );
             }
             if pressed_keys.contains(&Keycode::N) {
-                if level.main_character[character_index].is_touching_ground(entities.clone()) {
-                    level.main_character[character_index].velocity_y = -8.0;
-                    level.main_character[character_index].acceleration_y = 0.1;
-                }
-                if level.main_character[character_index].velocity_y < 0.0 {
-                    level.main_character[character_index].acceleration_y += 0.01;
-                } else {
-                    level.main_character[character_index].acceleration_y += 0.002;
-                }
+                commands.push(Box::new(|entity| {
+                    if entity.is_touching_ground(entities.clone()) {
+                        entity.velocity_y = -8.0;
+                        entity.acceleration_y = 0.1;
+                    }
+                    if entity.velocity_y < 0.0 {
+                        entity.acceleration_y += 0.01;
+                    } else {
+                        entity.acceleration_y += 0.002;
+                    }
+                }));
             } else {
-                level.main_character[character_index].acceleration_y = 1.0;
+                commands.push(Box::new(|entity| {
+                    entity.acceleration_y = 1.0;
+                }));
             }
             if pressed_keys.contains(&Keycode::D) {
                 target_camera.position.1 = level.main_character[character_index].y - 400.0;
@@ -307,22 +313,28 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             }
             if pressed_keys.contains(&Keycode::A) {
                 target_camera.position.0 = level.main_character[character_index].x - 400.0;
-                level.main_character[character_index].velocity_x = -5.0;
-                if ticks % 300 > 150 {
-                    level.main_character[character_index].sprite_sheet_rect = Some((0, 0, 32, 32));
-                } else {
-                    level.main_character[character_index].sprite_sheet_rect = Some((32, 0, 32, 32));
-                }
+                commands.push(Box::new(|entity| {
+                    entity.velocity_x = -5.0;
+                    if ticks % 300 > 150 {
+                        entity.sprite_sheet_rect = Some((0, 0, 32, 32));
+                    } else {
+                        entity.sprite_sheet_rect = Some((32, 0, 32, 32));
+                    }
+                }));
             } else if pressed_keys.contains(&Keycode::H) {
                 target_camera.position.0 = level.main_character[character_index].x + 400.0;
-                level.main_character[character_index].velocity_x = 5.0;
-                if ticks % 300 > 150 {
-                    level.main_character[character_index].sprite_sheet_rect = Some((64, 0, 32, 32));
-                } else {
-                    level.main_character[character_index].sprite_sheet_rect = Some((96, 0, 32, 32));
-                }
+                commands.push(Box::new(|entity| {
+                    entity.velocity_x = 5.0;
+                    if ticks % 300 > 150 {
+                        entity.sprite_sheet_rect = Some((64, 0, 32, 32));
+                    } else {
+                        entity.sprite_sheet_rect = Some((96, 0, 32, 32));
+                    }
+                }));
             } else {
-                level.main_character[character_index].velocity_x *= 0.8;
+                commands.push(Box::new(|entity| {
+                    entity.velocity_x *= 0.8;
+                }));
             }
             if !pressed_keys.contains(&Keycode::A)
                 && !pressed_keys.contains(&Keycode::S)
@@ -335,6 +347,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                     level.main_character[character_index].y
                         + level.main_character[character_index].height as f32 / 2.0,
                 );
+            }
+
+            for mut command in commands {
+                command(&mut level.main_character[character_index]);
             }
         }
 
