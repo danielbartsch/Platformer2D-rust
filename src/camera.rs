@@ -9,12 +9,7 @@ pub struct Camera {
 }
 impl Camera {
     pub fn new(width: u16, height: u16) -> Self {
-        Self {
-            position: (0.0, 0.0),
-            scale: (1.0, 1.0),
-            width,
-            height,
-        }
+        Self { position: (0.0, 0.0), scale: (1.0, 1.0), width, height }
     }
     pub fn get_x(&self) -> f32 {
         self.position.0

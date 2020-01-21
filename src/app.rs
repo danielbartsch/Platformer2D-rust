@@ -21,24 +21,9 @@ use std::fs;
 use std::mem;
 use std::time::{Duration, SystemTime};
 
-static BACKGROUND_COLOR: Color = Color {
-    r: 42,
-    g: 43,
-    b: 37,
-    a: 0xff,
-};
-static LINE_COLOR: Color = Color {
-    r: 67,
-    g: 86,
-    b: 63,
-    a: 0xff,
-};
-static LINE_BACKGROUND_COLOR: Color = Color {
-    r: 46,
-    g: 50,
-    b: 40,
-    a: 0xff,
-};
+static BACKGROUND_COLOR: Color = Color { r: 42, g: 43, b: 37, a: 0xff };
+static LINE_COLOR: Color = Color { r: 67, g: 86, b: 63, a: 0xff };
+static LINE_BACKGROUND_COLOR: Color = Color { r: 46, g: 50, b: 40, a: 0xff };
 
 static MAX_FRAME_TIME_MILLIS: u64 = 16;
 
@@ -119,13 +104,9 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         sprite_sheet_name
     )))
     .unwrap();
-    temp_surface
-        .set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0))
-        .unwrap();
+    temp_surface.set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0)).unwrap();
     let texture_creator = canvas.texture_creator();
-    let texture = texture_creator
-        .create_texture_from_surface(&temp_surface)
-        .unwrap();
+    let texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
 
     let mut paused = false;
 
@@ -184,10 +165,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                     }
                     _ => {}
                 },
-                Event::Window {
-                    win_event: WindowEvent::Resized(width, height),
-                    ..
-                } => {
+                Event::Window { win_event: WindowEvent::Resized(width, height), .. } => {
                     window_width = width as u32;
                     window_height = height as u32;
                 }
@@ -206,9 +184,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 }
                 Event::MouseButtonDown { x, y, .. } => {
                     if has_free_camera {
-                        let clicked_variant_button = EditorMenu::get_variant_button_rects()
-                            .into_iter()
-                            .find(|(_, rect)| {
+                        let clicked_variant_button =
+                            EditorMenu::get_variant_button_rects().into_iter().find(|(_, rect)| {
                                 x > rect.x()
                                     && x < rect.x() + rect.width() as i32
                                     && y > rect.y()
@@ -374,17 +351,11 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 command(&mut level.main_character[character_index]);
             }
             for mut command in attack_commands {
-                command(
-                    &mut level.main_character[character_index],
-                    &mut level.effects,
-                );
+                command(&mut level.main_character[character_index], &mut level.effects);
             }
         }
         for mut command in camera_commands {
-            command(
-                &mut level.main_character[character_index],
-                &mut target_camera,
-            );
+            command(&mut level.main_character[character_index], &mut target_camera);
         }
 
         if !paused {
@@ -396,14 +367,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             }
         }
 
-        camera.to_target(
-            &target_camera,
-            if has_free_camera {
-                (0.3, 0.3)
-            } else {
-                (0.03, 0.03)
-            },
-        );
+        camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
         let dimensions = (window_width, window_height);
 
@@ -417,12 +381,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
         if paused {
             let original_color = canvas.draw_color();
-            canvas.set_draw_color(Color {
-                r: 255,
-                g: 60,
-                b: 60,
-                a: 0xff,
-            });
+            canvas.set_draw_color(Color { r: 255, g: 60, b: 60, a: 0xff });
 
             let stop_width = 8u32;
             let stop_height = 20u32;
@@ -431,12 +390,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             let stop_1_bar_y = 0i32;
 
             canvas
-                .fill_rect(Rect::new(
-                    stop_1_bar_x,
-                    stop_1_bar_y,
-                    stop_width,
-                    stop_height,
-                ))
+                .fill_rect(Rect::new(stop_1_bar_x, stop_1_bar_y, stop_width, stop_height))
                 .unwrap();
             canvas
                 .fill_rect(Rect::new(
@@ -451,12 +405,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
         if edit_mode {
             let original_color = canvas.draw_color();
-            canvas.set_draw_color(Color {
-                r: 255,
-                g: 60,
-                b: 60,
-                a: 0xff,
-            });
+            canvas.set_draw_color(Color { r: 255, g: 60, b: 60, a: 0xff });
 
             // Crosshair to indicate center of frame
             canvas
@@ -495,12 +444,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
             match mouse_click_position {
                 Some((x, y)) => {
-                    canvas.set_draw_color(Color {
-                        r: 255,
-                        g: 60,
-                        b: 60,
-                        a: 0xff,
-                    });
+                    canvas.set_draw_color(Color { r: 255, g: 60, b: 60, a: 0xff });
                     let (pos_x, width) =
                         (cmp::min(x, mouse_x), (x - mouse_x).wrapping_abs() as u32);
                     let (pos_y, height) =
@@ -520,10 +464,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         if millis_to_sleep > 0 {
             ::std::thread::sleep(Duration::from_millis(millis_to_sleep));
         } else {
-            println!(
-                "Detecting Lag. Frame took {}ms too long",
-                -(millis_to_sleep as i32)
-            );
+            println!("Detecting Lag. Frame took {}ms too long", -(millis_to_sleep as i32));
         }
         last_frame_time = SystemTime::now();
     }

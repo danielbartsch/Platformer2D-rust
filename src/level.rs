@@ -104,10 +104,8 @@ impl Entity {
         .parallax_y(parallax_y)
     }
     pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
-        let intended_velocity = (
-            self.velocity_x + self.acceleration_x,
-            self.velocity_y + self.acceleration_y,
-        );
+        let intended_velocity =
+            (self.velocity_x + self.acceleration_x, self.velocity_y + self.acceleration_y);
         let intended_position = (
             (self.x + intended_velocity.0 as f32) as i32,
             (self.y + intended_velocity.1 as f32) as i32,
