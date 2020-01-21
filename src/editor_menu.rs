@@ -22,16 +22,24 @@ impl EditorMenu {
     pub fn variant(&mut self, variant: LevelEntityVariant) {
         self.variant = variant;
     }
-    pub fn get_variant_button_rects() -> Vec<(LevelEntityVariant, Rect)> {
+    pub fn get_variant_button_rects() -> Vec<(LevelEntityVariant, Rect, (i32, i32, u32, u32))> {
         vec![
-            (LevelEntityVariant::Background, Rect::new(0, 30, 20, 20)),
-            (LevelEntityVariant::Indestructible, Rect::new(0, 30 + (25), 20, 20)),
-            (LevelEntityVariant::Destructible, Rect::new(0, 30 + (25 * 2), 20, 20)),
-            (LevelEntityVariant::Enemies, Rect::new(0, 30 + (25 * 3), 20, 20)),
-            (LevelEntityVariant::MainCharacter, Rect::new(0, 30 + (25 * 4), 20, 20)),
-            (LevelEntityVariant::Effects, Rect::new(0, 30 + (25 * 5), 20, 20)),
-            (LevelEntityVariant::Foreground, Rect::new(0, 30 + (25 * 6), 20, 20)),
-            (LevelEntityVariant::Deletion, Rect::new(0, 30 + (25 * 7), 20, 20)),
+            (LevelEntityVariant::Background, Rect::new(0, 30, 20, 20), (0, 0, 20, 20)),
+            (LevelEntityVariant::Indestructible, Rect::new(0, 30 + (25), 20, 20), (20, 0, 20, 20)),
+            (
+                LevelEntityVariant::Destructible,
+                Rect::new(0, 30 + (25 * 2), 20, 20),
+                (40, 0, 20, 20),
+            ),
+            (LevelEntityVariant::Enemies, Rect::new(0, 30 + (25 * 3), 20, 20), (60, 0, 20, 20)),
+            (
+                LevelEntityVariant::MainCharacter,
+                Rect::new(0, 30 + (25 * 4), 20, 20),
+                (80, 0, 20, 20),
+            ),
+            (LevelEntityVariant::Effects, Rect::new(0, 30 + (25 * 5), 20, 20), (100, 0, 20, 20)),
+            (LevelEntityVariant::Foreground, Rect::new(0, 30 + (25 * 6), 20, 20), (120, 0, 20, 20)),
+            (LevelEntityVariant::Deletion, Rect::new(0, 30 + (25 * 7), 20, 20), (140, 0, 20, 20)),
         ]
     }
     pub fn create_entity(&mut self, level: &mut Level, actionable_entity: &Entity) {

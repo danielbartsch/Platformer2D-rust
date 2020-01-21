@@ -108,6 +108,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     let texture_creator = canvas.texture_creator();
     let texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
 
+    temp_surface =
+        sdl2::surface::Surface::load_bmp(std::path::Path::new("assets/spritesheets/ui.bmp"))
+            .unwrap();
+    temp_surface.set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0)).unwrap();
+    let ui_texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
+
     let mut paused = false;
 
     let mut camera = Camera::new(900, 600);
@@ -184,8 +190,9 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 }
                 Event::MouseButtonDown { x, y, .. } => {
                     if has_free_camera {
-                        let clicked_variant_button =
-                            EditorMenu::get_variant_button_rects().into_iter().find(|(_, rect)| {
+                        let clicked_variant_button = EditorMenu::get_variant_button_rects()
+                            .into_iter()
+                            .find(|(_, rect, _)| {
                                 x > rect.x()
                                     && x < rect.x() + rect.width() as i32
                                     && y > rect.y()
@@ -217,7 +224,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                                     mouse_click_position = Some((x, y));
                                 }
                             }
-                        } else if let Some((variant, _)) = clicked_variant_button {
+                        } else if let Some((variant, _, _)) = clicked_variant_button {
                             editor_menu.variant(variant);
                         }
                     }
@@ -428,17 +435,20 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             canvas.draw_line((5, 20 - 5), (20 - 5, 20 - 5)).unwrap();
             canvas.draw_line((5, 20 / 2), (20 - 5, 20 / 2)).unwrap();
 
-            for (variant, rect) in EditorMenu::get_variant_button_rects() {
-                canvas.draw_rect(rect).unwrap();
+            for (variant, rect, sprite_rect) in EditorMenu::get_variant_button_rects() {
+                canvas
+                    .copy_ex(
+                        &ui_texture,
+                        Some(Rect::new(sprite_rect.0, sprite_rect.1, sprite_rect.2, sprite_rect.3)),
+                        Some(rect),
+                        0.0,
+                        None,
+                        false,
+                        false,
+                    )
+                    .unwrap();
                 if mem::discriminant(&variant) == mem::discriminant(&editor_menu.variant) {
-                    canvas
-                        .draw_rect(Rect::new(
-                            rect.x() + 5,
-                            rect.y() + 5,
-                            rect.width() - 10,
-                            rect.height() - 10,
-                        ))
-                        .unwrap();
+                    canvas.draw_rect(rect).unwrap();
                 }
             }
 
