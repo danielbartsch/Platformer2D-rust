@@ -162,6 +162,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
         let has_free_camera = edit_mode || paused;
 
+        let mut camera_commands: Vec<Box<dyn FnMut(&mut Entity, &mut Camera)>> = vec![];
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => {
@@ -192,9 +194,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 Event::MouseWheel { y, .. } => {
                     if has_free_camera {
                         if y < 0 {
-                            target_camera.zoom(0.97);
+                            camera_commands.push(Box::new(|entity, current_camera| {
+                                current_camera.zoom(0.97);
+                            }));
                         } else {
-                            target_camera.zoom(1.03);
+                            camera_commands.push(Box::new(|entity, current_camera| {
+                                current_camera.zoom(1.03);
+                            }));
                         }
                     }
                 }
@@ -250,47 +256,54 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
         if has_free_camera {
             if pressed_keys.contains(&Keycode::D) {
-                target_camera.position.1 -= 25.0 / target_camera.scale.1;
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.1 -= 25.0 / current_camera.scale.1;
+                }));
             } else if pressed_keys.contains(&Keycode::S) {
-                target_camera.position.1 += 25.0 / target_camera.scale.1;
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.1 += 25.0 / current_camera.scale.1;
+                }));
             }
             if pressed_keys.contains(&Keycode::A) {
-                target_camera.position.0 -= 25.0 / target_camera.scale.0;
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.0 -= 25.0 / current_camera.scale.0;
+                }));
             } else if pressed_keys.contains(&Keycode::H) {
-                target_camera.position.0 += 25.0 / target_camera.scale.1;
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.0 += 25.0 / current_camera.scale.1;
+                }));
             }
             if pressed_keys.contains(&Keycode::Q) {
-                target_camera.zoom(1.03);
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.zoom(1.03);
+                }));
             } else if pressed_keys.contains(&Keycode::R) {
-                target_camera.zoom(0.97);
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.zoom(0.97);
+                }));
             }
         } else {
-            target_camera.set_zoom(1.0);
+            camera_commands.push(Box::new(|entity, current_camera| {
+                current_camera.set_zoom(1.0);
+            }));
 
-            let mut commands: Vec<Box<dyn FnMut(&mut Entity)>> = vec![];
+            let mut entity_commands: Vec<Box<dyn FnMut(&mut Entity)>> = vec![];
+            let mut attack_commands: Vec<Box<dyn FnMut(&mut Entity, &mut Vec<Entity>)>> = vec![];
+
             if pressed_keys.contains(&Keycode::Y) {
-                let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
-                level.effects.push(
-                    Entity::new(
-                        level.main_character[character_index].x,
-                        level.main_character[character_index].y,
-                        10,
-                        10,
-                    )
-                    .velocity_x(
-                        level.main_character[character_index].velocity_x
-                            * (2.2 + pseudo_random.cos()),
-                    )
-                    .velocity_y(
-                        level.main_character[character_index].velocity_y
-                            * (2.2 + pseudo_random.sin()),
-                    )
-                    .acceleration_y(0.01)
-                    .bounciness(1.1),
-                );
+                attack_commands.push(Box::new(|entity, level_container| {
+                    let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
+                    level_container.push(
+                        Entity::new(entity.x, entity.y, 10, 10)
+                            .velocity_x(entity.velocity_x * (2.2 + pseudo_random.cos()))
+                            .velocity_y(entity.velocity_y * (2.2 + pseudo_random.sin()))
+                            .acceleration_y(0.01)
+                            .bounciness(1.1),
+                    );
+                }));
             }
             if pressed_keys.contains(&Keycode::N) {
-                commands.push(Box::new(|entity| {
+                entity_commands.push(Box::new(|entity| {
                     if entity.is_touching_ground(entities.clone()) {
                         entity.velocity_y = -8.0;
                         entity.acceleration_y = 0.1;
@@ -302,18 +315,24 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                     }
                 }));
             } else {
-                commands.push(Box::new(|entity| {
+                entity_commands.push(Box::new(|entity| {
                     entity.acceleration_y = 1.0;
                 }));
             }
             if pressed_keys.contains(&Keycode::D) {
-                target_camera.position.1 = level.main_character[character_index].y - 400.0;
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.1 = entity.y - 400.0;
+                }));
             } else if pressed_keys.contains(&Keycode::S) {
-                target_camera.position.1 = level.main_character[character_index].y + 400.0;
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.1 = entity.y + 400.0;
+                }));
             }
             if pressed_keys.contains(&Keycode::A) {
-                target_camera.position.0 = level.main_character[character_index].x - 400.0;
-                commands.push(Box::new(|entity| {
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.0 = entity.x - 400.0;
+                }));
+                entity_commands.push(Box::new(|entity| {
                     entity.velocity_x = -5.0;
                     if ticks % 300 > 150 {
                         entity.sprite_sheet_rect = Some((0, 0, 32, 32));
@@ -322,8 +341,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                     }
                 }));
             } else if pressed_keys.contains(&Keycode::H) {
-                target_camera.position.0 = level.main_character[character_index].x + 400.0;
-                commands.push(Box::new(|entity| {
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position.0 = entity.x + 400.0;
+                }));
+                entity_commands.push(Box::new(|entity| {
                     entity.velocity_x = 5.0;
                     if ticks % 300 > 150 {
                         entity.sprite_sheet_rect = Some((64, 0, 32, 32));
@@ -332,7 +353,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                     }
                 }));
             } else {
-                commands.push(Box::new(|entity| {
+                entity_commands.push(Box::new(|entity| {
                     entity.velocity_x *= 0.8;
                 }));
             }
@@ -341,17 +362,29 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 && !pressed_keys.contains(&Keycode::H)
                 && !pressed_keys.contains(&Keycode::D)
             {
-                target_camera.position = (
-                    level.main_character[character_index].x
-                        + level.main_character[character_index].width as f32 / 2.0,
-                    level.main_character[character_index].y
-                        + level.main_character[character_index].height as f32 / 2.0,
-                );
+                camera_commands.push(Box::new(|entity, current_camera| {
+                    current_camera.position = (
+                        entity.x + entity.width as f32 / 2.0,
+                        entity.y + entity.height as f32 / 2.0,
+                    );
+                }));
             }
 
-            for mut command in commands {
+            for mut command in entity_commands {
                 command(&mut level.main_character[character_index]);
             }
+            for mut command in attack_commands {
+                command(
+                    &mut level.main_character[character_index],
+                    &mut level.effects,
+                );
+            }
+        }
+        for mut command in camera_commands {
+            command(
+                &mut level.main_character[character_index],
+                &mut target_camera,
+            );
         }
 
         if !paused {
