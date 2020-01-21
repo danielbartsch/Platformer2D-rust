@@ -347,14 +347,14 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 }));
             }
 
-            for mut command in entity_commands {
+            for command in entity_commands {
                 command(&mut level.main_character[character_index]);
             }
-            for mut command in attack_commands {
+            for command in attack_commands {
                 command(&mut level.main_character[character_index], &mut level.effects);
             }
         }
-        for mut command in camera_commands {
+        for command in camera_commands {
             command(&mut level.main_character[character_index], &mut target_camera);
         }
 
