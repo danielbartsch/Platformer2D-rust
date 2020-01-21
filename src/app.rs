@@ -143,7 +143,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
         let has_free_camera = edit_mode || paused;
 
-        let mut camera_commands: Vec<Box<dyn FnMut(&mut Entity, &mut Camera)>> = vec![];
+        let mut camera_commands: Vec<Box<dyn Fn(&mut Entity, &mut Camera)>> = vec![];
 
         for event in event_pump.poll_iter() {
             match event {
@@ -264,8 +264,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 current_camera.set_zoom(1.0);
             }));
 
-            let mut entity_commands: Vec<Box<dyn FnMut(&mut Entity)>> = vec![];
-            let mut attack_commands: Vec<Box<dyn FnMut(&mut Entity, &mut Vec<Entity>)>> = vec![];
+            let mut entity_commands: Vec<Box<dyn Fn(&mut Entity)>> = vec![];
+            let mut attack_commands: Vec<Box<dyn Fn(&mut Entity, &mut Vec<Entity>)>> = vec![];
 
             if pressed_keys.contains(&Keycode::Y) {
                 attack_commands.push(Box::new(|entity, level_container| {
