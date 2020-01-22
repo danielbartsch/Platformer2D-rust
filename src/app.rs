@@ -95,9 +95,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     let pressed_keys: HashSet<_> =
       event_pump.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
 
-    let mouse_state = event_pump.mouse_state();
-
-    let (mouse_x, mouse_y) = (mouse_state.x(), mouse_state.y());
+    let (mouse_x, mouse_y) = {
+      let mouse_state = event_pump.mouse_state();
+      (mouse_state.x(), mouse_state.y())
+    };
 
     let has_free_camera = edit_mode || paused;
 
