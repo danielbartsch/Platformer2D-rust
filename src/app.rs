@@ -14,7 +14,7 @@ use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{Texture, WindowCanvas};
 use std::cmp;
 use std::collections::HashSet;
 use std::fs;
@@ -26,46 +26,6 @@ static LINE_COLOR: Color = Color { r: 67, g: 86, b: 63, a: 0xff };
 static LINE_BACKGROUND_COLOR: Color = Color { r: 46, g: 50, b: 40, a: 0xff };
 
 static MAX_FRAME_TIME_MILLIS: u64 = 16;
-
-macro_rules! draw_relatively {
-  ($canvas: expr, $entities: expr, $camera: expr, $texture: expr, $dimensions: expr) => {
-    if $entities.len() > 0 {
-      for entity in $entities {
-        let (_x, _y, _width, _height) =
-          entity.to_canvas_coordinates($camera, ($dimensions.0 / 2, $dimensions.1 / 2));
-        let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
-
-        if x + width as i32 >= 0
-          && y + height as i32 >= 0
-          && x <= $dimensions.0 as i32
-          && y <= $dimensions.1 as i32
-        {
-          let entity_rect = Rect::new(x, y, width, height);
-          if let Some(sprite_rect) = entity.sprite_sheet_rect {
-            $canvas
-              .copy_ex(
-                $texture,
-                Some(Rect::new(sprite_rect.0, sprite_rect.1, sprite_rect.2, sprite_rect.3)),
-                Some(entity_rect),
-                0.0,
-                None,
-                false,
-                false,
-              )
-              .unwrap();
-          } else {
-            let original_color = $canvas.draw_color();
-            $canvas.set_draw_color(LINE_BACKGROUND_COLOR);
-            $canvas.fill_rect(entity_rect).unwrap();
-            $canvas.set_draw_color(LINE_COLOR);
-            $canvas.draw_rect(entity_rect).unwrap();
-            $canvas.set_draw_color(original_color);
-          }
-        }
-      }
-    }
-  };
-}
 
 pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let sdl_context = sdl2::init().unwrap();
@@ -365,13 +325,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     let dimensions = (window_width, window_height);
 
-    draw_relatively!(canvas, &level.background, &camera, &texture, dimensions);
-    draw_relatively!(canvas, &level.indestructible, &camera, &texture, dimensions);
-    draw_relatively!(canvas, &level.destructible, &camera, &texture, dimensions);
-    draw_relatively!(canvas, &level.enemies, &camera, &texture, dimensions);
-    draw_relatively!(canvas, &level.main_character, &camera, &texture, dimensions);
-    draw_relatively!(canvas, &level.effects, &camera, &texture, dimensions);
-    draw_relatively!(canvas, &level.foreground, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.background, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.indestructible, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.destructible, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.enemies, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.main_character, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.effects, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.foreground, &camera, &texture, dimensions);
 
     if paused {
       let original_color = canvas.draw_color();
@@ -454,5 +414,47 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       println!("Detecting Lag. Frame took {}ms too long", -(millis_to_sleep as i32));
     }
     last_frame_time = SystemTime::now();
+  }
+}
+
+fn draw_relatively(
+  canvas: &mut WindowCanvas,
+  entities: &Vec<Entity>,
+  camera: &Camera,
+  texture: &Texture,
+  dimensions: (u32, u32),
+) {
+  for entity in entities {
+    let (_x, _y, _width, _height) =
+      entity.to_canvas_coordinates(camera, (dimensions.0 / 2, dimensions.1 / 2));
+    let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
+
+    if x + width as i32 >= 0
+      && y + height as i32 >= 0
+      && x <= dimensions.0 as i32
+      && y <= dimensions.1 as i32
+    {
+      let entity_rect = Rect::new(x, y, width, height);
+      if let Some(sprite_rect) = entity.sprite_sheet_rect {
+        canvas
+          .copy_ex(
+            texture,
+            Some(Rect::new(sprite_rect.0, sprite_rect.1, sprite_rect.2, sprite_rect.3)),
+            Some(entity_rect),
+            0.0,
+            None,
+            false,
+            false,
+          )
+          .unwrap();
+      } else {
+        let original_color = canvas.draw_color();
+        canvas.set_draw_color(LINE_BACKGROUND_COLOR);
+        canvas.fill_rect(entity_rect).unwrap();
+        canvas.set_draw_color(LINE_COLOR);
+        canvas.draw_rect(entity_rect).unwrap();
+        canvas.set_draw_color(original_color);
+      }
+    }
   }
 }
