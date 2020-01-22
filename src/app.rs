@@ -27,15 +27,15 @@ static LINE_BACKGROUND_COLOR: Color = Color { r: 46, g: 50, b: 40, a: 0xff };
 
 static MAX_FRAME_TIME_MILLIS: u64 = 16;
 
+static INITIAL_WINDOW_WIDTH: u16 = 900;
+static INITIAL_WINDOW_HEIGHT: u16 = 600;
+
 pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let sdl_context = sdl2::init().unwrap();
   let video_subsystem = sdl_context.video().unwrap();
 
-  let mut window_width: u16 = 900;
-  let mut window_height: u16 = 600;
-
   let window = video_subsystem
-    .window("Platformer 2D", window_width as u32, window_height as u32)
+    .window("Platformer 2D", INITIAL_WINDOW_WIDTH as u32, INITIAL_WINDOW_HEIGHT as u32)
     .position_centered()
     .resizable()
     .build()
@@ -69,8 +69,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
   let mut paused = false;
 
-  let mut camera = Camera::new((window_width, window_height));
-  let mut target_camera = Camera::new((window_width, window_height));
+  let mut camera = Camera::new((INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT));
+  let mut target_camera = Camera::new((INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT));
 
   let mut character_index = 0;
 
@@ -122,8 +122,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           _ => {}
         },
         Event::Window { win_event: WindowEvent::Resized(width, height), .. } => {
-          window_width = width as u16;
-          window_height = height as u16;
+          camera.dimensions = (width as u16, height as u16);
         }
         Event::MouseWheel { y, .. } => {
           if has_free_camera {
@@ -164,7 +163,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                         1.0,
                       ),
                       &camera,
-                      (window_width / 2, window_height / 2),
+                      (camera.dimensions.0 / 2, camera.dimensions.1 / 2),
                     ),
                   );
                   mouse_selection_rect = None;
@@ -323,15 +322,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
-    let dimensions = (window_width, window_height);
-
-    draw_relatively(&mut canvas, &level.background, &camera, &texture, dimensions);
-    draw_relatively(&mut canvas, &level.indestructible, &camera, &texture, dimensions);
-    draw_relatively(&mut canvas, &level.destructible, &camera, &texture, dimensions);
-    draw_relatively(&mut canvas, &level.enemies, &camera, &texture, dimensions);
-    draw_relatively(&mut canvas, &level.main_character, &camera, &texture, dimensions);
-    draw_relatively(&mut canvas, &level.effects, &camera, &texture, dimensions);
-    draw_relatively(&mut canvas, &level.foreground, &camera, &texture, dimensions);
+    draw_relatively(&mut canvas, &level.background, &camera, &texture);
+    draw_relatively(&mut canvas, &level.indestructible, &camera, &texture);
+    draw_relatively(&mut canvas, &level.destructible, &camera, &texture);
+    draw_relatively(&mut canvas, &level.enemies, &camera, &texture);
+    draw_relatively(&mut canvas, &level.main_character, &camera, &texture);
+    draw_relatively(&mut canvas, &level.effects, &camera, &texture);
+    draw_relatively(&mut canvas, &level.foreground, &camera, &texture);
 
     if paused {
       let original_color = canvas.draw_color();
@@ -361,10 +358,16 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
       // Crosshair to indicate center of frame
       canvas
-        .draw_line((window_width as i32 / 2, 0), (window_width as i32 / 2, window_height as i32))
+        .draw_line(
+          (camera.dimensions.0 as i32 / 2, 0),
+          (camera.dimensions.0 as i32 / 2, camera.dimensions.1 as i32),
+        )
         .unwrap();
       canvas
-        .draw_line((0, window_height as i32 / 2), (window_width as i32, window_height as i32 / 2))
+        .draw_line(
+          (0, camera.dimensions.1 as i32 / 2),
+          (camera.dimensions.0 as i32, camera.dimensions.1 as i32 / 2),
+        )
         .unwrap();
 
       // Edit mode "logo"
@@ -422,17 +425,16 @@ fn draw_relatively(
   entities: &Vec<Entity>,
   camera: &Camera,
   texture: &Texture,
-  dimensions: (u16, u16),
 ) {
   for entity in entities {
     let (_x, _y, _width, _height) =
-      entity.to_canvas_coordinates(camera, (dimensions.0 / 2, dimensions.1 / 2));
+      entity.to_canvas_coordinates(camera, (camera.dimensions.0 / 2, camera.dimensions.1 / 2));
     let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
 
     if x + width as i32 >= 0
       && y + height as i32 >= 0
-      && x <= dimensions.0 as i32
-      && y <= dimensions.1 as i32
+      && x <= camera.dimensions.0 as i32
+      && y <= camera.dimensions.1 as i32
     {
       let entity_rect = Rect::new(x, y, width, height);
       if let Some(sprite_rect) = entity.sprite_sheet_rect {
