@@ -15,10 +15,12 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
+use sdl2::surface::Surface;
 use std::cmp;
 use std::collections::HashSet;
 use std::fs;
 use std::mem;
+use std::path::Path;
 use std::time::{Duration, SystemTime};
 
 static BACKGROUND_COLOR: Color = Color { r: 42, g: 43, b: 37, a: 0xff };
@@ -51,19 +53,22 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let mut level =
     Level::deserialize(fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap());
 
-  let mut temp_surface = sdl2::surface::Surface::load_bmp(std::path::Path::new(&format!(
-    "assets/spritesheets/{}.bmp",
-    sprite_sheet_name
-  )))
-  .unwrap();
-  temp_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
   let texture_creator = canvas.texture_creator();
-  let texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
+  let (texture, ui_texture) = {
+    let mut texture_surface =
+      Surface::load_bmp(Path::new(&format!("assets/spritesheets/{}.bmp", sprite_sheet_name)))
+        .unwrap();
+    texture_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
 
-  temp_surface =
-    sdl2::surface::Surface::load_bmp(std::path::Path::new("assets/spritesheets/ui.bmp")).unwrap();
-  temp_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
-  let ui_texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
+    let mut ui_texture_surface =
+      Surface::load_bmp(Path::new("assets/spritesheets/ui.bmp")).unwrap();
+    ui_texture_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
+
+    (
+      texture_creator.create_texture_from_surface(&texture_surface).unwrap(),
+      texture_creator.create_texture_from_surface(&ui_texture_surface).unwrap(),
+    )
+  };
 
   let mut paused = false;
 
