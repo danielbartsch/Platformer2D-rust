@@ -87,8 +87,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     let ticks = first_frame_time.elapsed().unwrap().as_millis();
 
-    let mut pressed_keys = HashSet::new();
-    pressed_keys =
+    let pressed_keys: HashSet<_> =
       event_pump.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
 
     let mouse_state = event_pump.mouse_state();
@@ -125,11 +124,11 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         Event::MouseWheel { y, .. } => {
           if has_free_camera {
             if y < 0 {
-              camera_commands.push(Box::new(|entity, current_camera| {
+              camera_commands.push(Box::new(|_, current_camera| {
                 current_camera.zoom(0.97);
               }));
             } else {
-              camera_commands.push(Box::new(|entity, current_camera| {
+              camera_commands.push(Box::new(|_, current_camera| {
                 current_camera.zoom(1.03);
               }));
             }
@@ -186,34 +185,34 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     if has_free_camera {
       if pressed_keys.contains(&Keycode::D) {
-        camera_commands.push(Box::new(|entity, current_camera| {
+        camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.1 -= 25.0 / current_camera.scale.1;
         }));
       } else if pressed_keys.contains(&Keycode::S) {
-        camera_commands.push(Box::new(|entity, current_camera| {
+        camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.1 += 25.0 / current_camera.scale.1;
         }));
       }
       if pressed_keys.contains(&Keycode::A) {
-        camera_commands.push(Box::new(|entity, current_camera| {
+        camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.0 -= 25.0 / current_camera.scale.0;
         }));
       } else if pressed_keys.contains(&Keycode::H) {
-        camera_commands.push(Box::new(|entity, current_camera| {
+        camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.0 += 25.0 / current_camera.scale.1;
         }));
       }
       if pressed_keys.contains(&Keycode::Q) {
-        camera_commands.push(Box::new(|entity, current_camera| {
+        camera_commands.push(Box::new(|_, current_camera| {
           current_camera.zoom(1.03);
         }));
       } else if pressed_keys.contains(&Keycode::R) {
-        camera_commands.push(Box::new(|entity, current_camera| {
+        camera_commands.push(Box::new(|_, current_camera| {
           current_camera.zoom(0.97);
         }));
       }
     } else {
-      camera_commands.push(Box::new(|entity, current_camera| {
+      camera_commands.push(Box::new(|_, current_camera| {
         current_camera.set_zoom(1.0);
       }));
 
