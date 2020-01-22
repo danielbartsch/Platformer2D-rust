@@ -19,6 +19,8 @@ use sdl2::surface::Surface;
 use std::cmp;
 use std::collections::HashSet;
 use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
 use std::mem;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
@@ -121,6 +123,27 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           }
           Some(Keycode::Num0) => {
             edit_mode = !edit_mode;
+          }
+          Some(Keycode::S) => {
+            if pressed_keys.contains(&Keycode::LCtrl) || pressed_keys.contains(&Keycode::RCtrl) {
+              let file_path = {
+                let file_name =
+                  format!("{:x}.json", first_frame_time.elapsed().unwrap().as_nanos());
+                format!("assets/levels/{}", file_name)
+              };
+              let path = Path::new(&file_path);
+              let display = path.display();
+              match File::create(&path) {
+                Err(_) => panic!("couldn't create {}", display),
+                Ok(mut file) => {
+                  let level_serialized = level.serialize();
+                  println!("Saving now: {}", file_path);
+                  file
+                    .write_all(level_serialized.as_bytes())
+                    .expect(&format!("Save for file '{}' failed.", file_path))
+                }
+              };
+            }
           }
           _ => {}
         },
