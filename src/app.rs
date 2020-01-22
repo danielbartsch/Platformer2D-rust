@@ -31,11 +31,11 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let sdl_context = sdl2::init().unwrap();
   let video_subsystem = sdl_context.video().unwrap();
 
-  let mut window_width: u32 = 900;
-  let mut window_height: u32 = 600;
+  let mut window_width: u16 = 900;
+  let mut window_height: u16 = 600;
 
   let window = video_subsystem
-    .window("Platformer 2D", window_width, window_height)
+    .window("Platformer 2D", window_width as u32, window_height as u32)
     .position_centered()
     .resizable()
     .build()
@@ -69,8 +69,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
   let mut paused = false;
 
-  let mut camera = Camera::new(900, 600);
-  let mut target_camera = Camera::new(900, 600);
+  let mut camera = Camera::new((window_width, window_height));
+  let mut target_camera = Camera::new((window_width, window_height));
 
   let mut character_index = 0;
 
@@ -122,8 +122,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           _ => {}
         },
         Event::Window { win_event: WindowEvent::Resized(width, height), .. } => {
-          window_width = width as u32;
-          window_height = height as u32;
+          window_width = width as u16;
+          window_height = height as u16;
         }
         Event::MouseWheel { y, .. } => {
           if has_free_camera {
@@ -422,7 +422,7 @@ fn draw_relatively(
   entities: &Vec<Entity>,
   camera: &Camera,
   texture: &Texture,
-  dimensions: (u32, u32),
+  dimensions: (u16, u16),
 ) {
   for entity in entities {
     let (_x, _y, _width, _height) =

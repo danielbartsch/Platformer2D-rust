@@ -4,12 +4,11 @@ use serde::{Deserialize, Serialize};
 pub struct Camera {
   pub position: (f32, f32),
   pub scale: (f32, f32),
-  width: u16,
-  height: u16,
+  pub dimensions: (u16, u16),
 }
 impl Camera {
-  pub fn new(width: u16, height: u16) -> Self {
-    Self { position: (0.0, 0.0), scale: (1.0, 1.0), width, height }
+  pub fn new(dimensions: (u16, u16)) -> Self {
+    Self { position: (0.0, 0.0), scale: (1.0, 1.0), dimensions }
   }
   pub fn get_x(&self) -> f32 {
     self.position.0

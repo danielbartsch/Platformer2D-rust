@@ -70,7 +70,7 @@ impl Entity {
             && entity.x + entity.width as f32 > self.x + self.width as f32))
     })
   }
-  pub fn to_canvas_coordinates(&self, camera: &Camera, offset: (u32, u32)) -> (f32, f32, u16, u16) {
+  pub fn to_canvas_coordinates(&self, camera: &Camera, offset: (u16, u16)) -> (f32, f32, u16, u16) {
     (
       self.x * camera.get_scale_x() - camera.get_x() * (self.parallax_x * camera.get_scale_x())
         + offset.0 as f32,
@@ -84,7 +84,7 @@ impl Entity {
   pub fn from_canvas_coordinates(
     (x, y, width, height, parallax_x, parallax_y): (f32, f32, u16, u16, f32, f32),
     camera: &Camera,
-    offset: (u32, u32),
+    offset: (u16, u16),
   ) -> Self {
     Entity::new(
       (x + camera.get_x() * parallax_x * camera.get_scale_x() - offset.0 as f32)
@@ -192,7 +192,7 @@ impl Level {
 
 #[test]
 fn window_entity_coordinates_vs_actual_coordinates_entity_at_center() {
-  let mut camera = Camera::new(900, 600);
+  let mut camera = Camera::new((900, 600));
   camera.position.0 = -450.0;
   camera.position.1 = -300.0;
 
@@ -214,7 +214,7 @@ fn window_entity_coordinates_vs_actual_coordinates_entity_at_center() {
 
 #[test]
 fn window_entity_coordinates_vs_actual_coordinates_entity_at_start() {
-  let camera = Camera::new(900, 600);
+  let camera = Camera::new((900, 600));
 
   let entity = Entity::new(0.0, 0.0, 10, 10);
   let (x, y, width, height) = entity.to_canvas_coordinates(&camera, (450, 300));
@@ -234,7 +234,7 @@ fn window_entity_coordinates_vs_actual_coordinates_entity_at_start() {
 
 #[test]
 fn window_entity_coordinates_vs_actual_coordinates() {
-  let mut camera = Camera::new(900, 600);
+  let mut camera = Camera::new((900, 600));
   camera.position.0 = 450.0;
 
   let entity = Entity::new(600.0, 0.0, 10, 10);
@@ -255,7 +255,7 @@ fn window_entity_coordinates_vs_actual_coordinates() {
 
 #[test]
 fn window_entity_coordinates_vs_actual_coordinates_plus_scale() {
-  let mut camera = Camera::new(900, 600);
+  let mut camera = Camera::new((900, 600));
   camera.zoom(2.0);
   camera.position.0 = 450.0;
 
