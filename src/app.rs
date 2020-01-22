@@ -56,13 +56,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     sprite_sheet_name
   )))
   .unwrap();
-  temp_surface.set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0)).unwrap();
+  temp_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
   let texture_creator = canvas.texture_creator();
   let texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
 
   temp_surface =
     sdl2::surface::Surface::load_bmp(std::path::Path::new("assets/spritesheets/ui.bmp")).unwrap();
-  temp_surface.set_color_key(true, sdl2::pixels::Color::RGB(0, 0, 0)).unwrap();
+  temp_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
   let ui_texture = texture_creator.create_texture_from_surface(&temp_surface).unwrap();
 
   let mut paused = false;
