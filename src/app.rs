@@ -369,11 +369,17 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         .unwrap();
 
       // Edit mode "logo"
-      canvas.draw_rect(Rect::new(0, 0, 20, 20)).unwrap();
-      canvas.draw_line((5, 5), (20 - 5, 5)).unwrap();
-      canvas.draw_line((5, 5), (5, 20 - 5)).unwrap();
-      canvas.draw_line((5, 20 - 5), (20 - 5, 20 - 5)).unwrap();
-      canvas.draw_line((5, 20 / 2), (20 - 5, 20 / 2)).unwrap();
+      canvas
+        .copy_ex(
+          &ui_texture,
+          Some(Rect::new(0, 0, 20, 20)),
+          Some(Rect::new(0, 0, 20, 20)),
+          0.0,
+          None,
+          false,
+          false,
+        )
+        .unwrap();
 
       for (variant, rect, sprite_rect) in EditorMenu::get_variant_button_rects() {
         canvas
