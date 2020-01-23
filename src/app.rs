@@ -56,7 +56,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     Level::deserialize(fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap());
 
   let texture_creator = canvas.texture_creator();
-  let (texture, ui_texture) = {
+  let (entity_texture, ui_texture) = {
     let mut texture_surface =
       Surface::load_bmp(Path::new(&format!("assets/spritesheets/{}.bmp", sprite_sheet_name)))
         .unwrap();
@@ -348,13 +348,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
-    camera.draw_relatively(&mut canvas, &level.background, &texture);
-    camera.draw_relatively(&mut canvas, &level.indestructible, &texture);
-    camera.draw_relatively(&mut canvas, &level.destructible, &texture);
-    camera.draw_relatively(&mut canvas, &level.enemies, &texture);
-    camera.draw_relatively(&mut canvas, &level.main_character, &texture);
-    camera.draw_relatively(&mut canvas, &level.effects, &texture);
-    camera.draw_relatively(&mut canvas, &level.foreground, &texture);
+    camera.draw_relatively(&mut canvas, &level.background, &entity_texture);
+    camera.draw_relatively(&mut canvas, &level.indestructible, &entity_texture);
+    camera.draw_relatively(&mut canvas, &level.destructible, &entity_texture);
+    camera.draw_relatively(&mut canvas, &level.enemies, &entity_texture);
+    camera.draw_relatively(&mut canvas, &level.main_character, &entity_texture);
+    camera.draw_relatively(&mut canvas, &level.effects, &entity_texture);
+    camera.draw_relatively(&mut canvas, &level.foreground, &entity_texture);
 
     if paused {
       let original_color = canvas.draw_color();
