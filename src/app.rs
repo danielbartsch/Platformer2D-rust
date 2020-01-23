@@ -56,7 +56,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     Level::deserialize(fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap());
 
   let texture_creator = canvas.texture_creator();
-  let (entity_texture, ui_texture) = {
+  let (entity_texture, ui_texture, text_texture) = {
     let mut texture_surface =
       Surface::load_bmp(Path::new(&format!("assets/spritesheets/{}.bmp", sprite_sheet_name)))
         .unwrap();
@@ -66,9 +66,14 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       Surface::load_bmp(Path::new("assets/spritesheets/ui.bmp")).unwrap();
     ui_texture_surface.set_color_key(true, Color { r: 0, g: 0, b: 0, a: 0xff }).unwrap();
 
+    let mut text_texture_surface =
+      Surface::load_bmp(Path::new("assets/spritesheets/text.bmp")).unwrap();
+    text_texture_surface.set_color_key(true, Color { r: 255, g: 255, b: 255, a: 0xff }).unwrap();
+
     (
       texture_creator.create_texture_from_surface(&texture_surface).unwrap(),
       texture_creator.create_texture_from_surface(&ui_texture_surface).unwrap(),
+      texture_creator.create_texture_from_surface(&text_texture_surface).unwrap(),
     )
   };
 
@@ -438,6 +443,9 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       }
       canvas.set_draw_color(original_color);
     }
+
+    show_text_line(&mut canvas, &text_texture, "DUDLEY, RUN!", (10, 10), 5, 1.1);
+    show_text_line(&mut canvas, &text_texture, "ACCUMULATORS NOT INCLUDED!", (10, 100), 2, 1.1);
 
     canvas.present();
 
