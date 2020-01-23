@@ -14,7 +14,7 @@ use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{Texture, WindowCanvas};
 use sdl2::surface::Surface;
 use std::cmp;
 use std::collections::HashSet;
@@ -449,5 +449,123 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       println!("Detecting Lag. Frame took {}ms too long", -(millis_to_sleep as i32));
     }
     last_frame_time = SystemTime::now();
+  }
+}
+
+fn show_text_line(
+  canvas: &mut WindowCanvas,
+  texture: &Texture,
+  text: &str,
+  position: (i32, i32),
+  letter_scale: u8,
+  letter_gap: f32,
+) {
+  let chars = text.chars().enumerate();
+  for (index, character) in chars {
+    let rekt = get_text_texture_rects(character);
+
+    let letter_width = rekt.width() * letter_scale as u32;
+    let letter_height = rekt.height() * letter_scale as u32;
+
+    canvas
+      .copy_ex(
+        &texture,
+        Some(rekt),
+        Some(Rect::new(
+          position.0 + (index as f32 * letter_width as f32 * letter_gap) as i32,
+          position.1,
+          letter_width as u32,
+          letter_height as u32,
+        )),
+        0.0,
+        None,
+        false,
+        false,
+      )
+      .unwrap();
+  }
+}
+
+fn get_text_texture_rects(character: char) -> Rect {
+  let char_width = 7;
+  let char_height = 9;
+  match character {
+    'A' => Rect::new(char_width as i32 * 0, 0, char_width, char_height),
+    'a' => Rect::new(char_width as i32 * 0, char_height as i32, char_width, char_height),
+    'B' => Rect::new(char_width as i32 * 1, 0, char_width, char_height),
+    'b' => Rect::new(char_width as i32 * 1, char_height as i32, char_width, char_height),
+    'C' => Rect::new(char_width as i32 * 2, 0, char_width, char_height),
+    'c' => Rect::new(char_width as i32 * 2, char_height as i32, char_width, char_height),
+    'D' => Rect::new(char_width as i32 * 3, 0, char_width, char_height),
+    'd' => Rect::new(char_width as i32 * 3, char_height as i32, char_width, char_height),
+    'E' => Rect::new(char_width as i32 * 4, 0, char_width, char_height),
+    'e' => Rect::new(char_width as i32 * 4, char_height as i32, char_width, char_height),
+    'F' => Rect::new(char_width as i32 * 5, 0, char_width, char_height),
+    'f' => Rect::new(char_width as i32 * 5, char_height as i32, char_width, char_height),
+    'G' => Rect::new(char_width as i32 * 6, 0, char_width, char_height),
+    'g' => Rect::new(char_width as i32 * 6, char_height as i32, char_width, char_height),
+    'H' => Rect::new(char_width as i32 * 7, 0, char_width, char_height),
+    'h' => Rect::new(char_width as i32 * 7, char_height as i32, char_width, char_height),
+    'I' => Rect::new(char_width as i32 * 8, 0, char_width, char_height),
+    'i' => Rect::new(char_width as i32 * 8, char_height as i32, char_width, char_height),
+    'J' => Rect::new(char_width as i32 * 9, 0, char_width, char_height),
+    'j' => Rect::new(char_width as i32 * 9, char_height as i32, char_width, char_height),
+    'K' => Rect::new(char_width as i32 * 10, 0, char_width, char_height),
+    'k' => Rect::new(char_width as i32 * 10, char_height as i32, char_width, char_height),
+    'L' => Rect::new(char_width as i32 * 11, 0, char_width, char_height),
+    'l' => Rect::new(char_width as i32 * 11, char_height as i32, char_width, char_height),
+    'M' => Rect::new(char_width as i32 * 12, 0, char_width, char_height),
+    'm' => Rect::new(char_width as i32 * 12, char_height as i32, char_width, char_height),
+    'N' => Rect::new(char_width as i32 * 13, 0, char_width, char_height),
+    'n' => Rect::new(char_width as i32 * 13, char_height as i32, char_width, char_height),
+    'O' => Rect::new(char_width as i32 * 14, 0, char_width, char_height),
+    'o' => Rect::new(char_width as i32 * 14, char_height as i32, char_width, char_height),
+    'P' => Rect::new(char_width as i32 * 15, 0, char_width, char_height),
+    'p' => Rect::new(char_width as i32 * 15, char_height as i32, char_width, char_height),
+    'Q' => Rect::new(char_width as i32 * 16, 0, char_width, char_height),
+    'q' => Rect::new(char_width as i32 * 16, char_height as i32, char_width, char_height),
+    'R' => Rect::new(char_width as i32 * 17, 0, char_width, char_height),
+    'r' => Rect::new(char_width as i32 * 17, char_height as i32, char_width, char_height),
+    'S' => Rect::new(char_width as i32 * 18, 0, char_width, char_height),
+    's' => Rect::new(char_width as i32 * 18, char_height as i32, char_width, char_height),
+    'T' => Rect::new(char_width as i32 * 19, 0, char_width, char_height),
+    't' => Rect::new(char_width as i32 * 19, char_height as i32, char_width, char_height),
+    'U' => Rect::new(char_width as i32 * 20, 0, char_width, char_height),
+    'u' => Rect::new(char_width as i32 * 20, char_height as i32, char_width, char_height),
+    'V' => Rect::new(char_width as i32 * 21, 0, char_width, char_height),
+    'v' => Rect::new(char_width as i32 * 21, char_height as i32, char_width, char_height),
+    'W' => Rect::new(char_width as i32 * 22, 0, char_width, char_height),
+    'w' => Rect::new(char_width as i32 * 22, char_height as i32, char_width, char_height),
+    'X' => Rect::new(char_width as i32 * 23, 0, char_width, char_height),
+    'x' => Rect::new(char_width as i32 * 23, char_height as i32, char_width, char_height),
+    'Y' => Rect::new(char_width as i32 * 24, 0, char_width, char_height),
+    'y' => Rect::new(char_width as i32 * 24, char_height as i32, char_width, char_height),
+    'Z' => Rect::new(char_width as i32 * 25, 0, char_width, char_height),
+    'z' => Rect::new(char_width as i32 * 25, char_height as i32, char_width, char_height),
+    '0' => Rect::new(char_width as i32 * 26, 0, char_width, char_height),
+    '1' => Rect::new(char_width as i32 * 27, 0, char_width, char_height),
+    '2' => Rect::new(char_width as i32 * 28, 0, char_width, char_height),
+    '3' => Rect::new(char_width as i32 * 29, 0, char_width, char_height),
+    '4' => Rect::new(char_width as i32 * 30, 0, char_width, char_height),
+    '5' => Rect::new(char_width as i32 * 31, 0, char_width, char_height),
+    '6' => Rect::new(char_width as i32 * 32, 0, char_width, char_height),
+    '7' => Rect::new(char_width as i32 * 33, 0, char_width, char_height),
+    '8' => Rect::new(char_width as i32 * 34, 0, char_width, char_height),
+    '9' => Rect::new(char_width as i32 * 35, 0, char_width, char_height),
+    ',' => Rect::new(char_width as i32 * 36, 0, char_width, char_height),
+    '.' => Rect::new(char_width as i32 * 37, 0, char_width, char_height),
+    '!' => Rect::new(char_width as i32 * 38, 0, char_width, char_height),
+    '?' => Rect::new(char_width as i32 * 39, 0, char_width, char_height),
+    ':' => Rect::new(char_width as i32 * 40, 0, char_width, char_height),
+    ';' => Rect::new(char_width as i32 * 41, 0, char_width, char_height),
+    '"' => Rect::new(char_width as i32 * 42, 0, char_width, char_height),
+    '{' => Rect::new(char_width as i32 * 43, 0, char_width, char_height),
+    '}' => Rect::new(char_width as i32 * 44, 0, char_width, char_height),
+    '[' => Rect::new(char_width as i32 * 45, 0, char_width, char_height),
+    ']' => Rect::new(char_width as i32 * 46, 0, char_width, char_height),
+    '(' => Rect::new(char_width as i32 * 47, 0, char_width, char_height),
+    ')' => Rect::new(char_width as i32 * 48, 0, char_width, char_height),
+    ' ' => Rect::new(0, 0, 0, 0),
+    _ => Rect::new(5000, 0, char_width, char_height),
   }
 }
