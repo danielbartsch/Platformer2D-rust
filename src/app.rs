@@ -291,13 +291,14 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           current_camera.position.1 = entity.y + 400.0;
         }));
       }
+      let sprint_factor = if pressed_keys.contains(&Keycode::Space) { 2.0 } else { 1.0 };
       if pressed_keys.contains(&Keycode::A) {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position.0 = entity.x - 400.0;
         }));
         entity_commands.push(Box::new(|entity| {
-          entity.velocity_x = -5.0;
-          if ticks % 300 > 150 {
+          entity.velocity_x = -5.0 * sprint_factor;
+          if ticks % (300.0 / sprint_factor) as u128 > (150.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((0, 0, 32, 32));
           } else {
             entity.sprite_sheet_rect = Some((32, 0, 32, 32));
@@ -308,8 +309,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           current_camera.position.0 = entity.x + 400.0;
         }));
         entity_commands.push(Box::new(|entity| {
-          entity.velocity_x = 5.0;
-          if ticks % 300 > 150 {
+          entity.velocity_x = 5.0 * sprint_factor;
+          if ticks % (300.0 / sprint_factor) as u128 > (150.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((64, 0, 32, 32));
           } else {
             entity.sprite_sheet_rect = Some((96, 0, 32, 32));
