@@ -445,8 +445,31 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       canvas.set_draw_color(original_color);
     }
 
-    show_text_line(&mut canvas, &text_texture, "DUDLEY, RUN!", (10, 10), 5, 1.1);
-    show_text_line(&mut canvas, &text_texture, "ACCUMULATORS NOT INCLUDED!", (10, 100), 2, 1.1);
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!(
+        "ENTITIES: {}",
+        level.background.len()
+          + level.indestructible.len()
+          + level.destructible.len()
+          + level.enemies.len()
+          + level.main_character.len()
+          + level.effects.len()
+          + level.foreground.len()
+      ),
+      (10, 10),
+      5,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("FRAME TIME MICROSECONDS: {}", last_frame_time.elapsed().unwrap().as_micros()),
+      (10, 100),
+      2,
+      1.1,
+    );
 
     canvas.present();
 
