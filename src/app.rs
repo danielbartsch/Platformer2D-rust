@@ -291,7 +291,14 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           current_camera.position.1 = entity.y + 400.0;
         }));
       }
-      let sprint_factor = if pressed_keys.contains(&Keycode::Space) { 2.0 } else { 1.0 };
+      let sprint_factor = if pressed_keys.contains(&Keycode::Space) {
+        camera_commands.push(Box::new(|_, current_camera| {
+          current_camera.set_zoom(0.7);
+        }));
+        2.0
+      } else {
+        1.0
+      };
       if pressed_keys.contains(&Keycode::A) {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position.0 = entity.x - 400.0;
