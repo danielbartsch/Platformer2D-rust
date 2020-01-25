@@ -480,16 +480,32 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("FRAME TIME MICROSECONDS: {}", last_frame_time.elapsed().unwrap().as_micros()),
-      (10, 100),
+      &format!("MICROS: {}", last_frame_time.elapsed().unwrap().as_micros()),
+      (10, 70),
       2,
       1.1,
     );
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("CAMERA SCALE: {}", camera.scale.0),
-      (10, 210),
+      &format!("SCALE : {}", camera.scale.0),
+      (10, 90),
+      2,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("CAMERA: X({})", camera.position.0),
+      (10, 110),
+      2,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("        Y({})", camera.position.1),
+      (10, 130),
       2,
       1.1,
     );
