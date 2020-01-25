@@ -310,7 +310,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         }));
       } else if pressed_keys.contains(&Keycode::H) {
         camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position.0 = entity.x + 300.0;
+          current_camera.position.0 = entity.x + 400.0;
         }));
         entity_commands.push(Box::new(|entity| {
           entity.velocity_x = 5.0 * sprint_factor;
