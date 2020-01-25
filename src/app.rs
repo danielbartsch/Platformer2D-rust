@@ -478,6 +478,14 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       2,
       1.1,
     );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("CAMERA SCALE: {}", camera.scale.0),
+      (10, 210),
+      2,
+      1.1,
+    );
 
     canvas.present();
 
