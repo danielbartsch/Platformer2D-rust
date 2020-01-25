@@ -496,12 +496,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     canvas.present();
 
-    let millis_to_sleep =
-      MAX_FRAME_TIME_MILLIS - last_frame_time.elapsed().unwrap().as_millis() as u64;
+    let millis_to_sleep: i64 =
+      MAX_FRAME_TIME_MILLIS as i64 - last_frame_time.elapsed().unwrap().as_millis() as i64;
     if millis_to_sleep > 0 {
-      ::std::thread::sleep(Duration::from_millis(millis_to_sleep));
+      ::std::thread::sleep(Duration::from_millis(millis_to_sleep as u64));
     } else {
-      println!("Detecting Lag. Frame took {}ms too long", -(millis_to_sleep as i32));
+      println!("Detecting Lag. Frame took {}ms too long", -millis_to_sleep);
     }
     last_frame_time = SystemTime::now();
   }
