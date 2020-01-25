@@ -46,12 +46,9 @@ impl Camera {
     self.restrict_zoom();
   }
   pub fn set_zoom(&mut self, scale: f32) {
-    let difference = (self.scale.0 / scale, self.scale.1 / scale);
     self.scale.0 = scale;
     self.scale.1 = scale;
     self.restrict_zoom();
-    self.position.0 *= difference.0;
-    self.position.1 *= difference.1;
   }
   pub fn to_target(&mut self, target_camera: &Self, rate: (f32, f32)) {
     self.position.0 += (target_camera.get_x() - self.get_x()) * rate.0;
