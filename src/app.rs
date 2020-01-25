@@ -298,26 +298,30 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         }));
         entity_commands.push(Box::new(|entity| {
           entity.velocity_x = -5.0 * sprint_factor;
-          if ticks % (300.0 / sprint_factor) as u128 > (200.0 / sprint_factor) as u128 {
+          if ticks % (300.0 / sprint_factor) as u128 > (225.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((0, 0, 32, 32));
-          } else if ticks % (300.0 / sprint_factor) as u128 > (100.0 / sprint_factor) as u128 {
+          } else if ticks % (300.0 / sprint_factor) as u128 > (150.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((32, 0, 32, 32));
-          } else {
+          } else if ticks % (300.0 / sprint_factor) as u128 > (75.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((64, 0, 32, 32));
+          } else {
+            entity.sprite_sheet_rect = Some((32, 0, 32, 32));
           }
         }));
       } else if pressed_keys.contains(&Keycode::H) {
         camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position.0 = entity.x + 400.0;
+          current_camera.position.0 = entity.x + 300.0;
         }));
         entity_commands.push(Box::new(|entity| {
           entity.velocity_x = 5.0 * sprint_factor;
-          if ticks % (300.0 / sprint_factor) as u128 > (200.0 / sprint_factor) as u128 {
+          if ticks % (300.0 / sprint_factor) as u128 > (225.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((96, 0, 32, 32));
-          } else if ticks % (300.0 / sprint_factor) as u128 > (100.0 / sprint_factor) as u128 {
+          } else if ticks % (300.0 / sprint_factor) as u128 > (150.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((128, 0, 32, 32));
-          } else {
+          } else if ticks % (300.0 / sprint_factor) as u128 > (75.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((160, 0, 32, 32));
+          } else {
+            entity.sprite_sheet_rect = Some((128, 0, 32, 32));
           }
         }));
       } else {
