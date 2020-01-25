@@ -418,37 +418,11 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       }
       canvas.set_draw_color(original_color);
     }
-
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!(
-        "Entities: {}",
-        level.background.len()
-          + level.indestructible.len()
-          + level.destructible.len()
-          + level.enemies.len()
-          + level.main_character.len()
-          + level.effects.len()
-          + level.foreground.len()
-      ),
-      (10, 10),
-      5,
-      1.1,
-    );
     show_text_line(
       &mut canvas,
       &text_texture,
       &format!("Micros: {}", last_frame_time.elapsed().unwrap().as_micros()),
-      (10, 70),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("Scale : {}", camera.scale.0),
-      (10, 90),
+      (10, 10),
       2,
       1.1,
     );
@@ -456,7 +430,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       &mut canvas,
       &text_texture,
       &format!("Camera: x({})", camera.position.0),
-      (10, 110),
+      (10, 30),
       2,
       1.1,
     );
@@ -464,7 +438,23 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       &mut canvas,
       &text_texture,
       &format!("        y({})", camera.position.1),
-      (10, 130),
+      (10, 50),
+      2,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("Char:   x({})", level.main_character[character_index].x),
+      (10, 70),
+      2,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("        y({})", level.main_character[character_index].y),
+      (10, 90),
       2,
       1.1,
     );
