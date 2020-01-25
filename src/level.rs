@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 pub struct Entity {
   pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
   pub bounciness: f32,
-  pub width: u16,
-  pub height: u16,
+  pub width: u32,
+  pub height: u32,
   pub x: f32,
   pub y: f32,
   pub velocity_x: f32,
@@ -17,7 +17,7 @@ pub struct Entity {
   pub parallax_y: f32,
 }
 impl Entity {
-  pub fn new(x: f32, y: f32, width: u16, height: u16) -> Self {
+  pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
     Self {
       sprite_sheet_rect: None,
       bounciness: 0.4,
@@ -70,29 +70,29 @@ impl Entity {
             && entity.x + entity.width as f32 > self.x + self.width as f32))
     })
   }
-  pub fn to_canvas_coordinates(&self, camera: &Camera, offset: (u16, u16)) -> (f32, f32, u16, u16) {
+  pub fn to_canvas_coordinates(&self, camera: &Camera, offset: (u32, u32)) -> (f32, f32, u32, u32) {
     (
       self.x * camera.get_scale_x() - camera.get_x() * (self.parallax_x * camera.get_scale_x())
         + offset.0 as f32,
       self.y * camera.get_scale_y() - camera.get_y() * (self.parallax_y * camera.get_scale_y())
         + offset.1 as f32,
-      (self.width as f32 * camera.get_scale_x()) as u16,
-      (self.height as f32 * camera.get_scale_y()) as u16,
+      (self.width as f32 * camera.get_scale_x()) as u32,
+      (self.height as f32 * camera.get_scale_y()) as u32,
     )
   }
 
   pub fn from_canvas_coordinates(
-    (x, y, width, height, parallax_x, parallax_y): (f32, f32, u16, u16, f32, f32),
+    (x, y, width, height, parallax_x, parallax_y): (f32, f32, u32, u32, f32, f32),
     camera: &Camera,
-    offset: (u16, u16),
+    offset: (u32, u32),
   ) -> Self {
     Entity::new(
       (x + camera.get_x() * parallax_x * camera.get_scale_x() - offset.0 as f32)
         / camera.get_scale_x(),
       (y + camera.get_y() * parallax_y * camera.get_scale_y() - offset.1 as f32)
         / camera.get_scale_y(),
-      (width as f32 / camera.get_scale_x()) as u16,
-      (height as f32 / camera.get_scale_y()) as u16,
+      (width as f32 / camera.get_scale_x()) as u32,
+      (height as f32 / camera.get_scale_y()) as u32,
     )
     .parallax_x(parallax_x)
     .parallax_y(parallax_y)
@@ -144,7 +144,7 @@ impl Entity {
       self.y += self.velocity_y;
     }
   }
-  pub fn is_inside_bounds(&self, position: (i32, i32), width: u16, height: u16) -> bool {
+  pub fn is_inside_bounds(&self, position: (i32, i32), width: u32, height: u32) -> bool {
     (self.x as i32 + self.width as i32 >= position.0
       && self.y as i32 + self.height as i32 >= position.1
       && self.x as i32 <= position.0 + width as i32

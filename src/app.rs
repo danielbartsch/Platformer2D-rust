@@ -194,13 +194,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                       (
                         mouse_selection_rect.unwrap().x() as f32,
                         mouse_selection_rect.unwrap().y() as f32,
-                        mouse_selection_rect.unwrap().width() as u16,
-                        mouse_selection_rect.unwrap().height() as u16,
+                        mouse_selection_rect.unwrap().width(),
+                        mouse_selection_rect.unwrap().height(),
                         1.0,
                         1.0,
                       ),
                       &camera,
-                      (camera.dimensions.0 / 2, camera.dimensions.1 / 2),
+                      ((camera.dimensions.0 / 2) as u32, (camera.dimensions.1 / 2) as u32),
                     ),
                   );
                   mouse_selection_rect = None;

@@ -63,8 +63,10 @@ impl Camera {
     texture: &Texture,
   ) {
     for entity in entities {
-      let (_x, _y, _width, _height) =
-        entity.to_canvas_coordinates(self, (self.dimensions.0 / 2, self.dimensions.1 / 2));
+      let (_x, _y, _width, _height) = entity.to_canvas_coordinates(
+        self,
+        ((self.dimensions.0 / 2) as u32, (self.dimensions.1 / 2) as u32),
+      );
       let (x, y, width, height) = (_x as i32, _y as i32, _width as u32, _height as u32);
       if x + width as i32 >= 0
         && y + height as i32 >= 0
