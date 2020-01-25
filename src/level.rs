@@ -104,49 +104,37 @@ impl Entity {
       ((self.x + intended_velocity.0 as f32) as i32, (self.y + intended_velocity.1 as f32) as i32);
 
     interactive_entities
-      .retain(|entity| entity.is_inside_bounds(intended_position.clone(), self.width, self.height));
+      .retain(|entity| entity.is_inside_bounds(intended_position, self.width, self.height));
 
     if interactive_entities.len() > 0 {
-      let left_collided_entity = interactive_entities
-        .clone()
-        .into_iter()
-        .find(|entity| entity.x >= self.x + self.width as f32);
-      if let Some(entity) = left_collided_entity {
-        self.x = entity.x - self.width as f32;
-        self.velocity_x = self.velocity_x * -1.0 * self.bounciness * entity.bounciness;
+      if let Some(right_to_self) =
+        interactive_entities.iter().find(|entity| entity.x >= self.x + self.width as f32)
+      {
+        self.x = right_to_self.x - self.width as f32;
+        self.velocity_x = self.velocity_x * -1.0 * self.bounciness * right_to_self.bounciness;
+      } else if let Some(left_to_self) =
+        interactive_entities.iter().find(|entity| entity.x + entity.width as f32 <= self.x)
+      {
+        self.x = left_to_self.x + left_to_self.width as f32;
+        self.velocity_x = self.velocity_x * -1.0 * self.bounciness * left_to_self.bounciness;
       } else {
-        let right_collided_entity = interactive_entities
-          .clone()
-          .into_iter()
-          .find(|entity| entity.x + entity.width as f32 <= self.x);
-        if let Some(entity) = right_collided_entity {
-          self.x = entity.x + entity.width as f32;
-          self.velocity_x = self.velocity_x * -1.0 * self.bounciness * entity.bounciness;
-        } else {
-          self.x = intended_position.0 as f32;
-          self.velocity_x = intended_velocity.0;
-        }
+        self.x = intended_position.0 as f32;
+        self.velocity_x = intended_velocity.0;
       }
 
-      let top_collided_entity = interactive_entities
-        .clone()
-        .into_iter()
-        .find(|entity| entity.y >= self.y + self.height as f32);
-      if let Some(entity) = top_collided_entity {
-        self.y = entity.y - self.height as f32;
-        self.velocity_y = self.velocity_y * -1.0 * self.bounciness * entity.bounciness;
+      if let Some(bottom_to_self) =
+        interactive_entities.iter().find(|entity| entity.y >= self.y + self.height as f32)
+      {
+        self.y = bottom_to_self.y - self.height as f32;
+        self.velocity_y = self.velocity_y * -1.0 * self.bounciness * bottom_to_self.bounciness;
+      } else if let Some(top_to_self) =
+        interactive_entities.iter().find(|entity| entity.y + entity.height as f32 <= self.y)
+      {
+        self.y = top_to_self.y + top_to_self.height as f32;
+        self.velocity_y = self.velocity_y * -1.0 * self.bounciness * top_to_self.bounciness;
       } else {
-        let bottom_collided_entity = interactive_entities
-          .clone()
-          .into_iter()
-          .find(|entity| entity.y + entity.height as f32 <= self.y);
-        if let Some(entity) = bottom_collided_entity {
-          self.y = entity.y + entity.height as f32;
-          self.velocity_y = self.velocity_y * -1.0 * self.bounciness * entity.bounciness;
-        } else {
-          self.y = intended_position.1 as f32;
-          self.velocity_y = intended_velocity.1;
-        }
+        self.y = intended_position.1 as f32;
+        self.velocity_y = intended_velocity.1;
       }
     } else {
       self.velocity_x += self.acceleration_x;
