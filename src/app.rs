@@ -10,6 +10,9 @@ mod editor_menu;
 #[path = "text.rs"]
 mod text;
 
+#[path = "ui.rs"]
+mod ui;
+
 use camera::Camera;
 use editor_menu::EditorMenu;
 use level::{Entity, Level};
@@ -28,6 +31,7 @@ use std::mem;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 use text::show_text_line;
+use ui::{draw_edit_menu, draw_pause_menu};
 
 static BACKGROUND_COLOR: Color = Color { r: 42, g: 43, b: 37, a: 0xff };
 
@@ -49,8 +53,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
   let mut canvas: WindowCanvas = window.into_canvas().build().unwrap();
   canvas.window_mut().set_minimum_size(350, 250).unwrap();
-  canvas.clear();
-  canvas.present();
 
   let mut event_pump = sdl_context.event_pump().unwrap();
 
@@ -382,31 +384,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     camera.draw_relatively(&mut canvas, &level.foreground, &entity_texture);
 
     if paused {
-      let original_color = canvas.draw_color();
-      canvas.set_draw_color(Color { r: 255, g: 60, b: 60, a: 0xff });
-
-      let stop_width = 8u32;
-      let stop_height = 20u32;
-      let bar_gap = 4i32;
-      let stop_1_bar_x = 30i32;
-      let stop_1_bar_y = 0i32;
-
-      canvas.fill_rect(Rect::new(stop_1_bar_x, stop_1_bar_y, stop_width, stop_height)).unwrap();
-      canvas
-        .fill_rect(Rect::new(
-          stop_1_bar_x + stop_width as i32 + bar_gap,
-          stop_1_bar_y,
-          stop_width,
-          stop_height,
-        ))
-        .unwrap();
-      canvas.set_draw_color(original_color);
+      draw_pause_menu(&mut canvas);
     }
 
     if edit_mode {
       let original_color = canvas.draw_color();
       canvas.set_draw_color(Color { r: 255, g: 60, b: 60, a: 0xff });
-
       // Crosshair to indicate center of frame
       canvas
         .draw_line(
@@ -421,35 +404,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         )
         .unwrap();
 
-      // Edit mode "logo"
-      canvas
-        .copy_ex(
-          &ui_texture,
-          Some(Rect::new(0, 0, 20, 20)),
-          Some(Rect::new(0, 0, 20, 20)),
-          0.0,
-          None,
-          false,
-          false,
-        )
-        .unwrap();
-
-      for (variant, rect, sprite_rect) in EditorMenu::get_variant_button_rects() {
-        canvas
-          .copy_ex(
-            &ui_texture,
-            Some(Rect::new(sprite_rect.0, sprite_rect.1, sprite_rect.2, sprite_rect.3)),
-            Some(rect),
-            0.0,
-            None,
-            false,
-            false,
-          )
-          .unwrap();
-        if mem::discriminant(&variant) == mem::discriminant(&editor_menu.variant) {
-          canvas.draw_rect(rect).unwrap();
-        }
-      }
+      draw_edit_menu(&mut canvas, &ui_texture, &editor_menu.variant);
 
       match mouse_click_position {
         Some((x, y)) => {
