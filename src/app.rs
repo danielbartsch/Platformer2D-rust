@@ -464,7 +464,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       &mut canvas,
       &text_texture,
       &format!(
-        "ENTITIES: {}",
+        "Entities: {}",
         level.background.len()
           + level.indestructible.len()
           + level.destructible.len()
@@ -480,7 +480,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("MICROS: {}", last_frame_time.elapsed().unwrap().as_micros()),
+      &format!("Micros: {}", last_frame_time.elapsed().unwrap().as_micros()),
       (10, 70),
       2,
       1.1,
@@ -488,7 +488,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("SCALE : {}", camera.scale.0),
+      &format!("Scale : {}", camera.scale.0),
       (10, 90),
       2,
       1.1,
@@ -496,7 +496,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("CAMERA: X({})", camera.position.0),
+      &format!("Camera: x({})", camera.position.0),
       (10, 110),
       2,
       1.1,
@@ -504,7 +504,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("        Y({})", camera.position.1),
+      &format!("        y({})", camera.position.1),
       (10, 130),
       2,
       1.1,
@@ -614,9 +614,13 @@ fn get_text_texture_rects(character: char) -> Rect {
     'Z' => Rect::new(char_width as i32 * 25, 0, char_width, char_height),
     'z' => Rect::new(char_width as i32 * 25, char_height as i32, char_width, char_height),
     '0' => Rect::new(char_width as i32 * 26, 0, char_width, char_height),
+    '+' => Rect::new(char_width as i32 * 26, char_height as i32, char_width, char_height),
     '1' => Rect::new(char_width as i32 * 27, 0, char_width, char_height),
+    '-' => Rect::new(char_width as i32 * 27, char_height as i32, char_width, char_height),
     '2' => Rect::new(char_width as i32 * 28, 0, char_width, char_height),
+    '/' => Rect::new(char_width as i32 * 28, char_height as i32, char_width, char_height),
     '3' => Rect::new(char_width as i32 * 29, 0, char_width, char_height),
+    '\\' => Rect::new(char_width as i32 * 29, char_height as i32, char_width, char_height),
     '4' => Rect::new(char_width as i32 * 30, 0, char_width, char_height),
     '5' => Rect::new(char_width as i32 * 31, 0, char_width, char_height),
     '6' => Rect::new(char_width as i32 * 32, 0, char_width, char_height),
