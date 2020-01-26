@@ -149,13 +149,6 @@ impl Entity {
       && self.y as i32 + self.height as i32 >= position.1
       && self.x as i32 <= position.0 + width as i32
       && self.y as i32 <= position.1 + height as i32)
-      || (
-        // for entities bigger than the rect
-        (self.width > width && self.height > height)
-          && ((self.x as i32) < position.0 && (self.y as i32) < position.1)
-          && (self.x as i32 + self.width as i32 > width as i32
-            && self.y as i32 + self.height as i32 > height as i32)
-      )
   }
 }
 #[derive(Serialize, Deserialize)]
