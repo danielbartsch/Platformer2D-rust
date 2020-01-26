@@ -100,8 +100,7 @@ impl Entity {
   pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
     let intended_velocity =
       (self.velocity_x + self.acceleration_x, self.velocity_y + self.acceleration_y);
-    let intended_position =
-      ((self.x + intended_velocity.0 as f32) as i32, (self.y + intended_velocity.1 as f32) as i32);
+    let intended_position = (self.x + intended_velocity.0, self.y + intended_velocity.1);
 
     interactive_entities
       .retain(|entity| entity.is_inside_bounds(intended_position, self.width, self.height));
@@ -118,7 +117,7 @@ impl Entity {
         self.x = left_to_self.x + left_to_self.width as f32;
         self.velocity_x = self.velocity_x * -1.0 * self.bounciness * left_to_self.bounciness;
       } else {
-        self.x = intended_position.0 as f32;
+        self.x = intended_position.0;
         self.velocity_x = intended_velocity.0;
       }
 
@@ -133,7 +132,7 @@ impl Entity {
         self.y = top_to_self.y + top_to_self.height as f32;
         self.velocity_y = self.velocity_y * -1.0 * self.bounciness * top_to_self.bounciness;
       } else {
-        self.y = intended_position.1 as f32;
+        self.y = intended_position.1;
         self.velocity_y = intended_velocity.1;
       }
     } else {
@@ -144,11 +143,11 @@ impl Entity {
       self.y += self.velocity_y;
     }
   }
-  pub fn is_inside_bounds(&self, position: (i32, i32), width: u32, height: u32) -> bool {
-    (self.x as i32 + self.width as i32 >= position.0
-      && self.y as i32 + self.height as i32 >= position.1
-      && self.x as i32 <= position.0 + width as i32
-      && self.y as i32 <= position.1 + height as i32)
+  pub fn is_inside_bounds(&self, position: (f32, f32), width: u32, height: u32) -> bool {
+    (self.x + self.width as f32 >= position.0
+      && self.y + self.height as f32 >= position.1
+      && self.x <= position.0 + width as f32
+      && self.y <= position.1 + height as f32)
   }
 }
 #[derive(Serialize, Deserialize)]
