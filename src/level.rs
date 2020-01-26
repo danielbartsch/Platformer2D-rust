@@ -136,11 +136,11 @@ impl Entity {
         self.velocity_y = intended_velocity.1;
       }
     } else {
-      self.velocity_x += self.acceleration_x;
-      self.velocity_y += self.acceleration_y;
+      self.velocity_x = intended_velocity.0;
+      self.velocity_y = intended_velocity.1;
 
-      self.x += self.velocity_x;
-      self.y += self.velocity_y;
+      self.x = intended_position.0;
+      self.y = intended_position.1;
     }
   }
   pub fn is_inside_bounds(&self, position: (f32, f32), width: u32, height: u32) -> bool {
