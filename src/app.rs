@@ -364,6 +364,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       command(&mut level.main_character[character_index], &mut target_camera);
     }
 
+    let physics_start_time = SystemTime::now();
     if !paused {
       for character in &mut level.main_character {
         character.next_state(entities.clone());
@@ -372,6 +373,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         character.next_state(entities.clone());
       }
     }
+    let physics_time = physics_start_time.elapsed().unwrap().as_micros();
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
@@ -421,7 +423,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("Micros: {}", last_frame_time.elapsed().unwrap().as_micros()),
+      &format!("Micros (Frame)  : {}", last_frame_time.elapsed().unwrap().as_micros()),
       (10, 10),
       2,
       1.1,
@@ -429,7 +431,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("Camera: x({})", camera.position.0),
+      &format!("Micros (Physics): {}", physics_time),
       (10, 30),
       2,
       1.1,
@@ -437,15 +439,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("        y({})", camera.position.1),
-      (10, 50),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("Char:   x({})", level.main_character[character_index].x),
+      &format!("Camera: x({})", camera.position.0),
       (10, 70),
       2,
       1.1,
@@ -453,8 +447,24 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("        y({})", level.main_character[character_index].y),
+      &format!("        y({})", camera.position.1),
       (10, 90),
+      2,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("Char:   x({})", level.main_character[character_index].x),
+      (10, 110),
+      2,
+      1.1,
+    );
+    show_text_line(
+      &mut canvas,
+      &text_texture,
+      &format!("        y({})", level.main_character[character_index].y),
+      (10, 130),
       2,
       1.1,
     );
