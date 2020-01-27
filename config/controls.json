@@ -1,0 +1,13 @@
+{
+    "jump_key": "N",
+    "left_key": "A",
+    "right_key": "H",
+    "up_key": "D",
+    "down_key": "S",
+    "sprint_key": "Space",
+    "shoot_key": "Y",
+    "zoom_in_key": "R",
+    "zoom_out_key": "Q",
+    "pause_key": "Escape",
+    "edit_mode_key": "Num0"
+}
