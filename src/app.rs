@@ -88,8 +88,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let mut camera = Camera::new((INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT));
   let mut target_camera = Camera::new((INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT));
 
-  let mut character_index = 0;
-
   let first_frame_time = SystemTime::now();
   let mut last_frame_time = first_frame_time.clone();
 
@@ -128,9 +126,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
               mouse_click_position = None;
             }
             paused = !paused;
-          }
-          Keycode::P => {
-            character_index = (character_index + 1) % level.main_character.len();
           }
           Keycode::Num0 => {
             edit_mode = !edit_mode;
@@ -354,14 +349,14 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       }
 
       for command in entity_commands {
-        command(&mut level.main_character[character_index]);
+        command(&mut level.main_character[0]);
       }
       for command in attack_commands {
-        command(&mut level.main_character[character_index], &mut level.effects);
+        command(&mut level.main_character[0], &mut level.effects);
       }
     }
     for command in camera_commands {
-      command(&mut level.main_character[character_index], &mut target_camera);
+      command(&mut level.main_character[0], &mut target_camera);
     }
 
     let physics_start_time = SystemTime::now();
@@ -455,7 +450,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("Char:   x({})", level.main_character[character_index].x),
+      &format!("Char:   x({})", level.main_character[0].x),
       (10, 110),
       2,
       1.1,
@@ -463,7 +458,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("        y({})", level.main_character[character_index].y),
+      &format!("        y({})", level.main_character[0].y),
       (10, 130),
       2,
       1.1,
