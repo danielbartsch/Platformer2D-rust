@@ -13,7 +13,11 @@ mod text;
 #[path = "ui.rs"]
 mod ui;
 
+#[path = "controls.rs"]
+mod controls;
+
 use camera::Camera;
+use controls::Controls;
 use editor_menu::EditorMenu;
 use level::{Entity, Level};
 use sdl2::event::{Event, WindowEvent};
@@ -60,6 +64,9 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
   let mut level =
     Level::deserialize(fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap());
+
+  let controls =
+    Controls::deserialize(fs::read_to_string("config/controls.json").unwrap()).to_sdl_keycodes();
 
   let texture_creator = canvas.texture_creator();
   let (entity_texture, ui_texture, text_texture) = {
@@ -120,17 +127,15 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         Event::Quit { .. } => {
           break 'running;
         }
-        Event::KeyDown { keycode: Some(key), .. } => match key {
-          Keycode::Escape => {
+        Event::KeyDown { keycode: Some(key), .. } => {
+          if key == controls.pause_key {
             if edit_mode {
               mouse_click_position = None;
             }
             paused = !paused;
-          }
-          Keycode::Num0 => {
+          } else if key == controls.edit_mode_key {
             edit_mode = !edit_mode;
-          }
-          Keycode::S => {
+          } else if key == Keycode::S {
             if pressed_keys.contains(&Keycode::LCtrl) || pressed_keys.contains(&Keycode::RCtrl) {
               let file_path = {
                 let file_name =
@@ -151,8 +156,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
               };
             }
           }
-          _ => {}
-        },
+        }
         Event::Window { win_event: WindowEvent::Resized(width, height), .. } => {
           camera.dimensions = (width as u16, height as u16);
         }
@@ -219,29 +223,29 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     entities.extend(&level.enemies);
 
     if has_free_camera {
-      if pressed_keys.contains(&Keycode::D) {
+      if pressed_keys.contains(&controls.up_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.1 -= 25.0 / current_camera.scale.1;
         }));
-      } else if pressed_keys.contains(&Keycode::S) {
+      } else if pressed_keys.contains(&controls.down_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.1 += 25.0 / current_camera.scale.1;
         }));
       }
-      if pressed_keys.contains(&Keycode::A) {
+      if pressed_keys.contains(&controls.left_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.0 -= 25.0 / current_camera.scale.0;
         }));
-      } else if pressed_keys.contains(&Keycode::H) {
+      } else if pressed_keys.contains(&controls.right_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.position.0 += 25.0 / current_camera.scale.1;
         }));
       }
-      if pressed_keys.contains(&Keycode::Q) {
+      if pressed_keys.contains(&controls.zoom_in_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.zoom(1.03);
         }));
-      } else if pressed_keys.contains(&Keycode::R) {
+      } else if pressed_keys.contains(&controls.zoom_out_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.zoom(0.97);
         }));
@@ -254,7 +258,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       let mut entity_commands: Vec<Box<dyn Fn(&mut Entity)>> = vec![];
       let mut attack_commands: Vec<Box<dyn Fn(&mut Entity, &mut Vec<Entity>)>> = vec![];
 
-      if pressed_keys.contains(&Keycode::Y) {
+      if pressed_keys.contains(&controls.shoot_key) {
         attack_commands.push(Box::new(|entity, level_container| {
           let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
           level_container.push(
@@ -266,7 +270,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           );
         }));
       }
-      if pressed_keys.contains(&Keycode::N) {
+      if pressed_keys.contains(&controls.jump_key) {
         entity_commands.push(Box::new(|entity| {
           if entity.is_touching_ground(entities.clone()) {
             entity.velocity_y = -8.0;
@@ -283,16 +287,16 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           entity.acceleration_y = 1.0;
         }));
       }
-      if pressed_keys.contains(&Keycode::D) {
+      if pressed_keys.contains(&controls.up_key) {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position.1 = entity.y - 400.0;
         }));
-      } else if pressed_keys.contains(&Keycode::S) {
+      } else if pressed_keys.contains(&controls.down_key) {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position.1 = entity.y + 400.0;
         }));
       }
-      let sprint_factor = if pressed_keys.contains(&Keycode::Space) {
+      let sprint_factor = if pressed_keys.contains(&controls.sprint_key) {
         camera_commands.push(Box::new(|_, current_camera| {
           current_camera.set_zoom(0.7);
         }));
@@ -300,7 +304,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       } else {
         1.0
       };
-      if pressed_keys.contains(&Keycode::A) {
+      if pressed_keys.contains(&controls.left_key) {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position.0 = entity.x - 400.0;
         }));
@@ -316,7 +320,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             entity.sprite_sheet_rect = Some((32, 0, 32, 32));
           }
         }));
-      } else if pressed_keys.contains(&Keycode::H) {
+      } else if pressed_keys.contains(&controls.right_key) {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position.0 = entity.x + 400.0;
         }));
@@ -337,10 +341,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           entity.velocity_x *= 0.8;
         }));
       }
-      if !pressed_keys.contains(&Keycode::A)
-        && !pressed_keys.contains(&Keycode::S)
-        && !pressed_keys.contains(&Keycode::H)
-        && !pressed_keys.contains(&Keycode::D)
+      if !pressed_keys.contains(&controls.right_key)
+        && !pressed_keys.contains(&controls.down_key)
+        && !pressed_keys.contains(&controls.left_key)
+        && !pressed_keys.contains(&controls.up_key)
       {
         camera_commands.push(Box::new(|entity, current_camera| {
           current_camera.position =
