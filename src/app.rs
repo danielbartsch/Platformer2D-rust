@@ -122,20 +122,20 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         Event::Quit { .. } => {
           break 'running;
         }
-        Event::KeyDown { keycode, .. } => match keycode {
-          Some(Keycode::Escape) => {
+        Event::KeyDown { keycode: Some(key), .. } => match key {
+          Keycode::Escape => {
             if edit_mode {
               mouse_click_position = None;
             }
             paused = !paused;
           }
-          Some(Keycode::P) => {
+          Keycode::P => {
             character_index = (character_index + 1) % level.main_character.len();
           }
-          Some(Keycode::Num0) => {
+          Keycode::Num0 => {
             edit_mode = !edit_mode;
           }
-          Some(Keycode::S) => {
+          Keycode::S => {
             if pressed_keys.contains(&Keycode::LCtrl) || pressed_keys.contains(&Keycode::RCtrl) {
               let file_path = {
                 let file_name =
