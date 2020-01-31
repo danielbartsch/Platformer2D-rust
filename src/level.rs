@@ -98,49 +98,40 @@ impl Entity {
     .parallax_y(parallax_y)
   }
   pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
-    let intended_velocity =
-      (self.velocity_x + self.acceleration_x, self.velocity_y + self.acceleration_y);
-    let intended_position = (self.x + intended_velocity.0, self.y + intended_velocity.1);
+    self.velocity_x += self.acceleration_x;
+    self.velocity_y += self.acceleration_y;
+
+    let (x_before, y_before) = (self.x, self.y);
+
+    self.x += self.velocity_x;
+    self.y += self.velocity_y;
 
     interactive_entities
-      .retain(|entity| entity.is_inside_bounds(intended_position, self.width, self.height));
+      .retain(|entity| entity.is_inside_bounds((self.x, self.y), self.width, self.height));
 
     if interactive_entities.len() > 0 {
       if let Some(right_to_self) =
-        interactive_entities.iter().find(|entity| entity.x >= self.x + self.width as f32)
+        interactive_entities.iter().find(|entity| entity.x >= x_before + self.width as f32)
       {
         self.x = right_to_self.x - self.width as f32;
-        self.velocity_x = self.velocity_x * -1.0 * self.bounciness * right_to_self.bounciness;
+        self.velocity_x *= -1.0 * self.bounciness * right_to_self.bounciness;
       } else if let Some(left_to_self) =
-        interactive_entities.iter().find(|entity| entity.x + entity.width as f32 <= self.x)
+        interactive_entities.iter().find(|entity| entity.x + entity.width as f32 <= x_before)
       {
         self.x = left_to_self.x + left_to_self.width as f32;
-        self.velocity_x = self.velocity_x * -1.0 * self.bounciness * left_to_self.bounciness;
-      } else {
-        self.x = intended_position.0;
-        self.velocity_x = intended_velocity.0;
+        self.velocity_x *= -1.0 * self.bounciness * left_to_self.bounciness;
       }
-
       if let Some(bottom_to_self) =
-        interactive_entities.iter().find(|entity| entity.y >= self.y + self.height as f32)
+        interactive_entities.iter().find(|entity| entity.y >= y_before + self.height as f32)
       {
         self.y = bottom_to_self.y - self.height as f32;
-        self.velocity_y = self.velocity_y * -1.0 * self.bounciness * bottom_to_self.bounciness;
+        self.velocity_y *= -1.0 * self.bounciness * bottom_to_self.bounciness;
       } else if let Some(top_to_self) =
-        interactive_entities.iter().find(|entity| entity.y + entity.height as f32 <= self.y)
+        interactive_entities.iter().find(|entity| entity.y + entity.height as f32 <= y_before)
       {
         self.y = top_to_self.y + top_to_self.height as f32;
-        self.velocity_y = self.velocity_y * -1.0 * self.bounciness * top_to_self.bounciness;
-      } else {
-        self.y = intended_position.1;
-        self.velocity_y = intended_velocity.1;
+        self.velocity_y *= -1.0 * self.bounciness * top_to_self.bounciness;
       }
-    } else {
-      self.velocity_x = intended_velocity.0;
-      self.velocity_y = intended_velocity.1;
-
-      self.x = intended_position.0;
-      self.y = intended_position.1;
     }
   }
   pub fn is_inside_bounds(&self, position: (f32, f32), width: u32, height: u32) -> bool {
