@@ -61,7 +61,7 @@ impl Entity {
     self.bounciness = bounciness;
     self
   }
-  pub fn is_touching_ground(&mut self, interactive_entities: Vec<&Self>) -> bool {
+  pub fn is_touching_ground(&self, interactive_entities: Vec<&Self>) -> bool {
     let lower_end = self.y as i32 + self.height as i32;
     interactive_entities.iter().any(|entity| {
       entity.y as i32 == lower_end
