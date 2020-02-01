@@ -107,7 +107,7 @@ impl Entity {
     self.y += self.velocity_y;
 
     interactive_entities
-      .retain(|entity| entity.is_inside_bounds((self.x, self.y), self.width, self.height));
+      .retain(|entity| entity.is_inside_bounds(self.x, self.y, self.width, self.height));
 
     if interactive_entities.len() > 0 {
       if let Some(right_to_self) =
@@ -134,11 +134,12 @@ impl Entity {
       }
     }
   }
-  pub fn is_inside_bounds(&self, position: (f32, f32), width: u32, height: u32) -> bool {
-    (self.x + self.width as f32 >= position.0
-      && self.y + self.height as f32 >= position.1
-      && self.x <= position.0 + width as f32
-      && self.y <= position.1 + height as f32)
+
+  pub fn is_inside_bounds(&self, x: f32, y: f32, width: u32, height: u32) -> bool {
+    (self.x + self.width as f32 >= x
+      && self.y + self.height as f32 >= y
+      && self.x <= x + width as f32
+      && self.y <= y + height as f32)
   }
 }
 #[derive(Serialize, Deserialize)]
