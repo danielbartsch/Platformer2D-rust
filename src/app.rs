@@ -372,6 +372,15 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       for character in &mut level.effects {
         character.next_state(&entities);
       }
+      for character in &mut level.destructible {
+        character.next_state(&entities);
+      }
+      for character in &mut level.indestructible {
+        character.next_state(&entities);
+      }
+      for character in &mut level.enemies {
+        character.next_state(&entities);
+      }
     }
     let physics_time = physics_start_time.elapsed().unwrap().as_micros();
 
