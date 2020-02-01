@@ -61,7 +61,7 @@ impl Entity {
     self.bounciness = bounciness;
     self
   }
-  pub fn is_touching_ground(&self, interactive_entities: Vec<&Self>) -> bool {
+  pub fn is_touching_ground(&self, interactive_entities: &Vec<Self>) -> bool {
     let lower_end = self.y as i32 + self.height as i32;
     interactive_entities.iter().any(|entity| {
       entity.y as i32 == lower_end
@@ -97,44 +97,45 @@ impl Entity {
     .parallax_x(parallax_x)
     .parallax_y(parallax_y)
   }
-  pub fn next_state(&mut self, mut interactive_entities: Vec<&Self>) {
+  pub fn next_state(&mut self, interactive_entities: &Vec<Self>) {
     self.velocity_x += self.acceleration_x;
     self.velocity_y += self.acceleration_y;
 
-    let (x_before, y_before) = (self.x, self.y);
+    let (x_before, y_before, width, height) = (self.x, self.y, self.width, self.height);
 
     self.x += self.velocity_x;
     self.y += self.velocity_y;
 
-    interactive_entities
-      .retain(|entity| entity.is_inside_bounds(self.x, self.y, self.width, self.height));
+    let (x_after, y_after) = (self.x, self.y);
 
-    if interactive_entities.len() > 0 {
-      if let Some(right_to_self) =
-        interactive_entities.iter().find(|entity| entity.x >= x_before + self.width as f32)
-      {
-        self.x = right_to_self.x - self.width as f32;
-        self.velocity_x *= -1.0 * self.bounciness * right_to_self.bounciness;
-      } else if let Some(left_to_self) =
-        interactive_entities.iter().find(|entity| entity.x + entity.width as f32 <= x_before)
-      {
-        self.x = left_to_self.x + left_to_self.width as f32;
-        self.velocity_x *= -1.0 * self.bounciness * left_to_self.bounciness;
-      }
-      if let Some(bottom_to_self) =
-        interactive_entities.iter().find(|entity| entity.y >= y_before + self.height as f32)
-      {
-        self.y = bottom_to_self.y - self.height as f32;
-        self.velocity_y *= -1.0 * self.bounciness * bottom_to_self.bounciness;
-      } else if let Some(top_to_self) =
-        interactive_entities.iter().find(|entity| entity.y + entity.height as f32 <= y_before)
-      {
-        self.y = top_to_self.y + top_to_self.height as f32;
-        self.velocity_y *= -1.0 * self.bounciness * top_to_self.bounciness;
-      }
+    let collided_entities = interactive_entities
+      .iter()
+      .filter(|&entity| entity.is_inside_bounds(x_after, y_after, width, height))
+      .collect::<Vec<_>>();
+
+    if let Some(right_to_self) =
+      collided_entities.iter().find(|entity| entity.x >= x_before + width as f32)
+    {
+      self.x = right_to_self.x - width as f32;
+      self.velocity_x *= -1.0 * self.bounciness * right_to_self.bounciness;
+    } else if let Some(left_to_self) =
+      collided_entities.iter().find(|entity| entity.x + entity.width as f32 <= x_before)
+    {
+      self.x = left_to_self.x + left_to_self.width as f32;
+      self.velocity_x *= -1.0 * self.bounciness * left_to_self.bounciness;
+    }
+    if let Some(bottom_to_self) =
+      collided_entities.iter().find(|entity| entity.y >= y_before + height as f32)
+    {
+      self.y = bottom_to_self.y - height as f32;
+      self.velocity_y *= -1.0 * self.bounciness * bottom_to_self.bounciness;
+    } else if let Some(top_to_self) =
+      collided_entities.iter().find(|entity| entity.y + entity.height as f32 <= y_before)
+    {
+      self.y = top_to_self.y + top_to_self.height as f32;
+      self.velocity_y *= -1.0 * self.bounciness * top_to_self.bounciness;
     }
   }
-
   pub fn is_inside_bounds(&self, x: f32, y: f32, width: u32, height: u32) -> bool {
     (self.x + self.width as f32 >= x
       && self.y + self.height as f32 >= y

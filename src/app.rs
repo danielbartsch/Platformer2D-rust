@@ -44,6 +44,10 @@ static MAX_FRAME_TIME_MILLIS: u64 = 16;
 static INITIAL_WINDOW_WIDTH: u16 = 900;
 static INITIAL_WINDOW_HEIGHT: u16 = 600;
 
+fn concatenate(a: &[Entity], b: &[Entity], c: &[Entity]) -> Vec<Entity> {
+  [a, b, c].concat()
+}
+
 pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let sdl_context = sdl2::init().unwrap();
   let video_subsystem = sdl_context.video().unwrap();
@@ -217,10 +221,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       }
     }
 
-    let mut entities = vec![];
-    entities.extend(&level.indestructible);
-    entities.extend(&level.destructible);
-    entities.extend(&level.enemies);
+    let entities = concatenate(&level.indestructible, &level.destructible, &level.enemies);
 
     if has_free_camera {
       if pressed_keys.contains(&controls.up_key) {
@@ -272,7 +273,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       }
       if pressed_keys.contains(&controls.jump_key) {
         entity_commands.push(Box::new(|entity| {
-          if entity.is_touching_ground(entities.clone()) {
+          if entity.is_touching_ground(&entities) {
             entity.velocity_y = -8.0;
             entity.acceleration_y = 0.1;
           }
@@ -366,10 +367,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     let physics_start_time = SystemTime::now();
     if !paused {
       for character in &mut level.main_character {
-        character.next_state(entities.clone());
+        character.next_state(&entities);
       }
       for character in &mut level.effects {
-        character.next_state(entities.clone());
+        character.next_state(&entities);
       }
     }
     let physics_time = physics_start_time.elapsed().unwrap().as_micros();
