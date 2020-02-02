@@ -2262,6 +2262,7 @@
                 32,
                 32
             ],
+            "aim_direction": 0.0,
             "bounciness": 0.4,
             "width": 40,
             "height": 40,

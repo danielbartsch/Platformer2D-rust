@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Entity {
   pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
+  pub aim_direction: Option<f32>,
   pub bounciness: f32,
   pub width: u32,
   pub height: u32,
@@ -20,6 +21,7 @@ impl Entity {
   pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
     Self {
       sprite_sheet_rect: None,
+      aim_direction: None,
       bounciness: 0.4,
       width,
       height,

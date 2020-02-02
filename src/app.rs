@@ -261,14 +261,15 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
       if pressed_keys.contains(&controls.shoot_key) {
         attack_commands.push(Box::new(|entity, level_container| {
-          let pseudo_random = last_frame_time.elapsed().unwrap().as_nanos() as f32;
-          level_container.push(
-            Entity::new(entity.x, entity.y, 10, 10)
-              .velocity_x(entity.velocity_x * (2.2 + pseudo_random.cos()))
-              .velocity_y(entity.velocity_y * (2.2 + pseudo_random.sin()))
-              .acceleration_y(0.01)
-              .bounciness(1.1),
-          );
+          if let Some(aim_direction) = entity.aim_direction {
+            let (x, y) = (aim_direction.cos(), aim_direction.sin());
+            level_container.push(
+              Entity::new(entity.x, entity.y, 10, 10)
+                .velocity_x(x * 20.0)
+                .velocity_y(y * 20.0)
+                .bounciness(2.5),
+            );
+          }
         }));
       }
       if pressed_keys.contains(&controls.jump_key) {
@@ -289,12 +290,16 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         }));
       }
       if pressed_keys.contains(&controls.up_key) {
-        camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position.1 = entity.y - 400.0;
+        entity_commands.push(Box::new(|entity| {
+          if let Some(aim_direction) = entity.aim_direction {
+            entity.aim_direction = Some(aim_direction - 3.1415926535 / 30.0);
+          }
         }));
       } else if pressed_keys.contains(&controls.down_key) {
-        camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position.1 = entity.y + 400.0;
+        entity_commands.push(Box::new(|entity| {
+          if let Some(aim_direction) = entity.aim_direction {
+            entity.aim_direction = Some(aim_direction + 3.1415926535 / 30.0);
+          }
         }));
       }
       let sprint_factor = if pressed_keys.contains(&controls.sprint_key) {
