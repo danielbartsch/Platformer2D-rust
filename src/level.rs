@@ -41,14 +41,6 @@ impl Entity {
     self.velocity.1 = velocity_y;
     self
   }
-  pub fn acceleration_x(mut self, acceleration_x: f32) -> Self {
-    self.acceleration.0 = acceleration_x;
-    self
-  }
-  pub fn acceleration_y(mut self, acceleration_y: f32) -> Self {
-    self.acceleration.1 = acceleration_y;
-    self
-  }
   pub fn bounciness(mut self, bounciness: f32) -> Self {
     self.bounciness = bounciness;
     self
@@ -66,14 +58,12 @@ impl Entity {
   }
   pub fn to_canvas_coordinates(&self, camera: &Camera, offset: (u32, u32)) -> (f32, f32, u32, u32) {
     (
-      self.position.0 * camera.get_scale_x()
-        - camera.get_x() * (self.parallax.0 * camera.get_scale_x())
+      self.position.0 * camera.scale.0 - camera.position.0 * (self.parallax.0 * camera.scale.0)
         + offset.0 as f32,
-      self.position.1 * camera.get_scale_y()
-        - camera.get_y() * (self.parallax.1 * camera.get_scale_y())
+      self.position.1 * camera.scale.1 - camera.position.1 * (self.parallax.1 * camera.scale.1)
         + offset.1 as f32,
-      (self.dimensions.0 as f32 * camera.get_scale_x()) as u32,
-      (self.dimensions.1 as f32 * camera.get_scale_y()) as u32,
+      (self.dimensions.0 as f32 * camera.scale.0) as u32,
+      (self.dimensions.1 as f32 * camera.scale.1) as u32,
     )
   }
 
@@ -83,12 +73,10 @@ impl Entity {
     offset: (u32, u32),
   ) -> Self {
     Entity::new(
-      (x + camera.get_x() * parallax_x * camera.get_scale_x() - offset.0 as f32)
-        / camera.get_scale_x(),
-      (y + camera.get_y() * parallax_y * camera.get_scale_y() - offset.1 as f32)
-        / camera.get_scale_y(),
-      (width as f32 / camera.get_scale_x()) as u32,
-      (height as f32 / camera.get_scale_y()) as u32,
+      (x + camera.position.0 * parallax_x * camera.scale.0 - offset.0 as f32) / camera.scale.0,
+      (y + camera.position.1 * parallax_y * camera.scale.1 - offset.1 as f32) / camera.scale.1,
+      (width as f32 / camera.scale.0) as u32,
+      (height as f32 / camera.scale.1) as u32,
     )
     .parallax_x(parallax_x)
     .parallax_y(parallax_y)
@@ -97,49 +85,48 @@ impl Entity {
     self.velocity.0 += self.acceleration.0;
     self.velocity.1 += self.acceleration.1;
 
-    let (x_before, y_before, width, height) =
-      (self.position.0, self.position.1, self.dimensions.0, self.dimensions.1);
+    let position_before = self.position;
 
     self.position.0 += self.velocity.0;
     self.position.1 += self.velocity.1;
 
-    let (x_after, y_after) = (self.position.0, self.position.1);
-
     let collided_entities = interactive_entities
       .iter()
-      .filter(|&entity| entity.is_inside_bounds(x_after, y_after, width, height))
+      .filter(|&entity| entity.is_inside_entity(self))
       .collect::<Vec<_>>();
 
-    if let Some(right_to_self) =
-      collided_entities.iter().find(|entity| entity.position.0 >= x_before + width as f32)
+    if let Some(right_to_self) = collided_entities
+      .iter()
+      .find(|entity| entity.position.0 >= position_before.0 + self.dimensions.0 as f32)
     {
-      self.position.0 = right_to_self.position.0 - width as f32;
+      self.position.0 = right_to_self.position.0 - self.dimensions.0 as f32;
       self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
     } else if let Some(left_to_self) = collided_entities
       .iter()
-      .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= x_before)
+      .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= position_before.0)
     {
       self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
       self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
     }
-    if let Some(bottom_to_self) =
-      collided_entities.iter().find(|entity| entity.position.1 >= y_before + height as f32)
+    if let Some(bottom_to_self) = collided_entities
+      .iter()
+      .find(|entity| entity.position.1 >= position_before.1 + self.dimensions.1 as f32)
     {
-      self.position.1 = bottom_to_self.position.1 - height as f32;
+      self.position.1 = bottom_to_self.position.1 - self.dimensions.1 as f32;
       self.velocity.1 *= -1.0 * self.bounciness * bottom_to_self.bounciness;
     } else if let Some(top_to_self) = collided_entities
       .iter()
-      .find(|entity| entity.position.1 + entity.dimensions.1 as f32 <= y_before)
+      .find(|entity| entity.position.1 + entity.dimensions.1 as f32 <= position_before.1)
     {
       self.position.1 = top_to_self.position.1 + top_to_self.dimensions.1 as f32;
       self.velocity.1 *= -1.0 * self.bounciness * top_to_self.bounciness;
     }
   }
-  pub fn is_inside_bounds(&self, x: f32, y: f32, width: u32, height: u32) -> bool {
-    (self.position.0 + self.dimensions.0 as f32 >= x
-      && self.position.1 + self.dimensions.1 as f32 >= y
-      && self.position.0 <= x + width as f32
-      && self.position.1 <= y + height as f32)
+  pub fn is_inside_entity(&self, entity: &Entity) -> bool {
+    (self.position.0 + self.dimensions.0 as f32 >= entity.position.0
+      && self.position.1 + self.dimensions.1 as f32 >= entity.position.1
+      && self.position.0 <= entity.position.0 + entity.dimensions.0 as f32
+      && self.position.1 <= entity.position.1 + entity.dimensions.1 as f32)
   }
 }
 #[derive(Serialize, Deserialize)]

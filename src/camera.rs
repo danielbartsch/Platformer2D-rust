@@ -14,18 +14,6 @@ impl Camera {
   pub fn new(dimensions: (u16, u16)) -> Self {
     Self { position: (0.0, 0.0), scale: (1.0, 1.0), dimensions }
   }
-  pub fn get_x(&self) -> f32 {
-    self.position.0
-  }
-  pub fn get_y(&self) -> f32 {
-    self.position.1
-  }
-  pub fn get_scale_x(&self) -> f32 {
-    self.scale.0
-  }
-  pub fn get_scale_y(&self) -> f32 {
-    self.scale.1
-  }
   fn restrict_zoom(&mut self) {
     if self.scale.0 > 25.0 {
       self.scale.0 = 25.0
@@ -51,10 +39,10 @@ impl Camera {
     self.restrict_zoom();
   }
   pub fn to_target(&mut self, target_camera: &Self, rate: (f32, f32)) {
-    self.position.0 += (target_camera.get_x() - self.get_x()) * rate.0;
-    self.position.1 += (target_camera.get_y() - self.get_y()) * rate.1;
-    self.scale.0 += (target_camera.get_scale_x() - self.get_scale_x()) * rate.0;
-    self.scale.1 += (target_camera.get_scale_y() - self.get_scale_y()) * rate.1;
+    self.position.0 += (target_camera.position.0 - self.position.0) * rate.0;
+    self.position.1 += (target_camera.position.1 - self.position.1) * rate.1;
+    self.scale.0 += (target_camera.scale.0 - self.scale.0) * rate.0;
+    self.scale.1 += (target_camera.scale.1 - self.scale.1) * rate.1;
   }
   pub fn draw_relatively(
     &self,
