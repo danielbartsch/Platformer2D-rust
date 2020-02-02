@@ -264,7 +264,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           if let Some(aim_direction) = entity.aim_direction {
             let (x, y) = (aim_direction.cos(), aim_direction.sin());
             level_container.push(
-              Entity::new(entity.x, entity.y, 10, 10)
+              Entity::new(entity.position.0, entity.position.1, 10, 10)
                 .velocity_x(x * 20.0)
                 .velocity_y(y * 20.0)
                 .bounciness(2.5),
@@ -275,18 +275,18 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       if pressed_keys.contains(&controls.jump_key) {
         entity_commands.push(Box::new(|entity| {
           if entity.is_touching_ground(&entities) {
-            entity.velocity_y = -8.0;
-            entity.acceleration_y = 0.1;
+            entity.velocity.1 = -8.0;
+            entity.acceleration.1 = 0.1;
           }
-          if entity.velocity_y < 0.0 {
-            entity.acceleration_y += 0.01;
+          if entity.velocity.1 < 0.0 {
+            entity.acceleration.1 += 0.01;
           } else {
-            entity.acceleration_y += 0.002;
+            entity.acceleration.1 += 0.002;
           }
         }));
       } else {
         entity_commands.push(Box::new(|entity| {
-          entity.acceleration_y = 1.0;
+          entity.acceleration.1 = 1.0;
         }));
       }
       if pressed_keys.contains(&controls.up_key) {
@@ -312,10 +312,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       };
       if pressed_keys.contains(&controls.left_key) {
         camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position.0 = entity.x - 400.0;
+          current_camera.position.0 = entity.position.0 - 400.0;
         }));
         entity_commands.push(Box::new(|entity| {
-          entity.velocity_x = -5.0 * sprint_factor;
+          entity.velocity.0 = -5.0 * sprint_factor;
           if ticks % (300.0 / sprint_factor) as u128 > (225.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((0, 0, 32, 32));
           } else if ticks % (300.0 / sprint_factor) as u128 > (150.0 / sprint_factor) as u128 {
@@ -328,10 +328,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         }));
       } else if pressed_keys.contains(&controls.right_key) {
         camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position.0 = entity.x + 400.0;
+          current_camera.position.0 = entity.position.0 + 400.0;
         }));
         entity_commands.push(Box::new(|entity| {
-          entity.velocity_x = 5.0 * sprint_factor;
+          entity.velocity.0 = 5.0 * sprint_factor;
           if ticks % (300.0 / sprint_factor) as u128 > (225.0 / sprint_factor) as u128 {
             entity.sprite_sheet_rect = Some((96, 0, 32, 32));
           } else if ticks % (300.0 / sprint_factor) as u128 > (150.0 / sprint_factor) as u128 {
@@ -344,7 +344,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         }));
       } else {
         entity_commands.push(Box::new(|entity| {
-          entity.velocity_x *= 0.8;
+          entity.velocity.0 *= 0.8;
         }));
       }
       if !pressed_keys.contains(&controls.right_key)
@@ -353,8 +353,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         && !pressed_keys.contains(&controls.up_key)
       {
         camera_commands.push(Box::new(|entity, current_camera| {
-          current_camera.position =
-            (entity.x + entity.width as f32 / 2.0, entity.y + entity.height as f32 / 2.0);
+          current_camera.position = (
+            entity.position.0 + entity.dimensions.0 as f32 / 2.0,
+            entity.position.1 + entity.dimensions.1 as f32 / 2.0,
+          );
         }));
       }
 
@@ -453,7 +455,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("Camera: x({})", camera.position.0),
+      &format!("Camera: x{:?}", camera.position),
       (10, 70),
       2,
       1.1,
@@ -461,24 +463,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("        y({})", camera.position.1),
-      (10, 90),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("Char:   x({})", level.main_character[0].x),
+      &format!("Char:   x{:?}", level.main_character[0].position),
       (10, 110),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("        y({})", level.main_character[0].y),
-      (10, 130),
       2,
       1.1,
     );

@@ -6,16 +6,11 @@ pub struct Entity {
   pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
   pub aim_direction: Option<f32>,
   pub bounciness: f32,
-  pub width: u32,
-  pub height: u32,
-  pub x: f32,
-  pub y: f32,
-  pub velocity_x: f32,
-  pub velocity_y: f32,
-  pub acceleration_x: f32,
-  pub acceleration_y: f32,
-  pub parallax_x: f32,
-  pub parallax_y: f32,
+  pub dimensions: (u32, u32),
+  pub position: (f32, f32),
+  pub velocity: (f32, f32),
+  pub acceleration: (f32, f32),
+  pub parallax: (f32, f32),
 }
 impl Entity {
   pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
@@ -23,40 +18,35 @@ impl Entity {
       sprite_sheet_rect: None,
       aim_direction: None,
       bounciness: 0.4,
-      width,
-      height,
-      x,
-      y,
-      velocity_x: 0.0,
-      velocity_y: 0.0,
-      acceleration_x: 0.0,
-      acceleration_y: 1.0,
-      parallax_x: 1.0,
-      parallax_y: 1.0,
+      dimensions: (width, height),
+      position: (x, y),
+      velocity: (0.0, 0.0),
+      acceleration: (0.0, 1.0),
+      parallax: (1.0, 1.0),
     }
   }
   pub fn parallax_x(mut self, parallax_x: f32) -> Self {
-    self.parallax_x = parallax_x;
+    self.parallax.0 = parallax_x;
     self
   }
   pub fn parallax_y(mut self, parallax_y: f32) -> Self {
-    self.parallax_y = parallax_y;
+    self.parallax.1 = parallax_y;
     self
   }
   pub fn velocity_x(mut self, velocity_x: f32) -> Self {
-    self.velocity_x = velocity_x;
+    self.velocity.0 = velocity_x;
     self
   }
   pub fn velocity_y(mut self, velocity_y: f32) -> Self {
-    self.velocity_y = velocity_y;
+    self.velocity.1 = velocity_y;
     self
   }
   pub fn acceleration_x(mut self, acceleration_x: f32) -> Self {
-    self.acceleration_x = acceleration_x;
+    self.acceleration.0 = acceleration_x;
     self
   }
   pub fn acceleration_y(mut self, acceleration_y: f32) -> Self {
-    self.acceleration_y = acceleration_y;
+    self.acceleration.1 = acceleration_y;
     self
   }
   pub fn bounciness(mut self, bounciness: f32) -> Self {
@@ -64,22 +54,26 @@ impl Entity {
     self
   }
   pub fn is_touching_ground(&self, interactive_entities: &Vec<Self>) -> bool {
-    let lower_end = self.y as i32 + self.height as i32;
+    let lower_end = self.position.1 as i32 + self.dimensions.1 as i32;
     interactive_entities.iter().any(|entity| {
-      entity.y as i32 == lower_end
-        && ((entity.x < self.x && entity.x + entity.width as f32 > self.x)
-          || (entity.x < self.x + self.width as f32
-            && entity.x + entity.width as f32 > self.x + self.width as f32))
+      entity.position.1 as i32 == lower_end
+        && ((entity.position.0 < self.position.0
+          && entity.position.0 + entity.dimensions.0 as f32 > self.position.0)
+          || (entity.position.0 < self.position.0 + self.dimensions.0 as f32
+            && entity.position.0 + entity.dimensions.0 as f32
+              > self.position.0 + self.dimensions.0 as f32))
     })
   }
   pub fn to_canvas_coordinates(&self, camera: &Camera, offset: (u32, u32)) -> (f32, f32, u32, u32) {
     (
-      self.x * camera.get_scale_x() - camera.get_x() * (self.parallax_x * camera.get_scale_x())
+      self.position.0 * camera.get_scale_x()
+        - camera.get_x() * (self.parallax.0 * camera.get_scale_x())
         + offset.0 as f32,
-      self.y * camera.get_scale_y() - camera.get_y() * (self.parallax_y * camera.get_scale_y())
+      self.position.1 * camera.get_scale_y()
+        - camera.get_y() * (self.parallax.1 * camera.get_scale_y())
         + offset.1 as f32,
-      (self.width as f32 * camera.get_scale_x()) as u32,
-      (self.height as f32 * camera.get_scale_y()) as u32,
+      (self.dimensions.0 as f32 * camera.get_scale_x()) as u32,
+      (self.dimensions.1 as f32 * camera.get_scale_y()) as u32,
     )
   }
 
@@ -100,15 +94,16 @@ impl Entity {
     .parallax_y(parallax_y)
   }
   pub fn next_state(&mut self, interactive_entities: &Vec<Self>) {
-    self.velocity_x += self.acceleration_x;
-    self.velocity_y += self.acceleration_y;
+    self.velocity.0 += self.acceleration.0;
+    self.velocity.1 += self.acceleration.1;
 
-    let (x_before, y_before, width, height) = (self.x, self.y, self.width, self.height);
+    let (x_before, y_before, width, height) =
+      (self.position.0, self.position.1, self.dimensions.0, self.dimensions.1);
 
-    self.x += self.velocity_x;
-    self.y += self.velocity_y;
+    self.position.0 += self.velocity.0;
+    self.position.1 += self.velocity.1;
 
-    let (x_after, y_after) = (self.x, self.y);
+    let (x_after, y_after) = (self.position.0, self.position.1);
 
     let collided_entities = interactive_entities
       .iter()
@@ -116,33 +111,35 @@ impl Entity {
       .collect::<Vec<_>>();
 
     if let Some(right_to_self) =
-      collided_entities.iter().find(|entity| entity.x >= x_before + width as f32)
+      collided_entities.iter().find(|entity| entity.position.0 >= x_before + width as f32)
     {
-      self.x = right_to_self.x - width as f32;
-      self.velocity_x *= -1.0 * self.bounciness * right_to_self.bounciness;
-    } else if let Some(left_to_self) =
-      collided_entities.iter().find(|entity| entity.x + entity.width as f32 <= x_before)
+      self.position.0 = right_to_self.position.0 - width as f32;
+      self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
+    } else if let Some(left_to_self) = collided_entities
+      .iter()
+      .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= x_before)
     {
-      self.x = left_to_self.x + left_to_self.width as f32;
-      self.velocity_x *= -1.0 * self.bounciness * left_to_self.bounciness;
+      self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
+      self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
     }
     if let Some(bottom_to_self) =
-      collided_entities.iter().find(|entity| entity.y >= y_before + height as f32)
+      collided_entities.iter().find(|entity| entity.position.1 >= y_before + height as f32)
     {
-      self.y = bottom_to_self.y - height as f32;
-      self.velocity_y *= -1.0 * self.bounciness * bottom_to_self.bounciness;
-    } else if let Some(top_to_self) =
-      collided_entities.iter().find(|entity| entity.y + entity.height as f32 <= y_before)
+      self.position.1 = bottom_to_self.position.1 - height as f32;
+      self.velocity.1 *= -1.0 * self.bounciness * bottom_to_self.bounciness;
+    } else if let Some(top_to_self) = collided_entities
+      .iter()
+      .find(|entity| entity.position.1 + entity.dimensions.1 as f32 <= y_before)
     {
-      self.y = top_to_self.y + top_to_self.height as f32;
-      self.velocity_y *= -1.0 * self.bounciness * top_to_self.bounciness;
+      self.position.1 = top_to_self.position.1 + top_to_self.dimensions.1 as f32;
+      self.velocity.1 *= -1.0 * self.bounciness * top_to_self.bounciness;
     }
   }
   pub fn is_inside_bounds(&self, x: f32, y: f32, width: u32, height: u32) -> bool {
-    (self.x + self.width as f32 >= x
-      && self.y + self.height as f32 >= y
-      && self.x <= x + width as f32
-      && self.y <= y + height as f32)
+    (self.position.0 + self.dimensions.0 as f32 >= x
+      && self.position.1 + self.dimensions.1 as f32 >= y
+      && self.position.0 <= x + width as f32
+      && self.position.1 <= y + height as f32)
   }
 }
 #[derive(Serialize, Deserialize)]
@@ -181,10 +178,10 @@ fn window_entity_coordinates_vs_actual_coordinates_entity_at_center() {
   assert_eq!(width, 10);
   assert_eq!(height, 10);
 
-  assert_eq!(entity.x, entity_like_at_the_beginning.x);
-  assert_eq!(entity.y, entity_like_at_the_beginning.y);
-  assert_eq!(entity.width, entity_like_at_the_beginning.width);
-  assert_eq!(entity.height, entity_like_at_the_beginning.height);
+  assert_eq!(entity.position.0, entity_like_at_the_beginning.position.0);
+  assert_eq!(entity.position.1, entity_like_at_the_beginning.position.1);
+  assert_eq!(entity.dimensions.0, entity_like_at_the_beginning.dimensions.0);
+  assert_eq!(entity.dimensions.1, entity_like_at_the_beginning.dimensions.1);
 }
 
 #[test]
@@ -201,10 +198,10 @@ fn window_entity_coordinates_vs_actual_coordinates_entity_at_start() {
   assert_eq!(width, 10);
   assert_eq!(height, 10);
 
-  assert_eq!(entity.x, entity_like_at_the_beginning.x);
-  assert_eq!(entity.y, entity_like_at_the_beginning.y);
-  assert_eq!(entity.width, entity_like_at_the_beginning.width);
-  assert_eq!(entity.height, entity_like_at_the_beginning.height);
+  assert_eq!(entity.position.0, entity_like_at_the_beginning.position.0);
+  assert_eq!(entity.position.1, entity_like_at_the_beginning.position.1);
+  assert_eq!(entity.dimensions.0, entity_like_at_the_beginning.dimensions.0);
+  assert_eq!(entity.dimensions.1, entity_like_at_the_beginning.dimensions.1);
 }
 
 #[test]
@@ -222,10 +219,10 @@ fn window_entity_coordinates_vs_actual_coordinates() {
   assert_eq!(width, 10);
   assert_eq!(height, 10);
 
-  assert_eq!(entity.x, entity_like_at_the_beginning.x);
-  assert_eq!(entity.y, entity_like_at_the_beginning.y);
-  assert_eq!(entity.width, entity_like_at_the_beginning.width);
-  assert_eq!(entity.height, entity_like_at_the_beginning.height);
+  assert_eq!(entity.position.0, entity_like_at_the_beginning.position.0);
+  assert_eq!(entity.position.1, entity_like_at_the_beginning.position.1);
+  assert_eq!(entity.dimensions.0, entity_like_at_the_beginning.dimensions.0);
+  assert_eq!(entity.dimensions.1, entity_like_at_the_beginning.dimensions.1);
 }
 
 #[test]
@@ -244,8 +241,8 @@ fn window_entity_coordinates_vs_actual_coordinates_plus_scale() {
   assert_eq!(width, 20);
   assert_eq!(height, 20);
 
-  assert_eq!(entity.x, entity_like_at_the_beginning.x);
-  assert_eq!(entity.y, entity_like_at_the_beginning.y);
-  assert_eq!(entity.width, entity_like_at_the_beginning.width);
-  assert_eq!(entity.height, entity_like_at_the_beginning.height);
+  assert_eq!(entity.position.0, entity_like_at_the_beginning.position.0);
+  assert_eq!(entity.position.1, entity_like_at_the_beginning.position.1);
+  assert_eq!(entity.dimensions.0, entity_like_at_the_beginning.dimensions.0);
+  assert_eq!(entity.dimensions.1, entity_like_at_the_beginning.dimensions.1);
 }

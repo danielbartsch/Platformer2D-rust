@@ -40,7 +40,12 @@ impl EditorMenu {
     match self.variant {
       LevelEntityVariant::Deletion => {
         let delete_entities = &Box::new(|current_entity: &Entity| {
-          !current_entity.is_inside_bounds(entity.x, entity.y, entity.width, entity.height)
+          !current_entity.is_inside_bounds(
+            entity.position.0,
+            entity.position.1,
+            entity.dimensions.0,
+            entity.dimensions.1,
+          )
         });
 
         level.background.retain(delete_entities);
