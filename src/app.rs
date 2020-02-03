@@ -371,7 +371,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       command(&mut level.main_character[0], &mut target_camera);
     }
 
-    let physics_start_time = SystemTime::now();
     if !paused {
       for entity in &mut level.main_character {
         entity.next_state(&entities);
@@ -400,7 +399,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       (&mut level.enemies)
         .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
     }
-    let physics_time = physics_start_time.elapsed().unwrap().as_micros();
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
@@ -451,32 +449,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     show_text_line(
       &mut canvas,
       &text_texture,
-      &format!("Micros (Frame)  : {}", last_frame_time.elapsed().unwrap().as_micros()),
-      (10, 10),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("Micros (Physics): {}", physics_time),
-      (10, 30),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("Camera: x{:?}", camera.position),
-      (10, 70),
-      2,
-      1.1,
-    );
-    show_text_line(
-      &mut canvas,
-      &text_texture,
-      &format!("Char:   x{:?}", level.main_character[0].position),
-      (10, 110),
+      &format!("{}", 1_000_000 / last_frame_time.elapsed().unwrap().as_micros()),
+      (camera.dimensions.0 as i32 - 100, 10),
       2,
       1.1,
     );
