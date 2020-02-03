@@ -73,7 +73,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     Controls::deserialize(fs::read_to_string("config/controls.json").unwrap()).to_sdl_keycodes();
 
   let texture_creator = canvas.texture_creator();
-  let (entity_texture, ui_texture, text_texture) = {
+  let (entity_texture, ui_texture, mut text_texture) = {
     let mut texture_surface =
       Surface::load_bmp(Path::new(&format!("assets/spritesheets/{}.bmp", sprite_sheet_name)))
         .unwrap();
@@ -85,7 +85,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     let mut text_texture_surface =
       Surface::load_bmp(Path::new("assets/spritesheets/text.bmp")).unwrap();
-    text_texture_surface.set_color_key(true, Color { r: 255, g: 255, b: 255, a: 0xff }).unwrap();
+    text_texture_surface.set_color_key(true, Color { r: 128, g: 128, b: 128, a: 0xff }).unwrap();
 
     (
       texture_creator.create_texture_from_surface(&texture_surface).unwrap(),
@@ -448,11 +448,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     }
     show_text_line(
       &mut canvas,
-      &text_texture,
+      &mut text_texture,
       &format!("{}", 1_000_000 / last_frame_time.elapsed().unwrap().as_micros()),
       (camera.dimensions.0 as i32 - 100, 10),
       2,
       1.1,
+      Color { r: 220, g: 140, b: 120, a: 0xff },
     );
 
     canvas.present();

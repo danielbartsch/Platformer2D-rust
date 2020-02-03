@@ -1,21 +1,23 @@
+use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
 
 pub fn show_text_line(
   canvas: &mut WindowCanvas,
-  texture: &Texture,
+  texture: &mut Texture,
   text: &str,
   position: (i32, i32),
   letter_scale: u8,
   letter_gap: f32,
+  color: Color,
 ) {
+  let color_mod = texture.color_mod();
+  texture.set_color_mod(color.r, color.g, color.b);
   let chars = text.chars().enumerate();
   for (index, character) in chars {
     let (x, y, width, height) = get_text_texture_rects(character);
-
     let letter_width = width * letter_scale as u32;
     let letter_height = height * letter_scale as u32;
-
     canvas
       .copy_ex(
         &texture,
@@ -33,6 +35,7 @@ pub fn show_text_line(
       )
       .unwrap();
   }
+  texture.set_color_mod(color_mod.0, color_mod.1, color_mod.2);
 }
 
 fn get_text_texture_rects(character: char) -> (i32, i32, u32, u32) {
