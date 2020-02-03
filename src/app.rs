@@ -383,17 +383,16 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       for entity in &mut level.enemies {
         entity.next_state(&entities);
       }
+
       let kill_rects = &level.kill_rects;
-      (&mut level.main_character)
-        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
-      (&mut level.effects)
-        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
-      (&mut level.destructible)
-        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
-      (&mut level.indestructible)
-        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
-      (&mut level.enemies)
-        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
+      let delete_entities = &Box::new(|entity: &Entity| {
+        !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect))
+      });
+      (&mut level.main_character).retain(delete_entities);
+      (&mut level.effects).retain(delete_entities);
+      (&mut level.destructible).retain(delete_entities);
+      (&mut level.indestructible).retain(delete_entities);
+      (&mut level.enemies).retain(delete_entities);
     }
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
