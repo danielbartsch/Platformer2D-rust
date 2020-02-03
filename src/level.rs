@@ -6,6 +6,7 @@ pub struct Entity {
   pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
   pub aim_direction: Option<f32>,
   pub bounciness: f32,
+  pub slippiness: f32,
   pub dimensions: (u32, u32),
   pub position: (f32, f32),
   pub velocity: (f32, f32),
@@ -18,6 +19,7 @@ impl Entity {
       sprite_sheet_rect: None,
       aim_direction: None,
       bounciness: 0.4,
+      slippiness: 0.8,
       dimensions: (width, height),
       position: (x, y),
       velocity: (0.0, 0.0),
@@ -46,8 +48,14 @@ impl Entity {
     self
   }
   pub fn is_touching_ground(&self, interactive_entities: &Vec<Self>) -> bool {
+    match self.find_ground_entity(interactive_entities) {
+      Some(_) => true,
+      None => false,
+    }
+  }
+  pub fn find_ground_entity<'a>(&self, interactive_entities: &'a Vec<Self>) -> Option<&'a Entity> {
     let lower_end = self.position.1 as i32 + self.dimensions.1 as i32;
-    interactive_entities.iter().any(|entity| {
+    interactive_entities.iter().find(|entity| {
       entity.position.1 as i32 == lower_end
         && ((entity.position.0 < self.position.0
           && entity.position.0 + entity.dimensions.0 as f32 > self.position.0)
@@ -82,8 +90,8 @@ impl Entity {
     .parallax_y(parallax_y)
   }
   pub fn next_state(&mut self, interactive_entities: &Vec<Self>) {
-    if self.is_touching_ground(&interactive_entities) {
-      self.velocity.0 *= 0.8;
+    if let Some(ground_entity) = self.find_ground_entity(&interactive_entities) {
+      self.velocity.0 *= self.slippiness.max(ground_entity.slippiness);
     }
 
     self.velocity.0 += self.acceleration.0;
