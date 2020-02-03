@@ -342,10 +342,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
             entity.sprite_sheet_rect = Some((128, 0, 32, 32));
           }
         }));
-      } else {
-        entity_commands.push(Box::new(|entity| {
-          entity.velocity.0 *= 0.8;
-        }));
       }
       if !pressed_keys.contains(&controls.right_key)
         && !pressed_keys.contains(&controls.down_key)

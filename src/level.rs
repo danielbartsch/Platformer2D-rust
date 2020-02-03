@@ -82,6 +82,10 @@ impl Entity {
     .parallax_y(parallax_y)
   }
   pub fn next_state(&mut self, interactive_entities: &Vec<Self>) {
+    if self.is_touching_ground(&interactive_entities) {
+      self.velocity.0 *= 0.8;
+    }
+
     self.velocity.0 += self.acceleration.0;
     self.velocity.1 += self.acceleration.1;
 
