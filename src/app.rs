@@ -373,26 +373,38 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     let physics_start_time = SystemTime::now();
     if !paused {
-      for character in &mut level.main_character {
-        character.next_state(&entities);
+      for entity in &mut level.main_character {
+        entity.next_state(&entities);
       }
-      for character in &mut level.effects {
-        character.next_state(&entities);
+      for entity in &mut level.effects {
+        entity.next_state(&entities);
       }
-      for character in &mut level.destructible {
-        character.next_state(&entities);
+      for entity in &mut level.destructible {
+        entity.next_state(&entities);
       }
-      for character in &mut level.indestructible {
-        character.next_state(&entities);
+      for entity in &mut level.indestructible {
+        entity.next_state(&entities);
       }
-      for character in &mut level.enemies {
-        character.next_state(&entities);
+      for entity in &mut level.enemies {
+        entity.next_state(&entities);
       }
+      let kill_rects = &level.kill_rects;
+      (&mut level.main_character)
+        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
+      (&mut level.effects)
+        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
+      (&mut level.destructible)
+        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
+      (&mut level.indestructible)
+        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
+      (&mut level.enemies)
+        .retain(|entity| !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect)));
     }
     let physics_time = physics_start_time.elapsed().unwrap().as_micros();
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
+    camera.draw_relatively(&mut canvas, &level.kill_rects, &entity_texture);
     camera.draw_relatively(&mut canvas, &level.background, &entity_texture);
     camera.draw_relatively(&mut canvas, &level.indestructible, &entity_texture);
     camera.draw_relatively(&mut canvas, &level.destructible, &entity_texture);

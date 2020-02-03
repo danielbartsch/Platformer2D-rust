@@ -138,6 +138,7 @@ pub struct Level {
   pub main_character: Vec<Entity>,
   pub effects: Vec<Entity>,
   pub foreground: Vec<Entity>,
+  pub kill_rects: Vec<Entity>,
 }
 
 impl Level {
