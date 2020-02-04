@@ -141,6 +141,18 @@ impl Entity {
       && self.position.1 <= entity.position.1 + entity.dimensions.1 as f32)
   }
 }
+
+#[derive(Serialize, Deserialize)]
+pub enum Event {
+  Kill,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct EventEntity {
+  pub entity: Entity,
+  pub event: Event,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Level {
   pub background: Vec<Entity>,
@@ -150,7 +162,7 @@ pub struct Level {
   pub main_character: Vec<Entity>,
   pub effects: Vec<Entity>,
   pub foreground: Vec<Entity>,
-  pub kill_rects: Vec<Entity>,
+  pub event_entities: Vec<EventEntity>,
 }
 
 impl Level {

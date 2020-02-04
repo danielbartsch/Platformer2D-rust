@@ -19,7 +19,7 @@ mod controls;
 use camera::Camera;
 use controls::Controls;
 use editor_menu::EditorMenu;
-use level::{Entity, Level};
+use level::{Entity, Event as EntityEvent, Level};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -384,9 +384,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         entity.next_state(&entities);
       }
 
-      let kill_rects = &level.kill_rects;
+      let event_entities = &level.event_entities;
       let delete_entities = &Box::new(|entity: &Entity| {
-        !kill_rects.iter().any(|kill_rect| entity.is_inside_entity(kill_rect))
+        !event_entities.iter().any(|event_entity| match event_entity.event {
+          EntityEvent::Kill => entity.is_inside_entity(&event_entity.entity),
+          _ => false,
+        })
       });
       (&mut level.main_character).retain(delete_entities);
       (&mut level.effects).retain(delete_entities);
@@ -397,7 +400,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
 
-    camera.draw_relatively(&mut canvas, &level.kill_rects, &entity_texture);
     camera.draw_relatively(&mut canvas, &level.background, &entity_texture);
     camera.draw_relatively(&mut canvas, &level.indestructible, &entity_texture);
     camera.draw_relatively(&mut canvas, &level.destructible, &entity_texture);
