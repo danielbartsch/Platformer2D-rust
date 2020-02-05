@@ -5,14 +5,36 @@ use serde::{Deserialize, Serialize};
 pub struct Entity {
   pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
   pub aim_direction: Option<f32>,
+  #[serde(default = "default_bounciness")]
   pub bounciness: f32,
+  #[serde(default = "default_slippiness")]
   pub slippiness: f32,
   pub dimensions: (u32, u32),
   pub position: (f32, f32),
+  #[serde(default = "default_velocity")]
   pub velocity: (f32, f32),
+  #[serde(default = "default_acceleration")]
   pub acceleration: (f32, f32),
+  #[serde(default = "default_parallax")]
   pub parallax: (f32, f32),
 }
+
+fn default_bounciness() -> f32 {
+  0.4
+}
+fn default_slippiness() -> f32 {
+  0.8
+}
+fn default_velocity() -> (f32, f32) {
+  (0.0, 0.0)
+}
+fn default_acceleration() -> (f32, f32) {
+  (0.0, 0.0)
+}
+fn default_parallax() -> (f32, f32) {
+  (1.0, 1.0)
+}
+
 impl Entity {
   pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
     Self {
