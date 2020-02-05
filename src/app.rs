@@ -69,8 +69,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let mut level =
     Level::deserialize(fs::read_to_string(format!("assets/levels/{}.json", level_name)).unwrap());
 
-  let controls =
-    Controls::deserialize(fs::read_to_string("config/controls.json").unwrap()).to_sdl_keycodes();
+  let controls = Controls::deserialize(fs::read_to_string("config/controls.json").unwrap());
 
   let texture_creator = canvas.texture_creator();
   let (entity_texture, ui_texture, mut text_texture) = {
