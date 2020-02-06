@@ -179,6 +179,12 @@ pub enum Event {
 pub struct EventEntity {
   pub entity: Entity,
   pub event: Event,
+  #[serde(default = "default_receiving_entity_ids")]
+  pub receiving_entity_ids: Vec<String>,
+}
+
+fn default_receiving_entity_ids() -> Vec<String> {
+  vec![]
 }
 
 #[derive(Serialize, Deserialize)]

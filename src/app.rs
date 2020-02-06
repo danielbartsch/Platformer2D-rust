@@ -386,9 +386,17 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
       let event_entities = &level.event_entities;
       let delete_entities = &Box::new(|entity: &Entity| {
-        !event_entities.iter().any(|event_entity| match event_entity.event {
-          EntityEvent::Kill => entity.is_inside_entity(&event_entity.entity),
-          _ => false,
+        !event_entities.iter().any(|event_entity| {
+          return match event_entity.event {
+            EntityEvent::Kill => entity.is_inside_entity(&event_entity.entity),
+            _ => false,
+          } && (event_entity.receiving_entity_ids.len() == 0
+            || match &entity.id {
+              Some(id) => {
+                event_entity.receiving_entity_ids.iter().any(|receiving_id| receiving_id == id)
+              }
+              None => false,
+            });
         })
       });
       (&mut level.main_character).retain(delete_entities);
