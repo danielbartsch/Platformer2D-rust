@@ -11,6 +11,7 @@ pub struct Entity {
   pub slippiness: f32,
   pub dimensions: (u32, u32),
   pub position: (f32, f32),
+  pub id: Option<String>,
   #[serde(default = "default_velocity")]
   pub velocity: (f32, f32),
   #[serde(default = "default_acceleration")]
@@ -38,6 +39,7 @@ fn default_parallax() -> (f32, f32) {
 impl Entity {
   pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
     Self {
+      id: None,
       sprite_sheet_rect: None,
       aim_direction: None,
       bounciness: 0.4,
@@ -67,6 +69,10 @@ impl Entity {
   }
   pub fn bounciness(mut self, bounciness: f32) -> Self {
     self.bounciness = bounciness;
+    self
+  }
+  pub fn id(mut self, id: String) -> Self {
+    self.id = Some(id);
     self
   }
   pub fn is_touching_ground(&self, interactive_entities: &Vec<Self>) -> bool {
