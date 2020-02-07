@@ -135,31 +135,47 @@ impl Entity {
       .filter(|&entity| entity.is_inside_entity(self))
       .collect::<Vec<_>>();
 
-    if let Some(right_to_self) = collided_entities
-      .iter()
-      .find(|entity| entity.position.0 >= position_before.0 + self.dimensions.0 as f32)
-    {
-      self.position.0 = right_to_self.position.0 - self.dimensions.0 as f32;
-      self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
-    } else if let Some(left_to_self) = collided_entities
-      .iter()
-      .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= position_before.0)
-    {
-      self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
-      self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
-    }
+    let mut is_on_ground = false;
+
     if let Some(bottom_to_self) = collided_entities
       .iter()
       .find(|entity| entity.position.1 >= position_before.1 + self.dimensions.1 as f32)
     {
       self.position.1 = bottom_to_self.position.1 - self.dimensions.1 as f32;
       self.velocity.1 *= -1.0 * self.bounciness * bottom_to_self.bounciness;
+
+      is_on_ground = true;
     } else if let Some(top_to_self) = collided_entities
       .iter()
       .find(|entity| entity.position.1 + entity.dimensions.1 as f32 <= position_before.1)
     {
       self.position.1 = top_to_self.position.1 + top_to_self.dimensions.1 as f32;
       self.velocity.1 *= -1.0 * self.bounciness * top_to_self.bounciness;
+    }
+    if let Some(right_to_self) = collided_entities
+      .iter()
+      .find(|entity| entity.position.0 >= position_before.0 + self.dimensions.0 as f32)
+    {
+      if is_on_ground
+        && (self.position.1 + self.dimensions.1 as f32) - right_to_self.position.1 < 5.1
+      {
+        self.position.1 = right_to_self.position.1 - self.dimensions.1 as f32;
+      } else {
+        self.position.0 = right_to_self.position.0 - self.dimensions.0 as f32;
+        self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
+      }
+    } else if let Some(left_to_self) = collided_entities
+      .iter()
+      .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= position_before.0)
+    {
+      if is_on_ground
+        && (self.position.1 + self.dimensions.1 as f32) - left_to_self.position.1 < 5.1
+      {
+        self.position.1 = left_to_self.position.1 - self.dimensions.1 as f32;
+      } else {
+        self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
+        self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
+      }
     }
   }
   pub fn is_inside_entity(&self, entity: &Entity) -> bool {
