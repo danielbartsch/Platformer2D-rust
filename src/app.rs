@@ -267,7 +267,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                 .id("bouncy-bullet".to_string())
                 .velocity_x(entity.velocity.0 + x * 20.0)
                 .velocity_y(entity.velocity.1 + y * 20.0)
-                .bounciness(2.5),
+                .bounciness(2.5)
+                .step_height(7.5),
             );
           }
         }));

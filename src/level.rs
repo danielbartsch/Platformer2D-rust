@@ -12,6 +12,8 @@ pub struct Entity {
   pub dimensions: (u32, u32),
   pub position: (f32, f32),
   pub id: Option<String>,
+  #[serde(default = "default_step_height")]
+  pub step_height: f32,
   #[serde(default = "default_velocity")]
   pub velocity: (f32, f32),
   #[serde(default = "default_acceleration")]
@@ -25,6 +27,9 @@ fn default_bounciness() -> f32 {
 }
 fn default_slippiness() -> f32 {
   0.8
+}
+fn default_step_height() -> f32 {
+  0.0
 }
 fn default_velocity() -> (f32, f32) {
   (0.0, 0.0)
@@ -40,15 +45,16 @@ impl Entity {
   pub fn new(x: f32, y: f32, width: u32, height: u32) -> Self {
     Self {
       id: None,
+      step_height: default_step_height(),
       sprite_sheet_rect: None,
       aim_direction: None,
-      bounciness: 0.4,
-      slippiness: 0.8,
+      bounciness: default_bounciness(),
+      slippiness: default_slippiness(),
       dimensions: (width, height),
       position: (x, y),
-      velocity: (0.0, 0.0),
+      velocity: default_velocity(),
       acceleration: (0.0, 1.0),
-      parallax: (1.0, 1.0),
+      parallax: default_parallax(),
     }
   }
   pub fn parallax_x(mut self, parallax_x: f32) -> Self {
@@ -73,6 +79,10 @@ impl Entity {
   }
   pub fn id(mut self, id: String) -> Self {
     self.id = Some(id);
+    self
+  }
+  pub fn step_height(mut self, step_height: f32) -> Self {
+    self.step_height = step_height;
     self
   }
   pub fn is_touching_ground(&self, interactive_entities: &Vec<Self>) -> bool {
@@ -157,7 +167,8 @@ impl Entity {
       .find(|entity| entity.position.0 >= position_before.0 + self.dimensions.0 as f32)
     {
       if is_on_ground
-        && (self.position.1 + self.dimensions.1 as f32) - right_to_self.position.1 < 5.1
+        && (self.position.1 + self.dimensions.1 as f32) - right_to_self.position.1
+          <= self.step_height
       {
         self.position.1 = right_to_self.position.1 - self.dimensions.1 as f32;
       } else {
@@ -169,7 +180,8 @@ impl Entity {
       .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= position_before.0)
     {
       if is_on_ground
-        && (self.position.1 + self.dimensions.1 as f32) - left_to_self.position.1 < 5.1
+        && (self.position.1 + self.dimensions.1 as f32) - left_to_self.position.1
+          <= self.step_height
       {
         self.position.1 = left_to_self.position.1 - self.dimensions.1 as f32;
       } else {
