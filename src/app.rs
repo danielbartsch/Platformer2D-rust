@@ -402,6 +402,36 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       (&mut level.destructible).retain(kill_entities);
       (&mut level.indestructible).retain(kill_entities);
       (&mut level.enemies).retain(kill_entities);
+
+      let teleport_entities = &Box::new(|entity: &mut Entity| {
+        for event in events {
+          match event.event_type {
+            EventType::Teleport(new_pos_x, new_pos_y) => {
+              if event.is_triggering(entity) {
+                entity.position.0 = new_pos_x;
+                entity.position.1 = new_pos_y;
+              }
+            }
+            _ => {}
+          }
+        }
+      });
+
+      for entity in &mut level.main_character {
+        teleport_entities(entity);
+      }
+      for entity in &mut level.effects {
+        teleport_entities(entity);
+      }
+      for entity in &mut level.destructible {
+        teleport_entities(entity);
+      }
+      for entity in &mut level.indestructible {
+        teleport_entities(entity);
+      }
+      for entity in &mut level.enemies {
+        teleport_entities(entity);
+      }
     }
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
