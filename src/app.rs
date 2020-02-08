@@ -201,7 +201,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
                   editor_menu.create_entity(
                     &mut level,
-                    &Entity::from_canvas_coordinates(
+                    Entity::from_canvas_coordinates(
                       (
                         mouse_selection_rect.unwrap().x() as f32,
                         mouse_selection_rect.unwrap().y() as f32,

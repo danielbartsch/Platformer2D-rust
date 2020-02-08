@@ -35,9 +35,7 @@ impl EditorMenu {
       (LevelEntityVariant::Deletion, Rect::new(0, 30 + (25 * 7), 20, 20), (20 * 8, 0, 20, 20)),
     ]
   }
-  pub fn create_entity(&mut self, level: &mut Level, actionable_entity: &Entity) {
-    let entity = actionable_entity.clone();
-
+  pub fn create_entity(&mut self, level: &mut Level, actionable_entity: Entity) {
     match self.variant {
       LevelEntityVariant::Deletion => {
         let delete_entities =
@@ -52,25 +50,25 @@ impl EditorMenu {
         level.foreground.retain(delete_entities);
       }
       LevelEntityVariant::Background => {
-        level.background.push(entity);
+        level.background.push(actionable_entity);
       }
       LevelEntityVariant::Indestructible => {
-        level.indestructible.push(entity);
+        level.indestructible.push(actionable_entity);
       }
       LevelEntityVariant::Destructible => {
-        level.destructible.push(entity);
+        level.destructible.push(actionable_entity);
       }
       LevelEntityVariant::Enemies => {
-        level.enemies.push(entity);
+        level.enemies.push(actionable_entity);
       }
       LevelEntityVariant::MainCharacter => {
-        level.main_character.push(entity);
+        level.main_character.push(actionable_entity);
       }
       LevelEntityVariant::Effects => {
-        level.effects.push(entity);
+        level.effects.push(actionable_entity);
       }
       LevelEntityVariant::Foreground => {
-        level.foreground.push(entity);
+        level.foreground.push(actionable_entity);
       }
     }
   }
