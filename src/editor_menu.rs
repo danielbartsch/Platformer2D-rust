@@ -1,4 +1,5 @@
-use super::level::{Entity, Level};
+use super::entity::Entity;
+use super::level::Level;
 use sdl2::rect::Rect;
 
 #[derive(Debug)]

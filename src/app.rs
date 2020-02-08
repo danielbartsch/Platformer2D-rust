@@ -16,10 +16,18 @@ mod ui;
 #[path = "controls.rs"]
 mod controls;
 
+#[path = "entity.rs"]
+mod entity;
+
+#[path = "event.rs"]
+mod event;
+
 use camera::Camera;
 use controls::Controls;
 use editor_menu::EditorMenu;
-use level::{Entity, EventType, Level};
+use entity::Entity;
+use event::EventType;
+use level::Level;
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;

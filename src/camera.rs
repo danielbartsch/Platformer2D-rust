@@ -1,4 +1,4 @@
-use super::level::Entity;
+use super::entity::Entity;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
