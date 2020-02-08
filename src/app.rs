@@ -107,6 +107,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let mut mouse_click_position = None;
   let mut mouse_selection_rect: Option<Rect> = None;
 
+  let mut last_shot = first_frame_time.clone();
   'running: loop {
     canvas.set_draw_color(BACKGROUND_COLOR);
     canvas.clear();
@@ -259,18 +260,21 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       let mut attack_commands: Vec<Box<dyn Fn(&mut Entity, &mut Vec<Entity>)>> = vec![];
 
       if pressed_keys.contains(&controls.shoot_key) {
-        attack_commands.push(Box::new(|entity, level_container| {
-          if let Some(aim_direction) = entity.aim_direction {
-            level_container.push(
-              Entity::new(entity.position.0, entity.position.1, 10, 10)
-                .id("bouncy-bullet".to_string())
-                .velocity_x(entity.velocity.0 + aim_direction.cos() * 20.0)
-                .velocity_y(entity.velocity.1 + aim_direction.sin() * 20.0)
-                .bounciness(2.5)
-                .step_height(7.5),
-            );
-          }
-        }));
+        if last_shot.elapsed().unwrap().as_millis() > 50 {
+          last_shot = SystemTime::now();
+          attack_commands.push(Box::new(|entity, level_container| {
+            if let Some(aim_direction) = entity.aim_direction {
+              level_container.push(
+                Entity::new(entity.position.0, entity.position.1, 10, 10)
+                  .id("bouncy-bullet".to_string())
+                  .velocity_x(entity.velocity.0 + aim_direction.cos() * 20.0)
+                  .velocity_y(entity.velocity.1 + aim_direction.sin() * 20.0)
+                  .bounciness(2.5)
+                  .step_height(7.5),
+              );
+            }
+          }));
+        }
       }
       if pressed_keys.contains(&controls.jump_key) {
         entity_commands.push(Box::new(|entity| {
