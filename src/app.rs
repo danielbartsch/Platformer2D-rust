@@ -19,7 +19,7 @@ mod controls;
 use camera::Camera;
 use controls::Controls;
 use editor_menu::EditorMenu;
-use level::{Entity, Event as EntityEvent, Level};
+use level::{Entity, Level};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -388,26 +388,16 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         entity.next_state(&entities);
       }
 
-      let event_entities = &level.event_entities;
-      let delete_entities = &Box::new(|entity: &Entity| {
-        !event_entities.iter().any(|event_entity| {
-          return match event_entity.event {
-            EntityEvent::Kill => entity.is_inside_entity(&event_entity.entity),
-            _ => false,
-          } && (event_entity.receiving_entity_ids.len() == 0
-            || match &entity.id {
-              Some(id) => {
-                event_entity.receiving_entity_ids.iter().any(|receiving_id| receiving_id == id)
-              }
-              None => false,
-            });
-        })
-      });
-      (&mut level.main_character).retain(delete_entities);
-      (&mut level.effects).retain(delete_entities);
-      (&mut level.destructible).retain(delete_entities);
-      (&mut level.indestructible).retain(delete_entities);
-      (&mut level.enemies).retain(delete_entities);
+      let events = &level.events;
+
+      let kill_entities =
+        &Box::new(|entity: &Entity| !events.iter().any(|event| event.is_triggering(entity)));
+
+      (&mut level.main_character).retain(kill_entities);
+      (&mut level.effects).retain(kill_entities);
+      (&mut level.destructible).retain(kill_entities);
+      (&mut level.indestructible).retain(kill_entities);
+      (&mut level.enemies).retain(kill_entities);
     }
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });

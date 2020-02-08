@@ -199,16 +199,28 @@ impl Entity {
 }
 
 #[derive(Serialize, Deserialize)]
-pub enum Event {
+enum EventType {
   Kill,
+  Teleport(f32, f32),
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct EventEntity {
+pub struct Event {
   pub entity: Entity,
-  pub event: Event,
+  event: EventType,
   #[serde(default = "default_receiving_entity_ids")]
   pub receiving_entity_ids: Vec<String>,
+}
+
+impl Event {
+  pub fn is_triggering(&self, entity: &Entity) -> bool {
+    entity.is_inside_entity(&self.entity)
+      && (self.receiving_entity_ids.len() == 0
+        || match &entity.id {
+          Some(id) => self.receiving_entity_ids.iter().any(|receiving_id| receiving_id == id),
+          None => false,
+        })
+  }
 }
 
 fn default_receiving_entity_ids() -> Vec<String> {
@@ -224,7 +236,7 @@ pub struct Level {
   pub main_character: Vec<Entity>,
   pub effects: Vec<Entity>,
   pub foreground: Vec<Entity>,
-  pub event_entities: Vec<EventEntity>,
+  pub events: Vec<Event>,
 }
 
 impl Level {
