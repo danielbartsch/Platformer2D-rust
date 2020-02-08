@@ -19,7 +19,7 @@ mod controls;
 use camera::Camera;
 use controls::Controls;
 use editor_menu::EditorMenu;
-use level::{Entity, Level};
+use level::{Entity, EventType, Level};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -390,8 +390,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
 
       let events = &level.events;
 
-      let kill_entities =
-        &Box::new(|entity: &Entity| !events.iter().any(|event| event.is_triggering(entity)));
+      let kill_entities = &Box::new(|entity: &Entity| {
+        !events.iter().any(|event| match event.event_type {
+          EventType::Kill => event.is_triggering(entity),
+          _ => false,
+        })
+      });
 
       (&mut level.main_character).retain(kill_entities);
       (&mut level.effects).retain(kill_entities);

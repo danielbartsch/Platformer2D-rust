@@ -199,7 +199,7 @@ impl Entity {
 }
 
 #[derive(Serialize, Deserialize)]
-enum EventType {
+pub enum EventType {
   Kill,
   Teleport(f32, f32),
 }
@@ -207,7 +207,7 @@ enum EventType {
 #[derive(Serialize, Deserialize)]
 pub struct Event {
   pub entity: Entity,
-  event: EventType,
+  pub event_type: EventType,
   #[serde(default = "default_receiving_entity_ids")]
   pub receiving_entity_ids: Vec<String>,
 }
