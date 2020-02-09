@@ -376,26 +376,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     }
 
     if !paused {
-      (&mut level.main_character).drain_filter(|entity| {
-        entity.next_state(&entities);
-        Some("dying".to_string()) == entity.id
-      });
-      (&mut level.effects).drain_filter(|entity| {
-        entity.next_state(&entities);
-        Some("dying".to_string()) == entity.id
-      });
-      (&mut level.destructible).drain_filter(|entity| {
-        entity.next_state(&entities);
-        Some("dying".to_string()) == entity.id
-      });
-      (&mut level.indestructible).drain_filter(|entity| {
-        entity.next_state(&entities);
-        Some("dying".to_string()) == entity.id
-      });
-      (&mut level.enemies).drain_filter(|entity| {
-        entity.next_state(&entities);
-        Some("dying".to_string()) == entity.id
-      });
+      (&mut level).next_state(&entities);
     }
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
