@@ -91,7 +91,7 @@ impl Entity {
       None => false,
     }
   }
-  pub fn find_ground_entity<'a>(&self, interactive_entities: &'a Vec<Self>) -> Option<&'a Entity> {
+  fn find_ground_entity<'a>(&self, interactive_entities: &'a Vec<Self>) -> Option<&'a Entity> {
     let lower_end = self.position.1 as i32 + self.dimensions.1 as i32;
     interactive_entities.iter().find(|entity| {
       entity.position.1 as i32 == lower_end
