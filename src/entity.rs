@@ -2,6 +2,23 @@ use super::camera::Camera;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum EventType {
+  Kill,
+  Teleport(f32, f32),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Event {
+  pub event_type: EventType,
+  #[serde(default = "default_receiving_entity_ids")]
+  pub receiving_entity_ids: Vec<String>,
+}
+
+fn default_receiving_entity_ids() -> Vec<String> {
+  vec![]
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Entity {
   pub sprite_sheet_rect: Option<(i32, i32, u32, u32)>,
   pub aim_direction: Option<f32>,
@@ -12,6 +29,7 @@ pub struct Entity {
   pub dimensions: (u32, u32),
   pub position: (f32, f32),
   pub id: Option<String>,
+  pub event: Option<Event>,
   #[serde(default = "default_step_height")]
   pub step_height: f32,
   #[serde(default = "default_velocity")]
@@ -48,6 +66,7 @@ impl Entity {
       step_height: default_step_height(),
       sprite_sheet_rect: None,
       aim_direction: None,
+      event: None,
       bounciness: default_bounciness(),
       slippiness: default_slippiness(),
       dimensions: (width, height),
@@ -84,6 +103,28 @@ impl Entity {
   pub fn step_height(mut self, step_height: f32) -> Self {
     self.step_height = step_height;
     self
+  }
+  fn is_triggering(&self, entity: &Entity) -> bool {
+    if let Some(event) = &entity.event {
+      event.receiving_entity_ids.len() == 0
+        || match &self.id {
+          Some(id) => event.receiving_entity_ids.iter().any(|receiving_id| receiving_id == id),
+          None => false,
+        }
+    } else {
+      false
+    }
+  }
+  fn run_event(&mut self, event: &Event) {
+    match event.event_type {
+      EventType::Teleport(x, y) => {
+        self.position.0 = x;
+        self.position.1 = y;
+      }
+      EventType::Kill => {
+        self.id = Some("dying".to_string());
+      }
+    }
   }
   pub fn is_touching_ground(&self, interactive_entities: &Vec<Self>) -> bool {
     match self.find_ground_entity(interactive_entities) {
@@ -151,50 +192,65 @@ impl Entity {
       .iter()
       .find(|entity| entity.position.1 >= position_before.1 + self.dimensions.1 as f32)
     {
-      self.position.1 = bottom_to_self.position.1 - self.dimensions.1 as f32;
-      self.velocity.1 *= -1.0 * self.bounciness * bottom_to_self.bounciness;
-
+      if self.is_triggering(bottom_to_self) {
+        self.run_event(bottom_to_self.event.as_ref().unwrap());
+      } else {
+        self.position.1 = bottom_to_self.position.1 - self.dimensions.1 as f32;
+        self.velocity.1 *= -1.0 * self.bounciness * bottom_to_self.bounciness;
+      }
       is_on_ground = true;
     } else if let Some(top_to_self) = collided_entities
       .iter()
       .find(|entity| entity.position.1 + entity.dimensions.1 as f32 <= position_before.1)
     {
-      self.position.1 = top_to_self.position.1 + top_to_self.dimensions.1 as f32;
-      self.velocity.1 *= -1.0 * self.bounciness * top_to_self.bounciness;
+      if self.is_triggering(top_to_self) {
+        self.run_event(top_to_self.event.as_ref().unwrap());
+      } else {
+        self.position.1 = top_to_self.position.1 + top_to_self.dimensions.1 as f32;
+        self.velocity.1 *= -1.0 * self.bounciness * top_to_self.bounciness;
+      }
     }
     if let Some(right_to_self) = collided_entities
       .iter()
       .find(|entity| entity.position.0 >= position_before.0 + self.dimensions.0 as f32)
     {
-      if is_on_ground
-        && (self.position.1 + self.dimensions.1 as f32) - right_to_self.position.1
-          <= self.step_height
-      {
-        self.position.1 = right_to_self.position.1 - self.dimensions.1 as f32;
+      if self.is_triggering(right_to_self) {
+        self.run_event(right_to_self.event.as_ref().unwrap());
       } else {
-        self.position.0 = right_to_self.position.0 - self.dimensions.0 as f32;
-        self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
+        if is_on_ground
+          && (self.position.1 + self.dimensions.1 as f32) - right_to_self.position.1
+            <= self.step_height
+        {
+          self.position.1 = right_to_self.position.1 - self.dimensions.1 as f32;
+        } else {
+          self.position.0 = right_to_self.position.0 - self.dimensions.0 as f32;
+          self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
+        }
       }
     } else if let Some(left_to_self) = collided_entities
       .iter()
       .find(|entity| entity.position.0 + entity.dimensions.0 as f32 <= position_before.0)
     {
-      if is_on_ground
-        && (self.position.1 + self.dimensions.1 as f32) - left_to_self.position.1
-          <= self.step_height
-      {
-        self.position.1 = left_to_self.position.1 - self.dimensions.1 as f32;
+      if self.is_triggering(left_to_self) {
+        self.run_event(left_to_self.event.as_ref().unwrap());
       } else {
-        self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
-        self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
+        if is_on_ground
+          && (self.position.1 + self.dimensions.1 as f32) - left_to_self.position.1
+            <= self.step_height
+        {
+          self.position.1 = left_to_self.position.1 - self.dimensions.1 as f32;
+        } else {
+          self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
+          self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
+        }
       }
     }
   }
   pub fn is_inside_entity(&self, entity: &Entity) -> bool {
-    (self.position.0 + self.dimensions.0 as f32 >= entity.position.0
+    self.position.0 + self.dimensions.0 as f32 >= entity.position.0
       && self.position.1 + self.dimensions.1 as f32 >= entity.position.1
       && self.position.0 <= entity.position.0 + entity.dimensions.0 as f32
-      && self.position.1 <= entity.position.1 + entity.dimensions.1 as f32)
+      && self.position.1 <= entity.position.1 + entity.dimensions.1 as f32
   }
 }
 

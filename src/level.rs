@@ -1,5 +1,4 @@
 use super::entity::Entity;
-use super::event::Event;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -11,7 +10,6 @@ pub struct Level {
   pub main_character: Vec<Entity>,
   pub effects: Vec<Entity>,
   pub foreground: Vec<Entity>,
-  pub events: Vec<Event>,
 }
 
 impl Level {

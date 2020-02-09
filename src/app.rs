@@ -19,14 +19,10 @@ mod controls;
 #[path = "entity.rs"]
 mod entity;
 
-#[path = "event.rs"]
-mod event;
-
 use camera::Camera;
 use controls::Controls;
 use editor_menu::EditorMenu;
 use entity::Entity;
-use event::EventType;
 use level::Level;
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
@@ -380,66 +376,26 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     }
 
     if !paused {
-      for entity in &mut level.main_character {
+      (&mut level.main_character).drain_filter(|entity| {
         entity.next_state(&entities);
-      }
-      for entity in &mut level.effects {
-        entity.next_state(&entities);
-      }
-      for entity in &mut level.destructible {
-        entity.next_state(&entities);
-      }
-      for entity in &mut level.indestructible {
-        entity.next_state(&entities);
-      }
-      for entity in &mut level.enemies {
-        entity.next_state(&entities);
-      }
-
-      let events = &level.events;
-
-      let kill_entities = &Box::new(|entity: &Entity| {
-        !events.iter().any(|event| match event.event_type {
-          EventType::Kill => event.is_triggering(entity),
-          _ => false,
-        })
+        Some("dying".to_string()) == entity.id
       });
-
-      (&mut level.main_character).retain(kill_entities);
-      (&mut level.effects).retain(kill_entities);
-      (&mut level.destructible).retain(kill_entities);
-      (&mut level.indestructible).retain(kill_entities);
-      (&mut level.enemies).retain(kill_entities);
-
-      let teleport_entities = &Box::new(|entity: &mut Entity| {
-        for event in events {
-          match event.event_type {
-            EventType::Teleport(new_pos_x, new_pos_y) => {
-              if event.is_triggering(entity) {
-                entity.position.0 = new_pos_x;
-                entity.position.1 = new_pos_y;
-              }
-            }
-            _ => {}
-          }
-        }
+      (&mut level.effects).drain_filter(|entity| {
+        entity.next_state(&entities);
+        Some("dying".to_string()) == entity.id
       });
-
-      for entity in &mut level.main_character {
-        teleport_entities(entity);
-      }
-      for entity in &mut level.effects {
-        teleport_entities(entity);
-      }
-      for entity in &mut level.destructible {
-        teleport_entities(entity);
-      }
-      for entity in &mut level.indestructible {
-        teleport_entities(entity);
-      }
-      for entity in &mut level.enemies {
-        teleport_entities(entity);
-      }
+      (&mut level.destructible).drain_filter(|entity| {
+        entity.next_state(&entities);
+        Some("dying".to_string()) == entity.id
+      });
+      (&mut level.indestructible).drain_filter(|entity| {
+        entity.next_state(&entities);
+        Some("dying".to_string()) == entity.id
+      });
+      (&mut level.enemies).drain_filter(|entity| {
+        entity.next_state(&entities);
+        Some("dying".to_string()) == entity.id
+      });
     }
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
@@ -458,9 +414,6 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     }
     for entity in &level.main_character {
       camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for event in &level.events {
-      camera.draw_relatively(&mut canvas, &event.entity, &entity_texture);
     }
     for entity in &level.effects {
       camera.draw_relatively(&mut canvas, &entity, &entity_texture);
