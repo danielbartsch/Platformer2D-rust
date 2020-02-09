@@ -1,4 +1,6 @@
+use super::camera::Camera;
 use super::entity::Entity;
+use sdl2::render::{Texture, WindowCanvas};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -25,6 +27,26 @@ impl Level {
       entity.next_state(&entities);
       Some("dying".to_string()) == entity.id
     });
+  }
+
+  pub fn draw(&self, camera: &mut Camera, canvas: &mut WindowCanvas, texture: &Texture) {
+    Level::draw_container(&self.background, camera, canvas, texture);
+    Level::draw_container(&self.indestructible, camera, canvas, texture);
+    Level::draw_container(&self.destructible, camera, canvas, texture);
+    Level::draw_container(&self.enemies, camera, canvas, texture);
+    Level::draw_container(&self.main_character, camera, canvas, texture);
+    Level::draw_container(&self.effects, camera, canvas, texture);
+    Level::draw_container(&self.foreground, camera, canvas, texture);
+  }
+  fn draw_container(
+    container: &Vec<Entity>,
+    camera: &mut Camera,
+    canvas: &mut WindowCanvas,
+    texture: &Texture,
+  ) {
+    for entity in container {
+      camera.draw_relatively(canvas, &entity, &texture);
+    }
   }
   pub fn serialize(&self) -> String {
     serde_json::to_string(&self).unwrap()

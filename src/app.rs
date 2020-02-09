@@ -380,28 +380,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     }
 
     camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
-
-    for entity in &level.background {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for entity in &level.indestructible {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for entity in &level.destructible {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for entity in &level.enemies {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for entity in &level.main_character {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for entity in &level.effects {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
-    for entity in &level.foreground {
-      camera.draw_relatively(&mut canvas, &entity, &entity_texture);
-    }
+    level.draw(&mut camera, &mut canvas, &entity_texture);
 
     if paused {
       draw_pause_menu(&mut canvas);
