@@ -384,10 +384,10 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       if has_free_camera {
         (0.3, 0.3)
       } else {
-        let avg_speed = (level.main_character[0].velocity.0.abs()
-          + level.main_character[0].velocity.1.abs())
-          / 2.0;
-        (0.02 + avg_speed / 175.0, 0.02 + avg_speed / 175.0)
+        let velocity = (level.main_character[0].velocity.0 * level.main_character[0].velocity.0
+          + level.main_character[0].velocity.1 * level.main_character[0].velocity.1)
+          .sqrt();
+        (0.02 + velocity / 175.0, 0.02 + velocity / 175.0)
       },
     );
     level.draw(&mut camera, &mut canvas, &entity_texture);
