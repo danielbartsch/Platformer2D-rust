@@ -379,7 +379,17 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       (&mut level).next_state(&entities);
     }
 
-    camera.to_target(&target_camera, if has_free_camera { (0.3, 0.3) } else { (0.03, 0.03) });
+    camera.to_target(
+      &target_camera,
+      if has_free_camera {
+        (0.3, 0.3)
+      } else {
+        let avg_speed = (level.main_character[0].velocity.0.abs()
+          + level.main_character[0].velocity.1.abs())
+          / 2.0;
+        (0.02 + avg_speed / 175.0, 0.02 + avg_speed / 175.0)
+      },
+    );
     level.draw(&mut camera, &mut canvas, &entity_texture);
 
     if paused {
