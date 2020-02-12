@@ -392,18 +392,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         (x * x + y * y).sqrt()
       };
 
-      if distance_to_target_camera > 100.0 {
-        camera.to_target(&target_camera, {
-          let velocity = (level.main_character[0].velocity.0 * level.main_character[0].velocity.0
-            + level.main_character[0].velocity.1 * level.main_character[0].velocity.1)
-            .sqrt();
-          (0.02 + velocity / 175.0, 0.02 + velocity / 175.0)
-        });
-      } else {
-        target_camera.position = camera.position;
-        target_camera.scale = camera.scale;
-        target_camera.dimensions = camera.dimensions;
-      }
+      let velocity = (level.main_character[0].velocity.0 * level.main_character[0].velocity.0
+        + level.main_character[0].velocity.1 * level.main_character[0].velocity.1)
+        .sqrt();
+      let camera_smooth_speed_factor =
+        0.06 * (distance_to_target_camera / 100.0) * (velocity / 75.0);
+
+      camera.to_target(&target_camera, (camera_smooth_speed_factor, camera_smooth_speed_factor));
     }
     level.draw(&mut camera, &mut canvas, &entity_texture);
 
