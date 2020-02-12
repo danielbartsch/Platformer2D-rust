@@ -378,18 +378,33 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     if !paused {
       (&mut level).next_state(&entities);
     }
+    if has_free_camera {
+      camera.to_target(&target_camera, (0.3, 0.3));
+    } else {
+      let main_character_camera_target = (
+        level.main_character[0].position.0 + level.main_character[0].dimensions.0 as f32 / 2.0,
+        level.main_character[0].position.1 + level.main_character[0].dimensions.1 as f32 / 2.0,
+      );
+      let distance_to_target_camera = {
+        let x = main_character_camera_target.0 - camera.position.0;
+        let y = main_character_camera_target.1 - camera.position.1;
 
-    camera.to_target(
-      &target_camera,
-      if has_free_camera {
-        (0.3, 0.3)
+        (x * x + y * y).sqrt()
+      };
+
+      if distance_to_target_camera > 100.0 {
+        camera.to_target(&target_camera, {
+          let velocity = (level.main_character[0].velocity.0 * level.main_character[0].velocity.0
+            + level.main_character[0].velocity.1 * level.main_character[0].velocity.1)
+            .sqrt();
+          (0.02 + velocity / 175.0, 0.02 + velocity / 175.0)
+        });
       } else {
-        let velocity = (level.main_character[0].velocity.0 * level.main_character[0].velocity.0
-          + level.main_character[0].velocity.1 * level.main_character[0].velocity.1)
-          .sqrt();
-        (0.02 + velocity / 175.0, 0.02 + velocity / 175.0)
-      },
-    );
+        target_camera.position = camera.position;
+        target_camera.scale = camera.scale;
+        target_camera.dimensions = camera.dimensions;
+      }
+    }
     level.draw(&mut camera, &mut canvas, &entity_texture);
 
     if paused {
