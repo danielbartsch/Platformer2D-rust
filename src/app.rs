@@ -300,13 +300,13 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       if pressed_keys.contains(&controls.up_key) {
         entity_commands.push(Box::new(|entity| {
           if let Some(aim_direction) = entity.aim_direction {
-            entity.aim_direction = Some(aim_direction - 3.1415926535 / 30.0);
+            entity.aim_direction = Some(aim_direction - std::f32::consts::PI / 30.0);
           }
         }));
       } else if pressed_keys.contains(&controls.down_key) {
         entity_commands.push(Box::new(|entity| {
           if let Some(aim_direction) = entity.aim_direction {
-            entity.aim_direction = Some(aim_direction + 3.1415926535 / 30.0);
+            entity.aim_direction = Some(aim_direction + std::f32::consts::PI / 30.0);
           }
         }));
       }
