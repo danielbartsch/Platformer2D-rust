@@ -30,6 +30,8 @@ pub struct Entity {
   pub position: (f32, f32),
   pub id: Option<String>,
   pub event: Option<Event>,
+  pub health: Option<i32>,
+  pub damage_factor: Option<f32>,
   #[serde(default = "default_step_height")]
   pub step_height: f32,
   #[serde(default = "default_velocity")]
@@ -67,6 +69,8 @@ impl Entity {
       sprite_sheet_rect: None,
       aim_direction: None,
       event: None,
+      health: None,
+      damage_factor: None,
       bounciness: default_bounciness(),
       slippiness: default_slippiness(),
       dimensions: (width, height),
@@ -102,6 +106,10 @@ impl Entity {
   }
   pub fn step_height(mut self, step_height: f32) -> Self {
     self.step_height = step_height;
+    self
+  }
+  pub fn damage_factor(mut self, damage_factor: Option<f32>) -> Self {
+    self.damage_factor = damage_factor;
     self
   }
   fn is_triggering(&self, entity: &Entity) -> bool {
@@ -197,6 +205,12 @@ impl Entity {
       } else {
         self.position.1 = bottom_to_self.position.1 - self.dimensions.1 as f32;
         self.velocity.1 *= -1.0 * self.bounciness * bottom_to_self.bounciness;
+
+        if let Some(health) = bottom_to_self.health {
+          if let Some(damage_factor) = self.damage_factor {
+            self.id = Some("dying".to_string());
+          }
+        }
       }
       is_on_ground = true;
     } else if let Some(top_to_self) = collided_entities
@@ -208,6 +222,11 @@ impl Entity {
       } else {
         self.position.1 = top_to_self.position.1 + top_to_self.dimensions.1 as f32;
         self.velocity.1 *= -1.0 * self.bounciness * top_to_self.bounciness;
+        if let Some(health) = top_to_self.health {
+          if let Some(damage_factor) = self.damage_factor {
+            self.id = Some("dying".to_string());
+          }
+        }
       }
     }
     if let Some(right_to_self) = collided_entities
@@ -225,6 +244,11 @@ impl Entity {
         } else {
           self.position.0 = right_to_self.position.0 - self.dimensions.0 as f32;
           self.velocity.0 *= -1.0 * self.bounciness * right_to_self.bounciness;
+          if let Some(health) = right_to_self.health {
+            if let Some(damage_factor) = self.damage_factor {
+              self.id = Some("dying".to_string());
+            }
+          }
         }
       }
     } else if let Some(left_to_self) = collided_entities
@@ -242,6 +266,11 @@ impl Entity {
         } else {
           self.position.0 = left_to_self.position.0 + left_to_self.dimensions.0 as f32;
           self.velocity.0 *= -1.0 * self.bounciness * left_to_self.bounciness;
+          if let Some(health) = left_to_self.health {
+            if let Some(damage_factor) = self.damage_factor {
+              self.id = Some("dying".to_string());
+            }
+          }
         }
       }
     }

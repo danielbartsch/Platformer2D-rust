@@ -274,7 +274,8 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
                   .velocity_x(entity.velocity.0 + aim_direction.cos() * 20.0)
                   .velocity_y(entity.velocity.1 + aim_direction.sin() * 20.0)
                   .bounciness(2.5)
-                  .step_height(7.5),
+                  .step_height(7.5)
+                  .damage_factor(Some(10.0)),
               );
             }
           }));
