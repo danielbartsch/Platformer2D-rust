@@ -24,6 +24,7 @@ use controls::Controls;
 use editor_menu::EditorMenu;
 use entity::Entity;
 use level::Level;
+use sdl2::audio::{AudioCVT, AudioCallback, AudioSpecDesired, AudioSpecWAV};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -52,9 +53,47 @@ fn concatenate(a: &[Entity], b: &[Entity], c: &[Entity]) -> Vec<Entity> {
   [a, b, c].concat()
 }
 
+struct Sound {
+  data: Vec<u8>,
+  pos: usize,
+}
+
+impl AudioCallback for Sound {
+  type Channel = u8;
+
+  fn callback(&mut self, out: &mut [u8]) {
+    for dst in out.iter_mut() {
+      let pre_scale = *self.data.get(self.pos).unwrap_or(&128);
+      let scaled_signed_float = pre_scale as f32 - 128.0;
+      let scaled = (scaled_signed_float + 128.0) as u8;
+      *dst = scaled;
+      self.pos += 1;
+    }
+  }
+}
+
 pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let sdl_context = sdl2::init().unwrap();
   let video_subsystem = sdl_context.video().unwrap();
+  let audio_subsystem = sdl_context.audio().unwrap();
+
+  let mut jump_sound = audio_subsystem
+    .open_playback(
+      None,
+      &AudioSpecDesired { freq: Some(44_100), channels: Some(1), samples: None },
+      |spec| {
+        let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/jump.wav")).unwrap();
+
+        let cvt =
+          AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
+            .unwrap();
+
+        let data = cvt.convert(wav.buffer().to_vec());
+
+        Sound { data, pos: 0 }
+      },
+    )
+    .unwrap();
 
   let window = video_subsystem
     .window("Platformer 2D", INITIAL_WINDOW_WIDTH as u32, INITIAL_WINDOW_HEIGHT as u32)
