@@ -299,7 +299,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         current_camera.set_zoom(1.0);
       }));
 
-      let mut entity_commands: Vec<Box<dyn Fn(&mut Entity)>> = vec![];
+      let mut entity_commands: Vec<Box<dyn FnMut(&mut Entity)>> = vec![];
       let mut attack_commands: Vec<Box<dyn Fn(&mut Entity, &mut Vec<Entity>)>> = vec![];
 
       if pressed_keys.contains(&controls.shoot_key) {
@@ -325,6 +325,12 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
           if entity.is_touching_ground(&entities) {
             entity.velocity.1 = -8.0;
             entity.acceleration.1 = 0.1;
+
+            {
+              let mut lock = jump_sound.lock();
+              (*lock).pos = 0;
+            }
+            jump_sound.resume();
           }
           if entity.velocity.1 < 0.0 {
             entity.acceleration.1 += 0.01;
@@ -404,7 +410,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
         }));
       }
 
-      for command in entity_commands {
+      for mut command in entity_commands {
         command(&mut level.main_character[0]);
       }
       for command in attack_commands {
