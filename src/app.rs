@@ -95,6 +95,24 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
     )
     .unwrap();
 
+  let mut shoot_sound = audio_subsystem
+    .open_playback(
+      None,
+      &AudioSpecDesired { freq: Some(44_100), channels: Some(1), samples: None },
+      |spec| {
+        let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/shoot.wav")).unwrap();
+
+        let cvt =
+          AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
+            .unwrap();
+
+        let data = cvt.convert(wav.buffer().to_vec());
+
+        Sound { data, pos: 0 }
+      },
+    )
+    .unwrap();
+
   let window = video_subsystem
     .window("Platformer 2D", INITIAL_WINDOW_WIDTH as u32, INITIAL_WINDOW_HEIGHT as u32)
     .position_centered()
@@ -300,13 +318,18 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       }));
 
       let mut entity_commands: Vec<Box<dyn FnMut(&mut Entity)>> = vec![];
-      let mut attack_commands: Vec<Box<dyn Fn(&mut Entity, &mut Vec<Entity>)>> = vec![];
+      let mut attack_commands: Vec<Box<dyn FnMut(&mut Entity, &mut Vec<Entity>)>> = vec![];
 
       if pressed_keys.contains(&controls.shoot_key) {
         if last_shot.elapsed().unwrap().as_millis() > 50 {
           last_shot = SystemTime::now();
           attack_commands.push(Box::new(|entity, level_container| {
             if let Some(aim_direction) = entity.aim_direction {
+              {
+                let mut lock = shoot_sound.lock();
+                (*lock).pos = 0;
+              }
+              shoot_sound.resume();
               level_container.push(
                 Entity::new(entity.position.0, entity.position.1, 10, 10)
                   .id("bouncy-bullet".to_string())
@@ -413,7 +436,7 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
       for mut command in entity_commands {
         command(&mut level.main_character[0]);
       }
-      for command in attack_commands {
+      for mut command in attack_commands {
         command(&mut level.main_character[0], &mut level.effects);
       }
     }
