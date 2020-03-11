@@ -56,6 +56,7 @@ fn concatenate(a: &[Entity], b: &[Entity], c: &[Entity]) -> Vec<Entity> {
 struct Sound {
   data: Vec<u8>,
   pos: usize,
+  is_loop: bool,
 }
 
 impl AudioCallback for Sound {
@@ -67,7 +68,11 @@ impl AudioCallback for Sound {
       let scaled_signed_float = pre_scale as f32 - 128.0;
       let scaled = (scaled_signed_float + 128.0) as u8;
       *dst = scaled;
-      self.pos += 1;
+      if self.is_loop {
+        self.pos = (self.pos + 1) % self.data.len();
+      } else {
+        self.pos += 1;
+      }
     }
   }
 }
@@ -78,40 +83,48 @@ pub fn run(level_name: &str, sprite_sheet_name: &str) {
   let audio_subsystem = sdl_context.audio().unwrap();
 
   let mut jump_sound = audio_subsystem
-    .open_playback(
-      None,
-      &AudioSpecDesired { freq: Some(44_100), channels: Some(1), samples: None },
-      |spec| {
-        let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/jump.wav")).unwrap();
+    .open_playback(None, &AudioSpecDesired { freq: None, channels: None, samples: None }, |spec| {
+      let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/jump.wav")).unwrap();
 
-        let cvt =
-          AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
-            .unwrap();
+      let cvt =
+        AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
+          .unwrap();
 
-        let data = cvt.convert(wav.buffer().to_vec());
+      let data = cvt.convert(wav.buffer().to_vec());
 
-        Sound { data, pos: 0 }
-      },
-    )
+      Sound { data, pos: 0, is_loop: false }
+    })
     .unwrap();
 
   let mut shoot_sound = audio_subsystem
-    .open_playback(
-      None,
-      &AudioSpecDesired { freq: Some(44_100), channels: Some(1), samples: None },
-      |spec| {
-        let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/shoot.wav")).unwrap();
+    .open_playback(None, &AudioSpecDesired { freq: None, channels: None, samples: None }, |spec| {
+      let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/shoot.wav")).unwrap();
 
-        let cvt =
-          AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
-            .unwrap();
+      let cvt =
+        AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
+          .unwrap();
 
-        let data = cvt.convert(wav.buffer().to_vec());
+      let data = cvt.convert(wav.buffer().to_vec());
 
-        Sound { data, pos: 0 }
-      },
-    )
+      Sound { data, pos: 0, is_loop: false }
+    })
     .unwrap();
+
+  let background_sound = audio_subsystem
+    .open_playback(None, &AudioSpecDesired { freq: None, channels: None, samples: None }, |spec| {
+      let wav = AudioSpecWAV::load_wav(Path::new("./assets/audio/background.wav")).unwrap();
+
+      let cvt =
+        AudioCVT::new(wav.format, wav.channels, wav.freq, spec.format, spec.channels, spec.freq)
+          .unwrap();
+
+      let data = cvt.convert(wav.buffer().to_vec());
+
+      Sound { data, pos: 0, is_loop: true }
+    })
+    .unwrap();
+
+  background_sound.resume();
 
   let window = video_subsystem
     .window("Platformer 2D", INITIAL_WINDOW_WIDTH as u32, INITIAL_WINDOW_HEIGHT as u32)
